@@ -1,0 +1,291 @@
+.messagePage{
+    padding: 30px;
+    background-color: #1A1A1A;
+    padding: 20px;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: 1fr 2fr;
+    height: 79vh;
+
+    .messageList{
+        background-color: rgba(80, 80, 80, 0.5);
+        border-radius: 10px;
+        
+
+        .messageTitle{
+            display: flex;
+            justify-content: space-between;
+            color: #fff;
+            padding: 20px 40px;
+            font-size: 20px;
+            font-weight: bold;
+
+            .fa-pen-to-square{
+                cursor: pointer;
+            }
+    
+            .fa-pen-to-square:hover{
+                color: #ccc;
+            }
+        }
+
+        .inputSearch{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+
+            .searchMess{
+                border: none;
+                background-color: #282828;
+                width: 75%;
+                padding: 10px 40px;
+                color: #fff;
+                border-radius: 10px;
+            }
+
+            .fa-magnifying-glass{
+                position: absolute;
+                left: 28px;
+                color: #fff;
+                padding: 4px;
+            }
+
+            .fa-sliders{
+                position: absolute;
+                right: 28px;
+                color: #fff;
+            }
+        }
+
+        .listFriendMessage{
+            //background-color: #fff;
+            margin-top: 20px;
+            gap: 5px;
+            height: 410px;
+            padding: 0 10px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: scroll;
+
+            scrollbar-color: #717070 #2f2f2f;  /* thumb | track */
+            scrollbar-width: thin; 
+            
+
+            .friendMessage{
+                padding: 10px;
+                background-color: #2f2f2f;
+                display: flex;
+                gap: 10px;
+                justify-content: space-between;
+                align-items: center;
+                cursor: pointer;
+                height: 50px;
+                border-radius: 10px;
+
+                .friendInfo{
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    
+                    .friend_ava{
+                        width: 40px;
+                        height: 40px;
+                        object-fit: cover;
+                        border: 4px solid #000;
+                        border-radius: 10px;
+                    }
+    
+                    .friendName{
+                        color: #fff;
+                        font-size: 20px;
+                    }
+                }
+
+                .fa-camera{
+                    color: #fff;
+                    margin-right: 10px;
+                    font-size: 24px;
+                }
+                
+            }
+
+            .friendMessage:hover{
+                background-color: rgba(80, 80, 80, 0.5);
+                border-radius: 10px;
+            }
+        }
+    }
+
+    .messageContent{
+        border-radius: 10px;
+        background-color: #0F0D0D;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+
+        .headerMessage{
+            padding: 16px;
+            background-color: rgba(80, 80, 80, 0.5);
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+
+            .friendInfo{
+                display: flex;
+                align-items: center;
+                gap: 10px;
+
+                .avaFriend{
+                    width: 50px;
+                    height: 50px;
+                    object-fit: cover;
+                    border: 4px solid #000;
+                    border-radius: 10px;
+                }
+
+                .nameFriend{
+                    color: #fff;
+                    font-size: 20px;
+                }
+            }
+
+            .actions{
+                display: flex;
+                align-items: center;
+                gap: 40px;
+                color: #fff;
+                font-size: 20px;
+            }
+
+            .fa-phone:hover{
+                transform: scale(1.2);
+                color: #ccc;
+                cursor: pointer;
+            }
+
+            .fa-video:hover{
+                transform: scale(1.2);
+                color: #ccc;
+                cursor: pointer;
+            }
+
+            .fa-ellipsis-vertical:hover{
+                transform: scale(1.2);
+                color: #ccc;
+                cursor: pointer;
+            }
+
+        }
+
+        .chatMessgae{
+            margin-top: 10px;
+            flex: 1;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+
+            &::-webkit-scrollbar {
+                display: none; /* Chrome, Safari and Opera */
+            }
+
+            .friendSend{
+                display: flex;
+                gap: 8px;
+                align-items: center;
+
+                .avaMess{
+                    width: 20px;
+                    height: 20px;
+                    object-fit: contain;
+                    margin-left: 10px;
+                }
+            }
+
+            p{
+                padding: 10px;
+                display: flex;
+                flex-wrap: wrap;
+                max-width: 40%;
+                width: fit-content;
+                border-radius: 5px;
+            }
+
+            .meSend{
+                margin-left: auto;
+                margin-right: 10px;
+                background-color: #efef48;
+            }
+
+            .youSend{
+                background-color: #aeadad;
+            }
+        }
+
+        .inputMessage{
+            display: flex;
+            color: #fff;
+            align-items: center;
+            background-color: #212121;
+            padding: 20px 0;
+            border-radius: 0 0 10px 10px;
+
+            .attachMessage{
+                flex: 1;
+                font-size: 24px;
+                display: flex;
+                justify-content: space-around;
+
+                .fa-face-smile{
+                    cursor: pointer;
+                }
+
+                .fa-face-smile:hover{
+                    transform: scale(1.2);
+                    color: #ccc;
+                    cursor: pointer;
+                }
+
+                .fa-file{
+                    cursor: pointer;
+                }
+
+                .fa-file:hover{
+                    transform: scale(1.2);
+                    color: #ccc;
+                    cursor: pointer;
+                }
+            }
+
+            .inputText{
+                flex: 6;
+                background-color: rgba(80, 80, 80, 0.5);
+                padding: 12px 20px;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                color: #fff;
+            }
+
+            .fa-paper-plane{
+                font-size: 24px;
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                cursor: pointer;
+            }
+
+            .fa-paper-plane:hover{
+                color: #ccc;
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+.choosenFriend{
+    background-color: rgba(80, 80, 80, 0.5) !important;
+}

@@ -1,0 +1,399 @@
+
+.home {
+  background-color: #1A1A1A;
+  .home-container{
+    padding: 20px;
+  }
+
+  .main-content{
+    display: grid;
+    grid-template-columns: 3fr 4fr 3fr;
+    gap: 20px;
+    border-radius: 15px;
+
+    .profile-container{
+
+      .profile-header{
+        position: relative;
+
+        .bg-image{
+          width: 100%;
+          height: 450px;
+          border-radius: 10px;
+          background: linear-gradient(210deg, #282828, #8E8E8E);
+        }
+
+        .profile-info{
+          position: absolute;
+          top: 200px;
+          background: #282828;
+          width: 100%;
+          text-align: center;
+          border-radius: 10px;
+
+          .avatar-container{
+            color: #282828;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+
+            .follow-container{
+              margin-top: 20px;
+
+              .number{
+                font-size: 20px;
+                color: #fff;
+                font-weight: bold;
+              }
+
+              .text{
+                margin-top: 5px;
+                font-size: 14px;
+                color: #fff;
+                opacity: 0.5;
+                font-weight: 400;
+              }
+            }
+
+            .avatar-image{
+              border: 10px solid #000;
+              width: 139px;
+              border-radius: 10px;
+              position: relative;
+              top: -50px;
+            }
+          }
+
+          .more-info{
+            position: relative;
+            top: -30px;
+
+            .profile-name{
+              color: #fff;
+              font-size: 20px;
+              font-weight: bold;
+            }
+  
+            .profile-tag{
+              margin-top: 10px;
+              color: #aca9a9;
+            }
+  
+            .profile-description{
+              color: #fff;
+              margin-top: 20px;
+            }
+
+            .follow-button{
+              padding: 12px 0;
+              margin-top: 15px;
+              background: linear-gradient(180deg, #282828, #8E8E8E);
+              border: none;
+              border-radius: 10px;
+              width: 80%;
+              font-size: 20px;
+              cursor: pointer;
+              color: #fff;
+              opacity: 0.68;
+              transition: 1s;
+            }
+
+            .follow-button:hover {
+              background: linear-gradient(45deg, #8E8E8E, #282828);
+            }
+          }
+        }
+
+        .profile-name{
+          color: #fff;
+        }
+      }
+
+      .features{
+        margin-top: 100px;
+        
+        .head{
+          color: #fff;
+          font-size: 24px;
+          font-weight: bold;
+          margin-bottom: 30px;
+        }
+
+        .list-skill{
+          display: flex;
+          gap: 20px;
+          flex-wrap: wrap;
+
+          .item{
+            background-color: #282828;
+            color: #aca9a9;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+          }
+        }
+
+        .list-coms{
+
+          .com-item{
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            cursor: pointer;
+
+            .img-com{
+              width: 50px;
+              height: 50px;
+            }
+
+            .com-info{
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+
+              .com-name{
+                color: #fff;
+              }
+  
+              .com-more{
+                color: #FFFD02;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                line-height: 1.5;
+  
+                .dot{
+                  font-size: 6px;
+                  margin-right: 4px;
+                  
+                }
+              }
+            }
+          }
+
+          .com-item:hover{
+            background-color: #aca9a9;
+            border-radius: 15px;
+            transform: scale(1.05);
+          }
+        }
+      }
+    }
+
+    .content-container{
+
+      .listStr{
+        display: flex;
+        gap: 40px;
+        margin: 10px;
+
+        .strItem{
+
+          .friendStr{
+            padding: 5px;
+            width: 50px;
+            height: 50px;
+            border: 2px #FFFD02 solid;
+            border-radius: 12px;
+            cursor: pointer;
+          }
+
+          .friendStr:hover{
+            transform: scale(1.2)
+          }
+        }
+      }
+
+      .statusPost{
+        margin-top: 80px;
+        background-color: #282828;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        border-radius: 15px;
+
+        .imgPost{
+          border: 4px #1A1A1A solid;
+          height: 50px;
+          width: 50px;
+          border-radius: 10px;
+          margin-left: 10px;
+        }
+
+        .inputPost{
+          border: none;
+          background-color: #1A1A1A;
+          width: 100%;
+          padding: 10px;
+          border-radius: 12px;
+          color: #fff;
+        }
+
+        .sendIcon{
+          color: #aca9a9;
+          cursor: pointer;
+        }
+
+        .sendIcon:hover{
+          transform: scale(1.3);
+          color: #fff;
+        }
+      }
+
+      .newfeed{
+        margin-top: 20px;
+
+        .friendPost{
+          background-color: #282828;
+          border-radius: 15px;
+          padding: 30px;
+
+          .ownerPost{
+            display: flex;
+            gap: 10px;
+
+            .ownerAva{
+              width: 60px;
+              height: 60px;
+              object-fit: cover;
+              border: 5px #1A1A1A solid;
+              border-radius: 12px;
+            }
+
+            .ownerInfo{
+              line-height: 1.5;
+
+              .ownerTag{
+                color: #8E8E8E;
+              }
+
+              .ownerName{
+                color: #fff;
+                font-weight: bold;
+                font-size: 20px;
+              }
+            }
+          }
+
+          .contentPost{
+            margin-top: 20px;
+            color: #fff;
+
+            .des_content{
+              
+            }
+
+            .img_content{
+              margin-top: 10px;
+              width: 100%;
+            }
+          }
+
+          .interactPost{
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            color: #fff;
+            font-size: 20px;
+
+            .love_icon{
+              cursor: pointer;
+              //color: red;
+            }
+
+            .comment_icon{
+              cursor: pointer;
+            }
+
+          }
+
+          .break{
+            margin-top: 20px;
+            border: 1px #aca9a9 solid;
+          }
+
+          .writeComment{
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+
+            .avaUser{
+              width: 35px;
+              height: 35px;
+              border: 3px #1A1A1A solid;
+              border-radius: 5px;
+            }
+
+            .inputComment{
+              border: none;
+              background-color: #1A1A1A;
+              width: 100%;
+              border-radius: 10px;
+              padding: 10px 20px;
+              color: #fff;
+            }
+
+            .sendButton{
+              color: #fff;
+              cursor: pointer;
+            }
+
+            .sendButton:hover{
+              transform: scale(1.4);
+            }
+          }
+        }
+
+        
+      }
+    }
+
+    .friends-container{
+      background-color: #282828;
+      padding: 20px;
+      border-radius: 15px;
+
+      .contact-head{
+        font-size: 20px;
+        font-weight: bold;
+        color: #fff;
+      }
+
+      .friendList{
+        margin-top: 20px;
+
+        .eachFriend{
+          padding: 0 10px;
+          height: 50px;
+          display: flex;
+          gap: 10px;
+          align-items: center;
+          cursor: pointer;
+
+          .ava_eachFriend{
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+          }
+
+          .name_eachFriend{
+            color: #fff;
+            font-weight: bold;
+          }
+        }
+
+        .eachFriend:hover{
+          background-color: #aca9a9;
+          border-radius: 10px;
+        }
+      }
+    }
+    
+  }
+}
+
+.is-choosen{
+  color: #FFFD02 !important;
+}
