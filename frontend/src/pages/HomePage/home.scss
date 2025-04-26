@@ -299,7 +299,7 @@
 
             .love_icon{
               cursor: pointer;
-              //color: red;
+              transition: transform 0.2s ease, color 0.3s ease;
             }
 
             .comment_icon{
@@ -396,4 +396,8 @@
 
 .is-choosen{
   color: #FFFD02 !important;
+}
+
+.is_loved{
+  color: red;
 }

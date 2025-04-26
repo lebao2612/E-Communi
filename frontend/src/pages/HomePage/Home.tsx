@@ -1,15 +1,16 @@
 import  "./home.scss";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import images from "../../assets/images/index";
+import {useHomeLogic} from '../../scripts/home'
 
 
 const Home = () => {
 
-    const user = {
-        name: "Le Bao",
-        tag: "mattob2612",
-        ava: images.avatar,
-    }
+    const {
+        user,
+        love,
+        handleClickLove
+    } = useHomeLogic()
 
     return (
         <div className="home">
@@ -33,7 +34,7 @@ const Home = () => {
                                 
                                 <div className="more-info">
                                     <h3 className="profile-name">{user.name}</h3>
-                                    <h3 className="profile-tag">{user.tag}</h3>
+                                    <h3 className="profile-tag">{user.username}</h3>
                                     <p className="profile-description">
                                         Dep trai nhat the gioi 
                                         <i className="fa-regular fa-star"></i>
@@ -54,7 +55,7 @@ const Home = () => {
                             </ul>
                         </div>
 
-                        <div className="features">
+                        <div className="features"> 
                             <h2 className="head">Communities</h2>
                             <ul className="list-coms">
                                 <li className="com-item">
@@ -128,7 +129,11 @@ const Home = () => {
 
                                 <div className="interactPost">
                                     {/* fa-solid se la cai de lam nhan nut love */}
-                                    <i className="fa-regular fa-heart love_icon"></i>
+                                    <i 
+                                        className = {`fa-heart love_icon ${love === true ? 'fa-solid is_loved' : 'fa-regular'}`}
+                                        onClick={handleClickLove}
+                                    >
+                                    </i>
                                     <i className="fa-regular fa-comment comment_icon"></i>
                                 </div>
 

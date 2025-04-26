@@ -1,84 +1,20 @@
 import images from '../../assets/images';
-import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
-import {Friend} from '../../types/friend'
 import './message.scss'
+import {useMessageLogic} from '../../scripts/message'
 
 const Message = () =>{ 
-
-    const friendList = [
-        {id: 1, name: 'Lee Hyeri', image: images.avaFriend},
-        {id: 2, name: 'Seul Gi', image: images.avaFriend},
-        {id: 3, name: 'Jae Ji', image: images.avaFriend},
-        
-        // {id: 4, name: 'Lee Hyeri', image: images.avaFriend},
-        // {id: 5, name: 'Seul Gi', image: images.avaFriend},
-        // {id: 6, name: 'Jae Ji', image: images.avaFriend},
-        
-        // {id: 7, name: 'Lee Hyeri', image: images.avaFriend},
-        // {id: 8, name: 'Seul Gi', image: images.avaFriend},
-        // {id: 9, name: 'Jae Ji', image: images.avaFriend},
-        
-        // {id: 10, name: 'Lee Hyeri', image: images.avaFriend},
-        // {id: 11, name: 'Seul Gi', image: images.avaFriend},
-        // {id: 12, name: 'Jae Ji', image: images.avaFriend},
-    ]
-
-    //mock data, time is Timestamp in PostgreSQL
-    const [messages, setMessages] = useState([
-        { id: 1, content: 'Dm cuoc doi', idSender: 1, idReceiver: 2, time: 1 },
-        { id: 2, content: 'Fuck', idSender: 2, idReceiver: 1, time: 2 },
-        { id: 3, content: 'Toi rat ghet ban', idSender: 1, idReceiver: 2, time: 3 },
-        { id: 4, content: 'Con toi thi van luon thich ban', idSender: 2, idReceiver: 1, time: 4 },
-        { id: 5, content: 'Neu co the quay lai', idSender: 1, idReceiver: 2, time: 5 },
-        { id: 6, content: 'Toi van thich ban', idSender: 2, idReceiver: 1, time: 6 },
-    ]);
-
-    const [inputText, setInputText] = useState('');
-    const [userChoosen, setUserChoosen] = useState(friendList[0]);
-
-    const [friendSearch, setFriendSearch] = useState('');
-
-    //const [userChoosen, setUserChoosen] = useState<Friend[]>([]);
-
-    const handleChooseFriend = (friend: Friend) => {
-        setUserChoosen(friend)
-        console.log("Click")
-    }
-
-    const handleSendMessage = () => {
-        if (inputText.trim() === '') return;
-    
-        const newMessage = {
-            id: messages.length + 1,
-            content: inputText,
-            idSender: 1, // giả định người gửi là mình
-            idReceiver: 2,
-            time: Date.now()
-        };
-    
-        setMessages([...messages, newMessage]);
-        setInputText('');
-    };
-
-    const handleSearchFriend = (e: ChangeEvent<HTMLInputElement>) =>{
-        setFriendSearch(e.target.value);
-    }
-
-    const filterFriends = friendList.filter((friend) =>
-        friend.name.toLowerCase().includes(friendSearch.toLowerCase())
-    )
-
-    const chatEndRef = useRef<HTMLDivElement | null>(null);
-
-    const scrollToBottom = () => {
-        if (chatEndRef.current) {
-            chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    const {
+        messages,
+        inputText,
+        setInputText,
+        userChoosen,
+        handleChooseFriend,
+        handleSendMessage,
+        handleSearchFriend,
+        friendSearch,
+        filterFriends,
+        chatEndRef
+    } = useMessageLogic();
 
     return (
         <div className='messagePage'>
