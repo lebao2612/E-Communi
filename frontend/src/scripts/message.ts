@@ -3,13 +3,36 @@
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import images from '../assets/images';
 import { Friend } from '../types/friend';
+import axios from 'axios';
+
+interface User{
+    id: number;
+    username: string;
+    name: string;
+    avatar: string | null;
+    background: string | null;
+}
 
 export const useMessageLogic = () => {
-    const friendList: Friend[] = [
-        { id: 1, name: 'Lee Hyeri', image: images.avaFriend },
-        { id: 2, name: 'Seul Gi', image: images.avaFriend },
-        { id: 3, name: 'Jae Ji', image: images.avaFriend },
-    ];
+
+    const [allUsers, getAllUsers] = useState<User[]>([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:3001/users")
+             .then(response => {
+                getAllUsers(response.data);
+             })
+             .catch(error => {
+                console.log("Error: ", error);
+             })
+
+    }, [])
+
+    // const friendList: Friend[] = [
+    //     { id: 1, name: 'Lee Hyeri', image: images.avaFriend },
+    //     { id: 2, name: 'Seul Gi', image: images.avaFriend },
+    //     { id: 3, name: 'Jae Ji', image: images.avaFriend },
+    // ];
 
     const [messages, setMessages] = useState([
         { id: 1, content: 'Dm cuoc doi', idSender: 1, idReceiver: 2, time: 1 },
@@ -21,11 +44,11 @@ export const useMessageLogic = () => {
     ]);
 
     const [inputText, setInputText] = useState('');
-    const [userChoosen, setUserChoosen] = useState(friendList[0]);
+    const [userChoosen, setUserChoosen] = useState<User>();
     const [friendSearch, setFriendSearch] = useState('');
 
-    const handleChooseFriend = (friend: Friend) => {
-        setUserChoosen(friend);
+    const handleChooseFriend = (user: User) => {
+        setUserChoosen(user);
         console.log("Click");
     };
 
@@ -48,7 +71,7 @@ export const useMessageLogic = () => {
         setFriendSearch(e.target.value);
     };
 
-    const filterFriends = friendList.filter((friend) =>
+    const filterFriends = allUsers.filter((friend) =>
         friend.name.toLowerCase().includes(friendSearch.toLowerCase())
     );
 
@@ -65,14 +88,13 @@ export const useMessageLogic = () => {
     }, [messages]);
 
     return {
+        allUsers,
         messages,
         inputText,
         setInputText,
         userChoosen,
-        setUserChoosen,
         friendSearch,
-        setFriendSearch,
-        friendList,
+        //friendList,
         handleChooseFriend,
         handleSendMessage,
         handleSearchFriend,

@@ -4,6 +4,7 @@ import {useMessageLogic} from '../../scripts/message'
 
 const Message = () =>{ 
     const {
+        allUsers,
         messages,
         inputText,
         setInputText,
@@ -39,7 +40,7 @@ const Message = () =>{
                             onClick={() => handleChooseFriend(friend)}>
                                 
                                 <div className='friendInfo'>
-                                    <img src={friend.image} className='friend_ava' alt='FriendAva'/>
+                                    <img src={friend.avatar || images.avaFriend} className='friend_ava' alt='FriendAva'/>
                                     <p className='friendName'>{friend.name}</p>
                                 </div>
 
@@ -50,54 +51,59 @@ const Message = () =>{
                 </div>
             </div>
 
-            <div className='messageContent'>
-                <div className='headerMessage'>
-                    <div className='friendInfo'>
-                        <img src={userChoosen.image} alt='avaFriend' className='avaFriend' />
-                        <p className='nameFriend'>{userChoosen.name}</p>
+            {userChoosen && (
+                <div className='messageContent'>
+                    
+                    <div className='headerMessage'>
+                        
+                        <div className='friendInfo'>
+                            <img src={userChoosen.avatar || images.avaFriend} alt='avaFriend' className='avaFriend' />
+                            <p className='nameFriend'>{userChoosen.name}</p>
+                        </div>
+                        
+                        <div className='actions'>
+                            <i className="fa-solid fa-phone"></i>
+                            <i className="fa-solid fa-video"></i>
+                            <i className="fa-solid fa-ellipsis-vertical"></i>
+                        </div>
                     </div>
-                    <div className='actions'>
-                        <i className="fa-solid fa-phone"></i>
-                        <i className="fa-solid fa-video"></i>
-                        <i className="fa-solid fa-ellipsis-vertical"></i>
-                    </div>
-                </div>
 
-                <div className='chatMessgae'>
-                    {messages.map((message) =>(
-                        message.idSender === 1 ? (
-                            <p className='meSend' key={message.id}>
-                                {message.content}
-                            </p>
-                        ) : (
-                            <div className='friendSend' key={message.id}>
-                                <img src={images.avaFriend} alt='avaFriend' className='avaMess' />
-                                <p className='youSend'> {message.content} </p>
-                            </div>
-                        )
-                    ))}
-                    <div ref={chatEndRef} />
-                </div>
-
-                <div className='inputMessage'>
-                    <div className='attachMessage'>
-                        <i className="fa-solid fa-face-smile"></i>
-                        <i className="fa-solid fa-file"></i>
+                    <div className='chatMessgae'>
+                        {messages.map((message) =>(
+                            message.idSender === 1 ? (
+                                <p className='meSend' key={message.id}>
+                                    {message.content}
+                                </p>
+                            ) : (
+                                <div className='friendSend' key={message.id}>
+                                    <img src={images.avaFriend} alt='avaFriend' className='avaMess' />
+                                    <p className='youSend'> {message.content} </p>
+                                </div>
+                            )
+                        ))}
+                        <div ref={chatEndRef} />
                     </div>
-                    <input 
-                        type='text' 
-                        placeholder='Aa' 
-                        className='inputText'
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        onKeyDown={(e) => {if (e.key == 'Enter') handleSendMessage();}}    
-                    />
-                    <i 
-                        className="fa-solid fa-paper-plane sendMessage" 
-                        onClick={handleSendMessage}    
-                    />
+
+                    <div className='inputMessage'>
+                        <div className='attachMessage'>
+                            <i className="fa-solid fa-face-smile"></i>
+                            <i className="fa-solid fa-file"></i>
+                        </div>
+                        <input 
+                            type='text' 
+                            placeholder='Aa' 
+                            className='inputText'
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            onKeyDown={(e) => {if (e.key == 'Enter') handleSendMessage();}}    
+                        />
+                        <i 
+                            className="fa-solid fa-paper-plane sendMessage" 
+                            onClick={handleSendMessage}    
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }

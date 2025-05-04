@@ -7,6 +7,7 @@ import {useHomeLogic} from '../../scripts/home'
 const Home = () => {
 
     const {
+        allUsers,
         user,
         love,
         handleClickLove
@@ -151,14 +152,12 @@ const Home = () => {
                     <div className="friends-container">
                         <p className="contact-head">Contacts</p>
                         <div className="friendList">
-                            <div className="eachFriend">
-                                <img src={images.friend1} alt="avaFriend" className="ava_eachFriend" />
-                                <p className="name_eachFriend">Lee Hyeri</p>
-                            </div>
-                            <div className="eachFriend">
-                                <img src={images.friend1} alt="avaFriend" className="ava_eachFriend" />
-                                <p className="name_eachFriend">Lee Hyeri</p>
-                            </div>
+                            {allUsers.map(friend => (
+                                <div className="eachFriend">
+                                    <img src={friend.avatar || images.friend1} alt="avaFriend" className="ava_eachFriend" />
+                                    <p className="name_eachFriend">{friend.name}</p>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

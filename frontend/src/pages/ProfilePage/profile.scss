@@ -1,0 +1,194 @@
+.profilePage{
+    padding: 30px 200px;
+    background-color: #1A1A1A;
+    display: grid;
+    gap: 20px;
+    color: #fff;
+
+    .profile{
+        position: relative;
+
+        .backgroundImg{
+            height: 350px;
+            width: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .infoGroup{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            top: 300px;
+            padding: 0 40px;
+            width: calc(100% - 80px); // chuẩn
+
+            .avaGroup{
+                display: flex;
+
+                .avaPr{
+                    position: relative;
+
+                    .avatarUser{
+                        width: 150px;
+                        height: 150px;
+                        border-radius: 50%;
+                        border: 4px #fff solid;
+                    }
+
+                    .fa-camera{
+                        position: absolute;
+                        right: 4px;
+                        bottom: 20px;
+                        background-color: #ccc;
+                        padding: 8px;
+                        border-radius: 50%;
+                        color: #000;
+                    }
+
+                    .fa-camera:hover{
+                        cursor: pointer;
+                        background-color: #888686;
+                    }
+                }
+
+                .namePr{
+                    margin-left: 12px;
+
+                    .name{
+                        margin-top: 80px;
+                        font-weight: 600;
+                        font-size: 30px;
+                    }
+
+                    .username{
+                        margin-top: 2px;
+                        font-style: italic;
+                    }
+                }
+            }
+
+            .changeProfile{
+                display: flex;
+                gap: 10px;
+                color: #000;
+                background-color: #ccc;
+                padding: 10px;
+                border-radius: 5px;
+                margin-top: 40px;
+            }
+
+            .changeProfile:hover{
+                cursor: pointer;
+                background-color: #888686;
+            }
+        }
+    }
+
+    .listPost{
+        margin-top: 100px;
+
+        .friendPost{
+            background-color: #282828;
+            border-radius: 15px;
+            padding: 30px;
+  
+            .ownerPost{
+              display: flex;
+              gap: 10px;
+  
+              .ownerAva{
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                border: 5px #1A1A1A solid;
+                border-radius: 12px;
+              }
+  
+              .ownerInfo{
+                line-height: 1.5;
+  
+                .ownerTag{
+                  color: #8E8E8E;
+                }
+  
+                .ownerName{
+                  color: #fff;
+                  font-weight: bold;
+                  font-size: 20px;
+                }
+              }
+            }
+  
+            .contentPost{
+              margin-top: 20px;
+              color: #fff;
+  
+              .des_content{
+                
+              }
+  
+              .img_content{
+                margin-top: 10px;
+                width: 100%;
+              }
+            }
+  
+            .interactPost{
+              margin-top: 20px;
+              display: flex;
+              gap: 20px;
+              color: #fff;
+              font-size: 20px;
+  
+              .love_icon{
+                cursor: pointer;
+                transition: transform 0.2s ease, color 0.3s ease;
+              }
+  
+              .comment_icon{
+                cursor: pointer;
+              }
+  
+            }
+  
+            .break{
+              margin-top: 20px;
+              border: 1px #aca9a9 solid;
+            }
+  
+            .writeComment{
+              margin-top: 20px;
+              display: flex;
+              gap: 20px;
+              align-items: center;
+  
+              .avaUser{
+                width: 35px;
+                height: 35px;
+                border: 3px #1A1A1A solid;
+                border-radius: 5px;
+              }
+  
+              .inputComment{
+                border: none;
+                background-color: #1A1A1A;
+                width: 100%;
+                border-radius: 10px;
+                padding: 10px 20px;
+                color: #fff;
+              }
+  
+              .sendButton{
+                color: #fff;
+                cursor: pointer;
+              }
+  
+              .sendButton:hover{
+                transform: scale(1.4);
+              }
+            }
+        }
+    }
+}

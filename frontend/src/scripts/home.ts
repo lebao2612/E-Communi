@@ -1,7 +1,28 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios";
 import images from "../assets/images";
 
+interface User{
+    id: number;
+    username: string;
+    name: string;
+    avatar: string | null;
+    background: string | null;
+}
+
 export const useHomeLogic = () =>{
+
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:3001/users")
+             .then(response => {
+                setAllUsers(response.data);
+             })
+             .catch(error => {
+                console.error("Error: ", error);
+             });
+    });
 
     const user = {
         name: "Le Bao",
@@ -16,6 +37,7 @@ export const useHomeLogic = () =>{
     }
 
     return{
+        allUsers,
         user,
         love,
         handleClickLove

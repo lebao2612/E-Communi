@@ -16,6 +16,9 @@ export class User {
     @Column({ nullable: true })
     avatar: string;
 
+    @Column({nullable: true})
+    background: string;
+
     @Column()
     name: string;
 
