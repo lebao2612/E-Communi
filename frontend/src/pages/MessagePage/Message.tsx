@@ -35,13 +35,13 @@ const Message = () =>{
                 <div className='listFriendMessage'>
                     {filterFriends.map((friend) =>
                         <div 
-                            className={`friendMessage ${userChoosen?.id === friend.id ? 'choosenFriend' : ''}`} 
-                            key={friend.id}  
+                            className={`friendMessage ${userChoosen?._id === friend._id ? 'choosenFriend' : ''}`} 
+                            key={friend._id}  
                             onClick={() => handleChooseFriend(friend)}>
                                 
                                 <div className='friendInfo'>
                                     <img src={friend.avatar || images.avaFriend} className='friend_ava' alt='FriendAva'/>
-                                    <p className='friendName'>{friend.name}</p>
+                                    <p className='friendName'>{friend.fullname}</p>
                                 </div>
 
                                 <i className="fa-solid fa-camera"></i>
@@ -58,7 +58,7 @@ const Message = () =>{
                         
                         <div className='friendInfo'>
                             <img src={userChoosen.avatar || images.avaFriend} alt='avaFriend' className='avaFriend' />
-                            <p className='nameFriend'>{userChoosen.name}</p>
+                            <p className='nameFriend'>{userChoosen.fullname}</p>
                         </div>
                         
                         <div className='actions'>
@@ -70,7 +70,7 @@ const Message = () =>{
 
                     <div className='chatMessgae'>
                         {messages.map((message) =>(
-                            message.idSender === 1 ? (
+                            message.idSender === '6877781dac46d7eef1c206d7' ? (
                                 <p className='meSend' key={message.id}>
                                     {message.content}
                                 </p>

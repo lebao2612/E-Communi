@@ -6,27 +6,27 @@ import { Friend } from '../types/friend';
 import axios from 'axios';
 
 interface User{
-    id: number;
+    _id: number;
     username: string;
-    name: string;
+    fullname: string;
     avatar: string | null;
     background: string | null;
 }
 
 export const useMessageLogic = () => {
 
-    const [allUsers, getAllUsers] = useState<User[]>([]);
+    const [allUsers, setAllUsers] = useState<User[]>([]);
 
     useEffect(() => {
-        axios.get("http://localhost:3001/users")
-             .then(response => {
-                getAllUsers(response.data);
-             })
-             .catch(error => {
-                console.log("Error: ", error);
-             })
-
-    }, [])
+        axios.get("http://localhost:5000/api/users")
+            .then(response => {
+                //console.log("response.data =", response.data);
+                setAllUsers(response.data); // ✅ chính xác
+            })
+            .catch(error => {
+                console.error("Error: ", error);
+            });
+    }, []);
 
     // const friendList: Friend[] = [
     //     { id: 1, name: 'Lee Hyeri', image: images.avaFriend },
@@ -35,12 +35,12 @@ export const useMessageLogic = () => {
     // ];
 
     const [messages, setMessages] = useState([
-        { id: 1, content: 'Dm cuoc doi', idSender: 1, idReceiver: 2, time: 1 },
-        { id: 2, content: 'Fuck', idSender: 2, idReceiver: 1, time: 2 },
-        { id: 3, content: 'Toi rat ghet ban', idSender: 1, idReceiver: 2, time: 3 },
-        { id: 4, content: 'Con toi thi van luon thich ban', idSender: 2, idReceiver: 1, time: 4 },
-        { id: 5, content: 'Neu co the quay lai', idSender: 1, idReceiver: 2, time: 5 },
-        { id: 6, content: 'Toi van thich ban', idSender: 2, idReceiver: 1, time: 6 },
+        { id: 1, content: 'Dm cuoc doi', idSender: '6877781dac46d7eef1c206d7', idReceiver: '68777cdeac46d7eef1c206dc', time: 1 },
+        { id: 2, content: 'Fuck', idSender: '68777cdeac46d7eef1c206dc', idReceiver: '6877781dac46d7eef1c206d7', time: 2 },
+        { id: 3, content: 'Toi rat ghet ban', idSender: '6877781dac46d7eef1c206d7', idReceiver: 2, time: 3 },
+        { id: 4, content: 'Con toi thi van luon thich ban', idSender: '68777cdeac46d7eef1c206dc', idReceiver: '6877781dac46d7eef1c206d7', time: 4 },
+        { id: 5, content: 'Neu co the quay lai', idSender: '6877781dac46d7eef1c206d7', idReceiver: '68777cdeac46d7eef1c206dc', time: 5 },
+        { id: 6, content: 'Toi van thich ban', idSender: '68777cdeac46d7eef1c206dc', idReceiver: '6877781dac46d7eef1c206d7', time: 6 },
     ]);
 
     const [inputText, setInputText] = useState('');
@@ -58,8 +58,8 @@ export const useMessageLogic = () => {
         const newMessage = {
             id: messages.length + 1,
             content: inputText,
-            idSender: 1,
-            idReceiver: 2,
+            idSender: '6877781dac46d7eef1c206d7',
+            idReceiver: '68777cdeac46d7eef1c206dc',
             time: Date.now()
         };
 
@@ -72,7 +72,7 @@ export const useMessageLogic = () => {
     };
 
     const filterFriends = allUsers.filter((friend) =>
-        friend.name.toLowerCase().includes(friendSearch.toLowerCase())
+        friend.fullname.toLowerCase().includes(friendSearch.toLowerCase())
     );
 
     const chatEndRef = useRef<HTMLDivElement | null>(null);

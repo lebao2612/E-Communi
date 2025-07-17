@@ -3,9 +3,9 @@ import axios from "axios";
 import images from "../assets/images";
 
 interface User{
-    id: number;
+    _id: number;
     username: string;
-    name: string;
+    fullname: string;
     avatar: string | null;
     background: string | null;
 }
@@ -15,14 +15,15 @@ export const useHomeLogic = () =>{
     const [allUsers, setAllUsers] = useState<User[]>([]);
 
     useEffect(() => {
-        axios.get("http://localhost:3001/users")
-             .then(response => {
-                setAllUsers(response.data);
-             })
-             .catch(error => {
+        axios.get("http://localhost:5000/api/users")
+            .then(response => {
+                //console.log("response.data =", response.data);
+                setAllUsers(response.data); // ✅ chính xác
+            })
+            .catch(error => {
                 console.error("Error: ", error);
-             });
-    });
+            });
+    }, []);
 
     const user = {
         name: "Le Bao",

@@ -13,6 +13,8 @@ const Home = () => {
         handleClickLove
     } = useHomeLogic()
 
+    console.log(allUsers)
+
     return (
         <div className="home">
             <div className="home-container">
@@ -153,9 +155,9 @@ const Home = () => {
                         <p className="contact-head">Contacts</p>
                         <div className="friendList">
                             {allUsers.map(friend => (
-                                <div className="eachFriend">
+                                <div key={friend._id} className="eachFriend">
                                     <img src={friend.avatar || images.friend1} alt="avaFriend" className="ava_eachFriend" />
-                                    <p className="name_eachFriend">{friend.name}</p>
+                                    <p className="name_eachFriend">{friend.fullname}</p>
                                 </div>
                             ))}
                         </div>
