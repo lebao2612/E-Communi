@@ -1,81 +1,140 @@
-// src/components/Message/scripts/useMessageLogic.ts
-
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
-import images from '../assets/images';
-import { Friend } from '../types/friend';
+import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios';
+import { io, Socket } from "socket.io-client";
 
-interface User{
-    _id: number;
+interface User {
+    _id: string;
     username: string;
     fullname: string;
     avatar: string | null;
     background: string | null;
 }
 
+interface Message {
+    _id?: string;
+    user1: string;
+    user2: string;
+    content: string;
+    sendAt?: string;
+}
+
+let socket: Socket;
+
 export const useMessageLogic = () => {
-
+    const { userId: friendId } = useParams(); // sửa tên key cho đồng bộ
     const [allUsers, setAllUsers] = useState<User[]>([]);
+    const rawUser = localStorage.getItem('user');
+    const currentUser: User | null = rawUser ? JSON.parse(rawUser) : null;
 
-    useEffect(() => {
-        axios.get("http://localhost:5000/api/users")
-            .then(response => {
-                //console.log("response.data =", response.data);
-                setAllUsers(response.data); // ✅ chính xác
-            })
-            .catch(error => {
-                console.error("Error: ", error);
-            });
-    }, []);
-
-    // const friendList: Friend[] = [
-    //     { id: 1, name: 'Lee Hyeri', image: images.avaFriend },
-    //     { id: 2, name: 'Seul Gi', image: images.avaFriend },
-    //     { id: 3, name: 'Jae Ji', image: images.avaFriend },
-    // ];
-
-    const [messages, setMessages] = useState([
-        { id: 1, content: 'Dm cuoc doi', idSender: '6877781dac46d7eef1c206d7', idReceiver: '68777cdeac46d7eef1c206dc', time: 1 },
-        { id: 2, content: 'Fuck', idSender: '68777cdeac46d7eef1c206dc', idReceiver: '6877781dac46d7eef1c206d7', time: 2 },
-        { id: 3, content: 'Toi rat ghet ban', idSender: '6877781dac46d7eef1c206d7', idReceiver: 2, time: 3 },
-        { id: 4, content: 'Con toi thi van luon thich ban', idSender: '68777cdeac46d7eef1c206dc', idReceiver: '6877781dac46d7eef1c206d7', time: 4 },
-        { id: 5, content: 'Neu co the quay lai', idSender: '6877781dac46d7eef1c206d7', idReceiver: '68777cdeac46d7eef1c206dc', time: 5 },
-        { id: 6, content: 'Toi van thich ban', idSender: '68777cdeac46d7eef1c206dc', idReceiver: '6877781dac46d7eef1c206d7', time: 6 },
-    ]);
-
+    const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const [userChoosen, setUserChoosen] = useState<User>();
     const [friendSearch, setFriendSearch] = useState('');
 
-    const handleChooseFriend = (user: User) => {
-        setUserChoosen(user);
-        console.log("Click");
+    const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+    const navigate = useNavigate();
+
+    // 🔌 Kết nối socket
+    useEffect(() => {
+        if (!currentUser) return;
+
+        socket = io("http://localhost:5000");
+
+        socket.emit("join", currentUser._id);
+
+        socket.on("receiveMessage", (message: Message) => {
+            if (
+                message.user1 === currentUser._id ||
+                message.user2 === currentUser._id
+            ) {
+                setMessages(prev => [...prev, message]);
+            }
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [currentUser]);
+
+    // 📥 Fetch all users
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/users")
+            .then(response => {
+                const users: User[] = response.data;
+                const filtered = currentUser
+                    ? users.filter(u => u._id !== currentUser._id)
+                    : users;
+                setAllUsers(filtered);
+            })
+            .catch(error => console.error("Error: ", error));
+    }, []);
+
+    // ✅ Auto chọn friend từ URL
+    useEffect(() => {
+        if (friendId && allUsers.length > 0) {
+            const found = allUsers.find(user => user._id === friendId);
+            if (found) {
+                setUserChoosen(found);
+                fetchMessages(found._id);
+            }
+        }
+    }, [friendId, allUsers]);
+
+    const fetchMessages = (friendId: string) => {
+        if (!currentUser) return;
+        axios.get(`http://localhost:5000/api/messages/${currentUser._id}/${friendId}`)
+            .then(res => {
+                setMessages(res.data.data);
+                scrollToBottom();
+            })
+            .catch(err => console.error("Error fetching messages:", err));
+    };
+
+    const handleChooseFriend = (friend: User) => {
+        window.history.pushState({}, "", `/message/${friend._id}`);
+        setUserChoosen(friend);
+        fetchMessages(friend._id);
     };
 
     const handleSendMessage = () => {
-        if (inputText.trim() === '') return;
+        if (!inputText.trim() || !userChoosen || !currentUser) return;
 
-        const newMessage = {
-            id: messages.length + 1,
-            content: inputText,
-            idSender: '6877781dac46d7eef1c206d7',
-            idReceiver: '68777cdeac46d7eef1c206dc',
-            time: Date.now()
+        const newMessage: Message = {
+            user1: currentUser._id,
+            user2: userChoosen._id,
+            content: inputText.trim(),
         };
 
-        setMessages([...messages, newMessage]);
-        setInputText('');
+        // Gửi lên server
+        axios.post("http://localhost:5000/api/messages/send", newMessage)
+            .then(res => {
+                const savedMessage = res.data.data;
+                setMessages(prev => [...prev, savedMessage]);
+
+                // Gửi socket tới người nhận
+                socket.emit("sendMessage", {
+                    ...savedMessage,
+                    receiverId: userChoosen._id,
+                });
+
+                setInputText('');
+                scrollToBottom();
+            });
     };
 
     const handleSearchFriend = (e: ChangeEvent<HTMLInputElement>) => {
         setFriendSearch(e.target.value);
     };
 
-    const filterFriends = allUsers.filter((friend) =>
+    const handleAvaClick = (user: User) =>{
+        navigate(`/${user.username}`);
+    }
+
+    const filterFriends = allUsers.filter(friend =>
         friend.fullname.toLowerCase().includes(friendSearch.toLowerCase())
     );
-
-    const chatEndRef = useRef<HTMLDivElement | null>(null);
 
     const scrollToBottom = () => {
         if (chatEndRef.current) {
@@ -88,16 +147,17 @@ export const useMessageLogic = () => {
     }, [messages]);
 
     return {
+        currentUser,
         allUsers,
         messages,
         inputText,
         setInputText,
         userChoosen,
         friendSearch,
-        //friendList,
         handleChooseFriend,
         handleSendMessage,
         handleSearchFriend,
+        handleAvaClick,
         filterFriends,
         chatEndRef
     };

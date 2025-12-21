@@ -1,35 +1,57 @@
 import { useState, useEffect } from "react"
 import axios from "axios";
-import images from "../assets/images";
+import { useNavigate } from "react-router-dom";
 
 interface User{
-    _id: number;
+    _id: string;
+    fullname?: string;
     username: string;
-    fullname: string;
-    avatar: string | null;
-    background: string | null;
+    email?: string;
+    createdAt?: string;
+    avatar ?: string;
 }
 
-export const useHomeLogic = () =>{
+interface Post{
+    _id: string;
+    user?: User;
+    image?: string;
+    content?: string;
+    createdAt?: string;
+}
+
+export const useHomeLogic = () => {
 
     const [allUsers, setAllUsers] = useState<User[]>([]);
+    const [allPosts, setAllPosts] = useState<Post[]>([]);
+    const [postContent, setPostContent] = useState<string>("");
+
+    const rawUser  = localStorage.getItem('user');
+    const user: User | null = rawUser ? JSON.parse(rawUser) : null;
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get("http://localhost:5000/api/users")
             .then(response => {
+                const users: User[] = response.data;
+                const filteredUsers = user ? users.filter(u => u._id !== user._id): users;
                 //console.log("response.data =", response.data);
-                setAllUsers(response.data); // ✅ chính xác
+                setAllUsers(filteredUsers);
             })
             .catch(error => {
                 console.error("Error: ", error);
             });
     }, []);
 
-    const user = {
-        name: "Le Bao",
-        username: "mattob2612",
-        ava: images.avatar,
-    }
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/posts/getAllPosts")
+            .then(response => {
+                const posts = response.data.data;
+                setAllPosts(posts);
+            })
+            .catch(error => {
+                console.error("Error: ", error);
+            });
+    }, []);
 
     const [love,setLove] =useState(false);
 
@@ -37,10 +59,37 @@ export const useHomeLogic = () =>{
         setLove(!love);
     }
 
+    const handleProfileButtonClick = () =>{
+        navigate(`/${user?.username}`)
+    }
+
+    const handlePostButtonClick = () =>{
+        if(postContent.trim() === ""){
+            return;
+        }
+        axios.post("http://localhost:5000/api/posts/upPost", {
+            userId: user?._id,
+            content: postContent,
+        })
+        .then(response => {
+            const newPost = response.data.post;
+            setAllPosts(prev => [newPost, ...prev]);
+            setPostContent("");
+        })
+        .catch(error => {
+            console.error("Error: ", error);
+        });
+    }
+
     return{
         allUsers,
+        allPosts,
         user,
         love,
-        handleClickLove
+        postContent,
+        setPostContent,
+        handlePostButtonClick,
+        handleClickLove,
+        handleProfileButtonClick,
     }
 }

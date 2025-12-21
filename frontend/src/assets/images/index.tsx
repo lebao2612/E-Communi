@@ -10,6 +10,7 @@ const images = {
     friend2: require('./friend2.svg').default,
     anhnen: require('./anhnen.jpg'),
     mylove: require('./mylove.jpg'),
+    ace: require('./aotuong.jpg'),
 }
 
 export default images;

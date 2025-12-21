@@ -1,22 +1,29 @@
 import  "./home.scss";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import images from "../../assets/images/index";
-import {useHomeLogic} from '../../scripts/home'
+import {useHomeLogic} from '../../scripts/home';
 
 
 const Home = () => {
 
     const {
         allUsers,
+        allPosts,
         user,
         love,
-        handleClickLove
+        postContent,
+        setPostContent,
+        handlePostButtonClick,
+        handleClickLove,
+        handleProfileButtonClick,
     } = useHomeLogic()
 
-    console.log(allUsers)
+    //console.log(allUsers)
+    console.log(allPosts)
 
     return (
         <div className="home">
+            {user && (
             <div className="home-container">
                 <div className="main-content">
                     <div className="profile-container">
@@ -28,7 +35,7 @@ const Home = () => {
                                         <p className="number">2612</p>
                                         <p className="text">Followers</p>
                                     </div>
-                                    <img src={user.ava} alt="Avatar" className="avatar-image" />
+                                    <img src={images.avatar} alt="Avatar" className="avatar-image" />
                                     <div className="follow-container">
                                         <p className="number">2004</p>
                                         <p className="text">Following</p>
@@ -36,13 +43,18 @@ const Home = () => {
                                 </div>
                                 
                                 <div className="more-info">
-                                    <h3 className="profile-name">{user.name}</h3>
+                                    <h3 className="profile-name">{user.fullname}</h3>
                                     <h3 className="profile-tag">{user.username}</h3>
                                     <p className="profile-description">
                                         Dep trai nhat the gioi 
                                         <i className="fa-regular fa-star"></i>
                                     </p>
-                                    <button className="follow-button">My Profile</button>
+                                    <button 
+                                        className="follow-button"
+                                        onClick={handleProfileButtonClick}
+                                    >
+                                        My Profile
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -111,43 +123,54 @@ const Home = () => {
 
                         <div className="statusPost">
                             <img src={images.avatar} alt="avatar" className="imgPost" />
-                            <input type="text" placeholder="Tell your friends about your thought..." className="inputPost"/>
-                            <i className="fa-solid fa-paper-plane sendIcon" />
+                            <input 
+                                type="text" 
+                                placeholder="Tell your friends about your thought..." 
+                                className="inputPost"
+                                value={postContent}
+                                onChange={(e) => setPostContent(e.target.value)}
+                            />
+                            <i className="fa-solid fa-paper-plane sendIcon" onClick={handlePostButtonClick}/>
                         </div>
 
                         <div className="newfeed">
-                            <div className="friendPost">
-                                <div className="ownerPost">
-                                    <img src={images.chungsubin} alt="ownerAva" className="ownerAva"/>
-                                    <div className="ownerInfo">
-                                        <p className="ownerTag">@chung.su.bin</p>
-                                        <p className="ownerName">Chung SuBin</p>
+                            {
+                                allPosts.map((post) => (
+                                    <div className="friendPost" key={post._id}>
+                                        <div className="ownerPost">
+                                            <img src={images.chungsubin} alt="ownerAva" className="ownerAva"/>
+                                            <div className="ownerInfo">
+                                                <p className="ownerTag">@{post.user?.username}</p>
+                                                <p className="ownerName">{post.user?.fullname}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="contentPost">
+                                            <p className="des_content"> {post.content} </p>
+                                            {post.image && <img src={post.image} alt="myloveCouple" className="img_content"/>}
+                                        </div>
+
+                                        <div className="interactPost">
+                                            {/* fa-solid se la cai de lam nhan nut love */}
+                                            <i 
+                                                className = {`fa-heart love_icon ${love === true ? 'fa-solid is_loved' : 'fa-regular'}`}
+                                                onClick={handleClickLove}
+                                            >
+                                            </i>
+                                            <i className="fa-regular fa-comment comment_icon"></i>
+                                        </div>
+
+                                        <div className="break"></div>
+
+                                        <div className="writeComment">
+                                            <img src={images.avatar} alt="avatar" className="avaUser"/>
+                                            <input type="text" placeholder="Write your comment..." className="inputComment"/>
+                                            <i className="fa-regular fa-paper-plane sendButton"></i>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div className="contentPost">
-                                    <p className="des_content"> My name is Chung SuBin </p>
-                                    <img src={images.couple} alt="myloveCouple" className="img_content"/>
-                                </div>
-
-                                <div className="interactPost">
-                                    {/* fa-solid se la cai de lam nhan nut love */}
-                                    <i 
-                                        className = {`fa-heart love_icon ${love === true ? 'fa-solid is_loved' : 'fa-regular'}`}
-                                        onClick={handleClickLove}
-                                    >
-                                    </i>
-                                    <i className="fa-regular fa-comment comment_icon"></i>
-                                </div>
-
-                                <div className="break"></div>
-
-                                <div className="writeComment">
-                                    <img src={images.avatar} alt="avatar" className="avaUser"/>
-                                    <input type="text" placeholder="Write your comment..." className="inputComment"/>
-                                    <i className="fa-regular fa-paper-plane sendButton"></i>
-                                </div>
-                            </div>
+                                ))
+                            }
+                            
                         </div>
                     </div>
 
@@ -165,6 +188,7 @@ const Home = () => {
                 </div>
 
             </div>
+            )}
             
         </div>
     );

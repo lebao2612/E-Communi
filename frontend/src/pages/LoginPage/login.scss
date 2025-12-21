@@ -1,0 +1,61 @@
+.loginPage{
+    background-color: #1A1A1A;
+    height: 100vh;
+    display: flex;
+
+    .loginForm{
+        padding:40px 80px;
+        background-color: #282828;
+        color: #fff;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+
+        .logoName{
+            display: flex;
+            align-items: center;
+
+            .nameApp{
+                margin-left: 10px;
+                font-weight: 600;
+                font-style: italic;
+                background: linear-gradient(to right, #999801, #FFFD02);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;              
+            }
+        }
+
+        .inputElement{
+            
+            flex: 1;
+            
+            .inputUsername{
+                width: 100%;
+                box-sizing: border-box;
+                color: #fff;
+                border: none;
+                border: 1px solid #fff;
+                padding: 10px;
+                margin-bottom: 10px;
+                background-color: #282828;
+            }
+        }
+
+        .comeback{
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .submitButton{
+            width: 100%;
+            cursor: pointer;
+            padding: 10px;
+        }
+    }
+
+    h2{
+        font-size: 30px;
+    }
+}
+

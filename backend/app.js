@@ -19,7 +19,9 @@ mongoose.connect(process.env.MONGO_URI, {
 // Sử dụng route
 const userRoutes = require('./routes/userRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const postRoutes = require('./routes/postRoutes');
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/posts', postRoutes);
 
 module.exports = app;

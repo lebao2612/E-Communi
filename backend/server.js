@@ -1,6 +1,37 @@
+const http = require('http'); // cần module này để tạo HTTP server
 const app = require('./app');
-const PORT = process.env.PORT || 5000;
+const { Server } = require('socket.io');
 
-app.listen(PORT, () => {
+const server = http.createServer(app); // tạo server từ express app
+
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000', // frontend
+    methods: ['GET', 'POST'],
+  }
+});
+
+// Bắt sự kiện kết nối từ client
+io.on('connection', (socket) => {
+  console.log('🔌 User connected:', socket.id);
+
+  socket.on('join', (userId) => {
+    socket.join(userId); // mỗi user join vào 1 room riêng
+    console.log(`✅ User ${userId} joined their room`);
+  });
+
+  socket.on('sendMessage', (message) => {
+    const { receiverId } = message;
+    io.to(receiverId).emit('receiveMessage', message); // gửi cho người nhận
+    console.log(`📨 Message sent to ${receiverId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('❌ User disconnected');
+  });
+});
+
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });

@@ -1,7 +1,21 @@
+import {useAuth} from '../../contexts/AuthContext'
+
 
 const Setting = () => {
+
+    const {logout} = useAuth();
+
+
     return (
-        <p>Setting Page</p>
+        <div>
+            Setting Page
+            <button
+                className='logoutButton'
+                onClick={logout}
+            >
+                logout
+            </button>
+        </div>
     )
 }
 

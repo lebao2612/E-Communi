@@ -1,9 +1,13 @@
 import images from '../../assets/images';
 import './message.scss'
 import {useMessageLogic} from '../../scripts/message'
+import { useParams } from "react-router-dom";
+
+
 
 const Message = () =>{ 
     const {
+        currentUser,
         allUsers,
         messages,
         inputText,
@@ -12,10 +16,17 @@ const Message = () =>{
         handleChooseFriend,
         handleSendMessage,
         handleSearchFriend,
+        handleAvaClick,
         friendSearch,
         filterFriends,
         chatEndRef
     } = useMessageLogic();
+
+
+    const { userId } = useParams();
+
+    console.log(messages)
+
 
     return (
         <div className='messagePage'>
@@ -56,7 +67,7 @@ const Message = () =>{
                     
                     <div className='headerMessage'>
                         
-                        <div className='friendInfo'>
+                        <div className='friendInfo' onClick={() => handleAvaClick(userChoosen)}>
                             <img src={userChoosen.avatar || images.avaFriend} alt='avaFriend' className='avaFriend' />
                             <p className='nameFriend'>{userChoosen.fullname}</p>
                         </div>
@@ -70,12 +81,12 @@ const Message = () =>{
 
                     <div className='chatMessgae'>
                         {messages.map((message) =>(
-                            message.idSender === '6877781dac46d7eef1c206d7' ? (
-                                <p className='meSend' key={message.id}>
+                            message.user1 === currentUser?._id ? (
+                                <p className='meSend' key={message._id}>
                                     {message.content}
                                 </p>
                             ) : (
-                                <div className='friendSend' key={message.id}>
+                                <div className='friendSend' key={message._id}>
                                     <img src={images.avaFriend} alt='avaFriend' className='avaMess' />
                                     <p className='youSend'> {message.content} </p>
                                 </div>

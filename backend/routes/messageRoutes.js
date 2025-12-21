@@ -4,10 +4,10 @@ const messageController = require('../controllers/messageController');
 
 
 
-// POST /api/users/register
+// POST /api/messages/send
 router.post('/send', messageController.sendMessage);
 
-// GET /api/users/
+// GET /api/messages/:user1/:user2
 router.get('/:user1/:user2', messageController.getMessagesBetweenUsers);
 
 module.exports = router;

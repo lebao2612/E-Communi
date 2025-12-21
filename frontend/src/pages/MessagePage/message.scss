@@ -5,7 +5,7 @@
     display: grid;
     gap: 20px;
     grid-template-columns: 1fr 2fr;
-    height: 79vh;
+    height: 82vh;
 
     .messageList{
         background-color: rgba(80, 80, 80, 0.5);
@@ -125,7 +125,7 @@
         overflow-y: auto;
 
         .headerMessage{
-            padding: 16px;
+            padding: 12px 16px 12px 12px;
             background-color: rgba(80, 80, 80, 0.5);
             border-radius: 10px 10px 0 0;
             display: flex;
@@ -134,7 +134,10 @@
             .friendInfo{
                 display: flex;
                 align-items: center;
+                border-radius: 12px;
+                padding: 4px;
                 gap: 10px;
+                cursor: pointer;
 
                 .avaFriend{
                     width: 50px;
@@ -148,6 +151,10 @@
                     color: #fff;
                     font-size: 20px;
                 }
+            }
+
+            .friendInfo:hover{
+                background-color: rgba(80, 80, 80, 0.5);
             }
 
             .actions{
