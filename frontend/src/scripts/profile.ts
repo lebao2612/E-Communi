@@ -30,7 +30,7 @@ export const useProfileLogic = () =>{
     const [userPosts, setUserPosts] = useState<Post[]>([]);
 
     useEffect(() => {
-            axios.get(`http://localhost:5000/api/users/${username}`)
+            axios.get(`${process.env.BE_URL}/api/users/${username}`)
                 .then(response => {
                     setUserParam(response.data)
                 })
@@ -41,7 +41,7 @@ export const useProfileLogic = () =>{
 
 
     useEffect(() => {   
-        axios.get(`http://localhost:5000/api/posts/getPostById`, {
+        axios.get(`${process.env.BE_URL}/api/posts/getPostById`, {
             params: {user: userParam?._id}
         })
             .then(response => {

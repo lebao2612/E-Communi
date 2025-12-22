@@ -30,7 +30,7 @@ export const useHomeLogic = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/users")
+        axios.get(`${process.env.BE_URL}/api/users`)
             .then(response => {
                 const users: User[] = response.data;
                 const filteredUsers = user ? users.filter(u => u._id !== user._id): users;
@@ -43,7 +43,7 @@ export const useHomeLogic = () => {
     }, []);
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/posts/getAllPosts")
+        axios.get(`${process.env.BE_URL}/api/posts/getAllPosts`)
             .then(response => {
                 const posts = response.data.data;
                 setAllPosts(posts);
@@ -67,7 +67,7 @@ export const useHomeLogic = () => {
         if(postContent.trim() === ""){
             return;
         }
-        axios.post("http://localhost:5000/api/posts/upPost", {
+        axios.post(`${process.env.BE_URL}/api/posts/upPost`, {
             userId: user?._id,
             content: postContent,
         })

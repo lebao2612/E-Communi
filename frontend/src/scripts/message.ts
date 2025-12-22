@@ -40,7 +40,7 @@ export const useMessageLogic = () => {
     useEffect(() => {
         if (!currentUser) return;
 
-        socket = io("http://localhost:5000");
+        socket = io(process.env.BE_URL || "http://localhost:5000");
 
         socket.emit("join", currentUser._id);
 
@@ -60,7 +60,7 @@ export const useMessageLogic = () => {
 
     // 📥 Fetch all users
     useEffect(() => {
-        axios.get("http://localhost:5000/api/users")
+        axios.get(`${process.env.BE_URL}/api/users`)
             .then(response => {
                 const users: User[] = response.data;
                 const filtered = currentUser
@@ -84,7 +84,7 @@ export const useMessageLogic = () => {
 
     const fetchMessages = (friendId: string) => {
         if (!currentUser) return;
-        axios.get(`http://localhost:5000/api/messages/${currentUser._id}/${friendId}`)
+        axios.get(`${process.env.BE_URL}/api/messages/${currentUser._id}/${friendId}`)
             .then(res => {
                 setMessages(res.data.data);
                 scrollToBottom();
@@ -108,7 +108,7 @@ export const useMessageLogic = () => {
         };
 
         // Gửi lên server
-        axios.post("http://localhost:5000/api/messages/send", newMessage)
+        axios.post(`${process.env.BE_URL}/api/messages/send`, newMessage)
             .then(res => {
                 const savedMessage = res.data.data;
                 setMessages(prev => [...prev, savedMessage]);
