@@ -1,46 +1,54 @@
-// contexts/AuthContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-interface User {
-  _id: string;
-  username: string;
-  email?: string;
-}
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import api, { setAccessToken } from '../api/axios';
 
 interface AuthContextType {
-  user: User | null;
-  login: (user: User) => void;
-  logout: () => void;
   isLoggedIn: boolean;
-  loading: boolean; // <- Thêm trạng thái loading
+  loading: boolean;
+  logout: () => void;
+  markLoggedIn: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // <- Ban đầu đang "loading" từ localStorage
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  // AUTO REFRESH TOKEN KHI RELOAD APP
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    if (!refreshToken) {
+      setLoading(false);
+      return;
     }
-    setLoading(false); // <- Sau khi kiểm tra xong thì mới hết loading
+
+    api.post('/api/users/refresh-token', { refreshToken })
+      .then(res => {
+        setAccessToken(res.data.accessToken);
+        setIsLoggedIn(true);
+      })
+      .catch(() => {
+        localStorage.removeItem('refreshToken');
+        setIsLoggedIn(false);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
-  const login = (user: User) => {
-    setUser(user);
-    localStorage.setItem('user', JSON.stringify(user));
+  const logout = () => {
+    setIsLoggedIn(false);
+    setAccessToken('');
+    localStorage.removeItem('refreshToken');
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const markLoggedIn = () => {
+    setIsLoggedIn(true);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoggedIn: !!user, loading }}>
+    <AuthContext.Provider value={{ isLoggedIn, loading, logout, markLoggedIn }}>
       {children}
     </AuthContext.Provider>
   );
@@ -48,6 +56,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used inside AuthProvider");
+  if (!context) {
+    throw new Error('useAuth must be used inside AuthProvider');
+  }
   return context;
 };

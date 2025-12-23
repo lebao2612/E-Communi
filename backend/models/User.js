@@ -18,6 +18,15 @@ const userSchema = new mongoose.Schema({
     //unique: true,
   },
 
+  password: {
+    type: String,
+    required: true
+  },
+  
+  refreshToken: {
+    type: String
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,

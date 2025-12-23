@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from '../api/axios';
 
 interface User{
     _id: string;
@@ -20,40 +20,32 @@ interface Post{
 }
 
 export const useHomeLogic = () => {
-
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [allPosts, setAllPosts] = useState<Post[]>([]);
     const [postContent, setPostContent] = useState<string>("");
+    
+    const [love,setLove] = useState(false);
 
-    const rawUser  = localStorage.getItem('user');
-    const user: User | null = rawUser ? JSON.parse(rawUser) : null;
+    const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get(`${process.env.BE_URL}/api/users`)
-            .then(response => {
-                const users: User[] = response.data;
-                const filteredUsers = user ? users.filter(u => u._id !== user._id): users;
-                //console.log("response.data =", response.data);
-                setAllUsers(filteredUsers);
-            })
-            .catch(error => {
-                console.error("Error: ", error);
-            });
+        api.get('/api/users/me')
+        .then(res => setUser(res.data))
+        .catch(() => navigate('/login'));
     }, []);
 
     useEffect(() => {
-        axios.get(`${process.env.BE_URL}/api/posts/getAllPosts`)
-            .then(response => {
-                const posts = response.data.data;
-                setAllPosts(posts);
-            })
-            .catch(error => {
-                console.error("Error: ", error);
-            });
-    }, []);
+    if (!user) return;
 
-    const [love,setLove] =useState(false);
+    api.get('/api/users').then(res => {
+        setAllUsers(res.data.filter((u: User) => u._id !== user._id));
+        });
+
+        api.get('/api/posts/getAllPosts').then(res => {
+        setAllPosts(res.data.data);
+        });
+    }, [user]);
 
     const handleClickLove = () =>{
         setLove(!love);
@@ -63,23 +55,15 @@ export const useHomeLogic = () => {
         navigate(`/${user?.username}`)
     }
 
-    const handlePostButtonClick = () =>{
-        if(postContent.trim() === ""){
-            return;
-        }
-        axios.post(`${process.env.BE_URL}/api/posts/upPost`, {
-            userId: user?._id,
-            content: postContent,
-        })
-        .then(response => {
-            const newPost = response.data.post;
-            setAllPosts(prev => [newPost, ...prev]);
-            setPostContent("");
-        })
-        .catch(error => {
-            console.error("Error: ", error);
+    const handlePostButtonClick = () => {
+        if (!postContent.trim()) return;
+
+        api.post('/api/posts/upPost', { content: postContent })
+        .then(res => {
+            setAllPosts(prev => [res.data.post, ...prev]);
+            setPostContent('');
         });
-    }
+    };
 
     return{
         allUsers,

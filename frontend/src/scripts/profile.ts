@@ -20,6 +20,7 @@ interface Post{
 }
 
 export const useProfileLogic = () =>{
+    const API_URL = process.env.REACT_APP_API_URL;
 
     const {username} = useParams();
     const navigate = useNavigate();
@@ -30,7 +31,7 @@ export const useProfileLogic = () =>{
     const [userPosts, setUserPosts] = useState<Post[]>([]);
 
     useEffect(() => {
-            axios.get(`${process.env.BE_URL}/api/users/${username}`)
+            axios.get(`${API_URL}/api/users/${username}`)
                 .then(response => {
                     setUserParam(response.data)
                 })
@@ -41,7 +42,7 @@ export const useProfileLogic = () =>{
 
 
     useEffect(() => {   
-        axios.get(`${process.env.BE_URL}/api/posts/getPostById`, {
+        axios.get(`${API_URL}/api/posts/getPostById`, {
             params: {user: userParam?._id}
         })
             .then(response => {

@@ -1,19 +1,14 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import images from "../../assets/images/index";
+import { setAccessToken } from '../../api/axios';
+import api from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import './login.scss';
 
 interface LoginResponse {
-  message: string;
-  user: {
-    _id: string;
-    fullname?: string;
-    username: string;
-    email?: string;
-    createdAt?: string;
-  };
+  accessToken: string;
+  refreshToken: string;
 }
 
 const Login = () => {
@@ -21,36 +16,34 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState('');
+
+  const { markLoggedIn } = useAuth();
 
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleLogin = async () => {
-    // Reset trạng thái
     setError(null);
     setLoading(true);
 
     try {
-      // Gửi POST request đến backend
-      const response = await axios.post<LoginResponse>('http://localhost:5000/api/users/login', {
-        username: username.trim()
-      });
+      const res = await api.post<LoginResponse>(
+        '/api/users/login',
+        {
+          username: username.trim(),
+          password
+        }
+      );
 
-      const user = response.data.user;
-      if (user) {
-        console.log("User login: ", user);
-        login(user);         // ✅ Gọi hàm login của AuthContext
-        navigate('/');       // ✅ Chuyển về trang chính
-      } else {
-        setError('Đăng nhập thất bại. Vui lòng thử lại.');
-      }
+      // 🔐 LƯU TOKEN
+      localStorage.setItem('refreshToken', res.data.refreshToken);
+      setAccessToken(res.data.accessToken);
+      markLoggedIn();
+
+      navigate('/');
+
     } catch (err: any) {
-      console.error('Login error:', err);
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else {
-        setError('Unknown error occurred');
-      }
+      setError(err.response?.data?.error || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -75,12 +68,22 @@ const Login = () => {
             onChange={e => setUsername(e.target.value)}
             placeholder="Enter username"
           />
+          <label htmlFor='password'>Password:</label><br/>
+          <input
+            type="password"
+            className='inputUsername'
+            id="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="Enter password"
+          />
           
           {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
         <button
           className='submitButton' 
           onClick={handleLogin}
+          disabled={loading}
         >
           {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>

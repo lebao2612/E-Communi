@@ -1,14 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const authMiddleware = require('../middleware/auth');
 
 
 
-// POST /api/users/register
-router.post('/register', userController.registerUser);
+router.get('/me', authMiddleware, userController.getMe);
 
-//GET /api/users/:username
-router.get('/:username', userController.getUserByUsername);
 
 // GET /api/users/
 router.get('/', userController.getAllUsers);
@@ -18,5 +16,13 @@ router.post('/login', userController.login);
 
 //POST /api/users/register
 router.post('/register', userController.register);
+
+router.post('/refresh-token', userController.refreshToken);
+
+
+//GET /api/users/:username
+router.get('/:username', userController.getUserByUsername);
+
+
 
 module.exports = router;

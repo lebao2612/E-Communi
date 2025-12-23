@@ -22,6 +22,10 @@ interface Message {
 let socket: Socket;
 
 export const useMessageLogic = () => {
+
+    const API_URL = process.env.REACT_APP_API_URL;
+
+
     const { userId: friendId } = useParams(); // sửa tên key cho đồng bộ
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const rawUser = localStorage.getItem('user');
@@ -40,7 +44,7 @@ export const useMessageLogic = () => {
     useEffect(() => {
         if (!currentUser) return;
 
-        socket = io(process.env.BE_URL || "http://localhost:5000");
+        socket = io(API_URL || "http://localhost:5000");
 
         socket.emit("join", currentUser._id);
 
@@ -60,7 +64,7 @@ export const useMessageLogic = () => {
 
     // 📥 Fetch all users
     useEffect(() => {
-        axios.get(`${process.env.BE_URL}/api/users`)
+        axios.get(`${API_URL}/api/users`)
             .then(response => {
                 const users: User[] = response.data;
                 const filtered = currentUser
@@ -84,7 +88,7 @@ export const useMessageLogic = () => {
 
     const fetchMessages = (friendId: string) => {
         if (!currentUser) return;
-        axios.get(`${process.env.BE_URL}/api/messages/${currentUser._id}/${friendId}`)
+        axios.get(`${API_URL}/api/messages/${currentUser._id}/${friendId}`)
             .then(res => {
                 setMessages(res.data.data);
                 scrollToBottom();
@@ -108,7 +112,7 @@ export const useMessageLogic = () => {
         };
 
         // Gửi lên server
-        axios.post(`${process.env.BE_URL}/api/messages/send`, newMessage)
+        axios.post(`${API_URL}/api/messages/send`, newMessage)
             .then(res => {
                 const savedMessage = res.data.data;
                 setMessages(prev => [...prev, savedMessage]);
