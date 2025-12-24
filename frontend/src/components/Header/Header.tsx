@@ -1,6 +1,8 @@
 import "./header.scss";
 import images from "../../assets/images/index";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
 
 interface User{
     _id: string;
@@ -13,8 +15,13 @@ interface User{
 
 function Header(){
 
-    const rawUser = localStorage.getItem('user');
-    const user: User | null = rawUser ? JSON.parse(rawUser) : null;
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        api.get('/api/users/me')
+            .then(res => setUser(res.data))
+            .catch(() => setUser(null))
+    }, []);
 
     return (
         <div className="header">
@@ -23,10 +30,6 @@ function Header(){
                 <input type="text" placeholder="#Explore" className="search-input"/>
             </div>
             <div className="nav-list">
-                {/* <a href="/" className="fa-solid fa-house is-choosen"></a>
-                <a href={`/profile/${user?.username}`} className="fa-solid fa-user"></a>
-                <a href="/message" className="fa-solid fa-message"></a>
-                <a href="/setting" className="fa-solid fa-gear"></a> */}
                 <Link to="/" className="fa-solid fa-house is-choosen"></Link>
                 <Link to={`/${user?.username}`} className="fa-solid fa-user"></Link>
                 <Link to="/message" className="fa-solid fa-message"></Link>

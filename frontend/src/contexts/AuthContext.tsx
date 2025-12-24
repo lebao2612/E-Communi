@@ -19,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const refreshToken = localStorage.getItem('refreshToken');
 
     if (!refreshToken) {
+      setIsLoggedIn(false);
       setLoading(false);
       return;
     }

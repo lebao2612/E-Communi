@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axios";
     
 interface User{
     _id: string;
@@ -20,18 +20,22 @@ interface Post{
 }
 
 export const useProfileLogic = () =>{
-    const API_URL = process.env.REACT_APP_API_URL;
 
     const {username} = useParams();
     const navigate = useNavigate();
 
     const [userParam, setUserParam] = useState<User>();
-    const rawUser = localStorage.getItem('user');
-    const userLogin: User | null = rawUser ? JSON.parse(rawUser) : null;
+    const [userLogin, setUserLogin] = useState<User | null>(null);
     const [userPosts, setUserPosts] = useState<Post[]>([]);
 
+     useEffect(() => {
+        api.get('/api/users/me')
+            .then(res => setUserLogin(res.data))
+            .catch(() => navigate('/login'));
+    }, []);
+
     useEffect(() => {
-            axios.get(`${API_URL}/api/users/${username}`)
+            api.get(`/api/users/${username}`)
                 .then(response => {
                     setUserParam(response.data)
                 })
@@ -42,7 +46,7 @@ export const useProfileLogic = () =>{
 
 
     useEffect(() => {   
-        axios.get(`${API_URL}/api/posts/getPostById`, {
+        api.get('/api/posts/getPostById', {
             params: {user: userParam?._id}
         })
             .then(response => {

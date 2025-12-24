@@ -37,8 +37,13 @@ exports.getAllPosts = async (req, res) => {
 
 exports.upPost = async(req, res) => {
     try{
-        const {userId, content} = req.body;
-        const newPost = new Post({user: userId, content: content});
+        const { content} = req.body;
+
+        if (!content || !content.trim()) {
+            return res.status(400).json({ message: "Content is required" });
+        }
+        
+        const newPost = new Post({user: req.user._id, content: content});
 
         await newPost.save();
         res.status(201).json({message:'up Post successfully', post: newPost});

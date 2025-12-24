@@ -9,12 +9,17 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB connected'))
-.catch(err => console.error('❌ MongoDB error:', err));
+if (!process.env.MONGO_URI) {
+  console.error('❌ MONGO_URI is missing')
+  process.exit(1)
+}
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => {
+    console.error('❌ MongoDB error:', err.message)
+    process.exit(1)
+  })
 
 // Sử dụng route
 const userRoutes = require('./routes/userRoutes');

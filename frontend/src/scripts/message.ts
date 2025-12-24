@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
-import axios from 'axios';
 import { io, Socket } from "socket.io-client";
+import api from "../api/axios";
 
 interface User {
     _id: string;
@@ -28,8 +28,7 @@ export const useMessageLogic = () => {
 
     const { userId: friendId } = useParams(); // sửa tên key cho đồng bộ
     const [allUsers, setAllUsers] = useState<User[]>([]);
-    const rawUser = localStorage.getItem('user');
-    const currentUser: User | null = rawUser ? JSON.parse(rawUser) : null;
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
@@ -39,6 +38,12 @@ export const useMessageLogic = () => {
     const chatEndRef = useRef<HTMLDivElement | null>(null);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        api.get('/api/users/me')
+            .then(res => setCurrentUser(res.data))
+            .catch(() => navigate('/login'));
+    }, []);
 
     // 🔌 Kết nối socket
     useEffect(() => {
@@ -64,31 +69,30 @@ export const useMessageLogic = () => {
 
     // 📥 Fetch all users
     useEffect(() => {
-        axios.get(`${API_URL}/api/users`)
+        if (!currentUser) return;
+
+        api.get('/api/users')
             .then(response => {
                 const users: User[] = response.data;
-                const filtered = currentUser
-                    ? users.filter(u => u._id !== currentUser._id)
-                    : users;
-                setAllUsers(filtered);
+                setAllUsers(users.filter(u => u._id !== currentUser._id));
             })
-            .catch(error => console.error("Error: ", error));
-    }, []);
+            .catch(console.error);
+    }, [currentUser]);
 
     // ✅ Auto chọn friend từ URL
     useEffect(() => {
-        if (friendId && allUsers.length > 0) {
-            const found = allUsers.find(user => user._id === friendId);
-            if (found) {
-                setUserChoosen(found);
-                fetchMessages(found._id);
-            }
+        if (!friendId || !currentUser || allUsers.length === 0) return;
+
+        const found = allUsers.find(user => user._id === friendId);
+        if (found) {
+            setUserChoosen(found);
+            fetchMessages(found._id);
         }
-    }, [friendId, allUsers]);
+    }, [friendId, allUsers, currentUser]);
 
     const fetchMessages = (friendId: string) => {
         if (!currentUser) return;
-        axios.get(`${API_URL}/api/messages/${currentUser._id}/${friendId}`)
+        api.get(`/api/messages/${currentUser._id}/${friendId}`)
             .then(res => {
                 setMessages(res.data.data);
                 scrollToBottom();
@@ -112,7 +116,7 @@ export const useMessageLogic = () => {
         };
 
         // Gửi lên server
-        axios.post(`${API_URL}/api/messages/send`, newMessage)
+        api.post('/api/messages/send', newMessage)
             .then(res => {
                 const savedMessage = res.data.data;
                 setMessages(prev => [...prev, savedMessage]);

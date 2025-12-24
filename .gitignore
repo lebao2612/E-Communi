@@ -1,0 +1,9 @@
+# SSH private keys
+*.pem
+
+# Env files
+.env
+.env.*
+
+# Node
+node_modules/
