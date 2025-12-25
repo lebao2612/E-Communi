@@ -4,10 +4,15 @@ const { Server } = require('socket.io');
 
 const server = http.createServer(app); // tạo server từ express app
 
+const allowedOrigins = [
+  "http://localhost:3000",      // dev
+  "http://13.212.47.205",       // production
+];
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.FE_URL, // frontend
-    methods: ['GET', 'POST'],
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
   }
 });
 
