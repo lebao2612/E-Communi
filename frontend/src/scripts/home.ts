@@ -33,18 +33,18 @@ export const useHomeLogic = () => {
         api.get('/api/users/me')
         .then(res => setUser(res.data))
         .catch(() => navigate('/login'));
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
-    if (!user) return;
+        if (!user) return;
 
-    api.get('/api/users').then(res => {
-        setAllUsers(res.data.filter((u: User) => u._id !== user._id));
-        });
+        api.get('/api/users').then(res => {
+            setAllUsers(res.data.filter((u: User) => u._id !== user._id));
+            });
 
-        api.get('/api/posts/getAllPosts').then(res => {
-        setAllPosts(res.data.data);
-        });
+            api.get('/api/posts/getAllPosts').then(res => {
+            setAllPosts(res.data.data);
+            });
     }, [user]);
 
     const handleClickLove = () =>{
@@ -60,7 +60,7 @@ export const useHomeLogic = () => {
 
         api.post('/api/posts/upPost', { content: postContent })
         .then(res => {
-            setAllPosts(prev => [res.data.post, ...prev]);
+            setAllPosts(prev => [res.data.post, ...prev]); 
             setPostContent('');
         });
     };

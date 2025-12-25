@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, ChangeEvent } from 'react';
+import { useState, useRef, useEffect, ChangeEvent, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import api from "../api/axios";
@@ -23,7 +23,10 @@ let socket: Socket;
 
 export const useMessageLogic = () => {
 
-    const API_URL = process.env.REACT_APP_API_URL;
+    const API_URL = useMemo(
+        () => process.env.REACT_APP_API_URL || "http://localhost:5000",
+        []
+    );
 
 
     const { userId: friendId } = useParams(); // sửa tên key cho đồng bộ
@@ -39,17 +42,29 @@ export const useMessageLogic = () => {
 
     const navigate = useNavigate();
 
+    const fetchMessages = useCallback((friendId: string) => {
+        if (!currentUser) return;
+
+        api.get(`/api/messages/${currentUser._id}/${friendId}`)
+            .then(res => {
+                setMessages(res.data.data);
+                scrollToBottom();
+            })
+            .catch(err => console.error("Error fetching messages:", err));
+    }, [currentUser]);
+
+
     useEffect(() => {
         api.get('/api/users/me')
             .then(res => setCurrentUser(res.data))
             .catch(() => navigate('/login'));
-    }, []);
+    }, [navigate]);
 
     // 🔌 Kết nối socket
     useEffect(() => {
         if (!currentUser) return;
 
-        socket = io(API_URL || "http://localhost:5000");
+        socket = io(API_URL);
 
         socket.emit("join", currentUser._id);
 
@@ -65,7 +80,7 @@ export const useMessageLogic = () => {
         return () => {
             socket.disconnect();
         };
-    }, [currentUser]);
+    }, [currentUser, API_URL]);
 
     // 📥 Fetch all users
     useEffect(() => {
@@ -88,18 +103,9 @@ export const useMessageLogic = () => {
             setUserChoosen(found);
             fetchMessages(found._id);
         }
-    }, [friendId, allUsers, currentUser]);
+    }, [friendId, allUsers, currentUser, fetchMessages]);
 
-    const fetchMessages = (friendId: string) => {
-        if (!currentUser) return;
-        api.get(`/api/messages/${currentUser._id}/${friendId}`)
-            .then(res => {
-                setMessages(res.data.data);
-                scrollToBottom();
-            })
-            .catch(err => console.error("Error fetching messages:", err));
-    };
-
+   
     const handleChooseFriend = (friend: User) => {
         window.history.pushState({}, "", `/message/${friend._id}`);
         setUserChoosen(friend);

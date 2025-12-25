@@ -1,14 +1,12 @@
 import images from '../../assets/images';
 import './message.scss'
 import {useMessageLogic} from '../../scripts/message'
-import { useParams } from "react-router-dom";
 
 
 
 const Message = () =>{ 
     const {
         currentUser,
-        allUsers,
         messages,
         inputText,
         setInputText,
@@ -21,9 +19,6 @@ const Message = () =>{
         filterFriends,
         chatEndRef
     } = useMessageLogic();
-
-
-    const { userId } = useParams();
 
     console.log(messages)
 
@@ -106,7 +101,7 @@ const Message = () =>{
                             className='inputText'
                             value={inputText}
                             onChange={(e) => setInputText(e.target.value)}
-                            onKeyDown={(e) => {if (e.key == 'Enter') handleSendMessage();}}    
+                            onKeyDown={(e) => {if (e.key === 'Enter') handleSendMessage();}}    
                         />
                         <i 
                             className="fa-solid fa-paper-plane sendMessage" 

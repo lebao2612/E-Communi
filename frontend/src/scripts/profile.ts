@@ -32,7 +32,7 @@ export const useProfileLogic = () =>{
         api.get('/api/users/me')
             .then(res => setUserLogin(res.data))
             .catch(() => navigate('/login'));
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
             api.get(`/api/users/${username}`)

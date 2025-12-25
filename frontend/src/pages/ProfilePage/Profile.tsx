@@ -90,7 +90,7 @@ const Profile = () =>{
 
                     
                     <div className="friendPost">
-                        {userPosts.length == 0 ? (
+                        {userPosts.length === 0 ? (
                             <div className='emptyPost'>
                                 <i className="fa-solid fa-circle-exclamation"></i>
                                 <p className='alert'>No post</p>
