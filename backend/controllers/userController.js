@@ -19,9 +19,9 @@ exports.getAllUsers = async (req, res) => {
 };
 
 // [GET] /api/users/:username
-exports.getUserByUsername = async (req, res) =>{
-  const {username} = req.params;
-  
+exports.getUserByUsername = async (req, res) => {
+  const { username } = req.params;
+
   try {
     const user = await User.findOne({ username });
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -34,8 +34,8 @@ exports.getUserByUsername = async (req, res) =>{
 
 // [POST] /api/users/register
 exports.register = async (req, res) => {
-  try{
-    const {username, fullname, password, confirmPassword} = req.body;
+  try {
+    const { username, fullname, password, confirmPassword } = req.body;
 
     if (!username || !password || !confirmPassword || !fullname)
       return res.status(400).json({ error: 'Missing fields' });
@@ -43,39 +43,39 @@ exports.register = async (req, res) => {
     if (password !== confirmPassword)
       return res.status(400).json({ error: 'Passwords do not match' });
 
-    const existingUser = await User.findOne({username});
-    if(existingUser){
-      return res.status(400).json({error: 'User already exists'});
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-      username, 
-      fullname, 
+      username,
+      fullname,
       password: hashedPassword
     });
 
     await newUser.save();
 
-    res.status(201).json({message: 'User registered successfully', user: newUser});
-  } catch{
-    res.status(500).json({error: err.message});
+    res.status(201).json({ message: 'User registered successfully', user: newUser });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
 //[POST] /api/users/login
 exports.login = async (req, res) => {
-  try{
-    const {username, password} = req.body;
+  try {
+    const { username, password } = req.body;
 
     if (!username) {
       return res.status(400).json({ error: 'Username is required' });
     }
 
-    const user = await User.findOne({username});
-    if(!user){
-      return res.status(404).json({error: 'User not found'});
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -93,8 +93,8 @@ exports.login = async (req, res) => {
       refreshToken
     });
 
-  } catch{
-    res.status(500).json({error: err.message});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 }
 
@@ -121,13 +121,28 @@ exports.refreshToken = async (req, res) => {
     );
 
     res.json({ accessToken: newAccessToken });
-  } catch {
-    res.status(403).json({ error: 'Token expired' });
+  } catch (err) {
+    res.status(403).json({ error: 'Token expired or invalid' });
   }
 };
 
 // [GET] /api/users/me
 exports.getMe = async (req, res) => {
-  const user = await User.findById(req.userId).select('-password -refreshToken');
-  res.json(user);
+  try {
+    console.log("req.userId = ", req.userId);
+
+    if (!req.userId) {
+      return res.status(401).json({ error: 'User ID not found' });
+    }
+
+    const user = await User.findById(req.userId).select('-password -refreshToken');
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };

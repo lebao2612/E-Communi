@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 import api from '../api/axios';
+import { useAuth } from '../contexts/AuthContext';
 
-interface User{
+interface User {
     _id: string;
     fullname?: string;
     username: string;
     email?: string;
     createdAt?: string;
-    avatar ?: string;
+    avatar?: string;
 }
 
-interface Post{
+interface Post {
     _id: string;
     user?: User;
     image?: string;
@@ -23,35 +24,49 @@ export const useHomeLogic = () => {
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [allPosts, setAllPosts] = useState<Post[]>([]);
     const [postContent, setPostContent] = useState<string>("");
-    
-    const [love,setLove] = useState(false);
+
+    const [love, setLove] = useState(false);
 
     const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
+    const { isLoggedIn, loading: authLoading } = useAuth();
 
     useEffect(() => {
+        if (authLoading) return; // Chờ auth context hoàn tất
+
+        if (!isLoggedIn) {
+            navigate('/login');
+            return;
+        }
+
         api.get('/api/users/me')
-        .then(res => setUser(res.data))
-        .catch(() => navigate('/login'));
-    }, [navigate]);
+            .then(res => {
+                setUser(res.data);
+                console.log('Fetched user:', res.data);
+            })
+            .catch(err => {
+                console.error('Error fetching user:', err.response?.data);
+                navigate('/login');
+            });
+    }, [navigate, isLoggedIn, authLoading]);
 
     useEffect(() => {
         if (!user) return;
 
         api.get('/api/users').then(res => {
             setAllUsers(res.data.filter((u: User) => u._id !== user._id));
-            });
+        });
 
-            api.get('/api/posts/getAllPosts').then(res => {
+        api.get('/api/posts/getAllPosts').then(res => {
             setAllPosts(res.data.data);
-            });
+        });
     }, [user]);
 
-    const handleClickLove = () =>{
+    const handleClickLove = () => {
         setLove(!love);
     }
 
-    const handleProfileButtonClick = () =>{
+    const handleProfileButtonClick = () => {
         navigate(`/${user?.username}`)
     }
 
@@ -59,13 +74,17 @@ export const useHomeLogic = () => {
         if (!postContent.trim()) return;
 
         api.post('/api/posts/upPost', { content: postContent })
-        .then(res => {
-            setAllPosts(prev => [res.data.post, ...prev]); 
-            setPostContent('');
-        });
+            .then(res => {
+                setAllPosts(prev => [res.data.post, ...prev]);
+                setPostContent('');
+            })
+            .catch(err => {
+                console.error('Error uploading post:', err.response?.data?.message || err.message);
+                alert('Lỗi khi đăng bài: ' + (err.response?.data?.message || err.message));
+            });
     };
 
-    return{
+    return {
         allUsers,
         allPosts,
         user,

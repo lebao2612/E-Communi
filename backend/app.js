@@ -6,7 +6,21 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors()); 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://13.212.47.205",
+  "https://ecommunity-frontend.s3.amazonaws.com",
+  "http://ecommunity-frontend.s3-website-ap-southeast-1.amazonaws.com"
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
+
+
 app.use(express.json());
 
 if (!process.env.MONGO_URI) {
