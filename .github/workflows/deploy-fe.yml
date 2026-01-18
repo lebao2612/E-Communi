@@ -20,6 +20,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Inject .env files
+        run: |
+          echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > .env
+          echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > .env.production
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -29,10 +34,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Inject .env.production
-        run: |
-          echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env.production
 
       - name: Build React app
         run: npm run build
