@@ -43,4 +43,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/posts', postRoutes);
 
+const uploadTestRoutes = require('./routes/uploadTest');
+app.use('/api/test', uploadTestRoutes);
+
 module.exports = app;

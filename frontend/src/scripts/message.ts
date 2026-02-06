@@ -2,22 +2,8 @@ import { useState, useRef, useEffect, ChangeEvent, useMemo, useCallback } from '
 import { useNavigate, useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import api from "../api/axios";
-
-interface User {
-    _id: string;
-    username: string;
-    fullname: string;
-    avatar: string | null;
-    background: string | null;
-}
-
-interface Message {
-    _id?: string;
-    user1: string;
-    user2: string;
-    content: string;
-    sendAt?: string;
-}
+import { User } from '../types/user';
+import { Message } from '../types/message';
 
 let socket: Socket;
 
@@ -105,7 +91,7 @@ export const useMessageLogic = () => {
         }
     }, [friendId, allUsers, currentUser, fetchMessages]);
 
-   
+
     const handleChooseFriend = (friend: User) => {
         window.history.pushState({}, "", `/message/${friend._id}`);
         setUserChoosen(friend);
@@ -142,7 +128,7 @@ export const useMessageLogic = () => {
         setFriendSearch(e.target.value);
     };
 
-    const handleAvaClick = (user: User) =>{
+    const handleAvaClick = (user: User) => {
         navigate(`/${user.username}`);
     }
 

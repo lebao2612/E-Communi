@@ -2,23 +2,8 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 import api from '../api/axios';
 import { useAuth } from '../contexts/AuthContext';
-
-interface User {
-    _id: string;
-    fullname?: string;
-    username: string;
-    email?: string;
-    createdAt?: string;
-    avatar?: string;
-}
-
-interface Post {
-    _id: string;
-    user?: User;
-    image?: string;
-    content?: string;
-    createdAt?: string;
-}
+import { User } from '../types/user';
+import { Post } from '../types/post';
 
 export const useHomeLogic = () => {
     const [allUsers, setAllUsers] = useState<User[]>([]);

@@ -1,4 +1,9 @@
+import { User } from "./user";
+
 export interface Post {
-    id: number;
-    cotent: string;
+    _id: string;
+    user?: User;
+    image?: string;
+    content?: string;
+    createdAt?: string;
 }

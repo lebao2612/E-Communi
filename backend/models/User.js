@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  
+
   refreshToken: {
     type: String
   },
@@ -31,6 +31,28 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
+  avatar: {
+    type: String,
+    default: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+  },
+
+  coverImage: {
+    type: String,
+    default: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+  },
+
+  bio: {
+    type: String,
+    default: ""
+  },
+
+  socialLinks: {
+    type: Array,
+    default: []
+  },
+
+
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -35,7 +35,7 @@ exports.getUserByUsername = async (req, res) => {
 // [POST] /api/users/register
 exports.register = async (req, res) => {
   try {
-    const { username, fullname, password, confirmPassword } = req.body;
+    const { username, fullname, password, confirmPassword, avatar } = req.body;
 
     if (!username || !password || !confirmPassword || !fullname)
       return res.status(400).json({ error: 'Missing fields' });
@@ -53,8 +53,11 @@ exports.register = async (req, res) => {
     const newUser = new User({
       username,
       fullname,
-      password: hashedPassword
+      password: hashedPassword,
+      avatar: avatar || undefined
     });
+
+    console.log('newUser created (before save): ', newUser);
 
     await newUser.save();
 

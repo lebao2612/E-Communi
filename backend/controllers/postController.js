@@ -24,7 +24,7 @@ exports.getPostsByUserId = async (req, res) => {
 exports.getAllPosts = async (req, res) => {
     try {
         const posts = await Post.find()
-            .populate('user', 'username fullname');
+            .populate('user', 'username fullname avatar');
 
         res.status(200).json({
             message: 'Get all posts successfully',

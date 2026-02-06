@@ -1,53 +1,39 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-    
-interface User{
-    _id: string;
-    fullname?: string;
-    username: string;
-    email?: string;
-    createdAt?: string;
-    avatar ?: string;
-}
+import { User } from '../types/user';
+import { Post } from '../types/post';
 
-interface Post{
-    _id: string;
-    user?: string;
-    image?: string;
-    content?: string;
-    createdAt?: string;
-}
 
-export const useProfileLogic = () =>{
+export const useProfileLogic = () => {
 
-    const {username} = useParams();
+    const { username } = useParams();
     const navigate = useNavigate();
 
     const [userParam, setUserParam] = useState<User>();
     const [userLogin, setUserLogin] = useState<User | null>(null);
     const [userPosts, setUserPosts] = useState<Post[]>([]);
 
-     useEffect(() => {
+    useEffect(() => {
         api.get('/api/users/me')
             .then(res => setUserLogin(res.data))
             .catch(() => navigate('/login'));
     }, [navigate]);
 
     useEffect(() => {
-            api.get(`/api/users/${username}`)
-                .then(response => {
-                    setUserParam(response.data)
-                })
-                .catch(error => {
-                    console.error("Error: ", error);
-                });
+        api.get(`/api/users/${username}`)
+            .then(response => {
+                setUserParam(response.data)
+            })
+            .catch(error => {
+                console.error("Error: ", error);
+            });
     }, [username]);
 
 
-    useEffect(() => {   
+    useEffect(() => {
         api.get('/api/posts/getPostById', {
-            params: {user: userParam?._id}
+            params: { user: userParam?._id }
         })
             .then(response => {
                 setUserPosts(response.data.data)
@@ -57,9 +43,9 @@ export const useProfileLogic = () =>{
             })
     }, [userParam?._id]);
 
-    const [love,setLove] = useState(false);
-    
-    const handleClickLove = () =>{
+    const [love, setLove] = useState(false);
+
+    const handleClickLove = () => {
         setLove(!love);
     }
 
@@ -67,11 +53,11 @@ export const useProfileLogic = () =>{
         navigate(`/message/${userid}`)
     }
 
-    return{
+    return {
         userLogin,
         userParam,
         userPosts,
-        love, 
+        love,
         handleClickLove,
         handleButtonMessage,
     }
