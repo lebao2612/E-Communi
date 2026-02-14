@@ -71,6 +71,8 @@ export const useProfileLogic = () => {
             // 2. Update User Profile
             const updateRes = await api.put('/api/users/update', { avatar: imageUrl });
 
+            console.log('updateRes: ', updateRes);
+
             // 3. Update Local State
             setUserParam(prev => prev ? { ...prev, avatar: imageUrl } : undefined);
             if (userLogin?._id === userParam?._id) {
