@@ -10,6 +10,7 @@ const Profile = () => {
         love,
         handleClickLove,
         handleButtonMessage,
+        handleAvatarUpload,
     } = useProfileLogic();
 
     console.log('userPost: ', userPosts);
@@ -24,7 +25,21 @@ const Profile = () => {
                             <div className='avaGroup'>
                                 <div className='avaPr'>
                                     <img src={userParam.avatar} alt='avatar' className='avatarUser' />
-                                    <i className="fa-solid fa-camera"></i>
+                                    {userLogin?._id === userParam._id && (
+                                        <>
+                                            <input
+                                                type="file"
+                                                id="avatar-upload"
+                                                style={{ display: 'none' }}
+                                                accept="image/*"
+                                                onChange={handleAvatarUpload}
+                                            />
+                                            <label htmlFor="avatar-upload">
+                                                <i className="fa-solid fa-camera" style={{ cursor: 'pointer' }}></i>
+                                            </label>
+                                        </>
+                                    )}
+                                    {/* <i className="fa-solid fa-camera"></i> */}
                                 </div>
                                 <div className='namePr'>
                                     <p className='name'>{userParam.fullname}</p>

@@ -149,3 +149,30 @@ exports.getMe = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// [PUT] /api/users/update
+exports.updateUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const updates = req.body;
+
+    const allowedUpdates = ['fullname', 'bio', 'avatar', 'coverImage'];
+    const actualUpdates = {};
+
+    Object.keys(updates).forEach(key => {
+      if (allowedUpdates.includes(key)) {
+        actualUpdates[key] = updates[key];
+      }
+    });
+
+    const user = await User.findByIdAndUpdate(userId, actualUpdates, { new: true }).select('-password -refreshToken');
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

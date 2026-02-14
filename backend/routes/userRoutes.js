@@ -6,6 +6,7 @@ const authMiddleware = require('../middleware/auth');
 
 
 router.get('/me', authMiddleware, userController.getMe);
+router.put('/update', authMiddleware, userController.updateUser);
 
 
 // GET /api/users/

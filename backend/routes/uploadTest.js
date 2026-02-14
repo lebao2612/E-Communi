@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { upload, uploadToCloudinary } = require('../middleware/uploadMiddleware');
 
-// Route to upload a single image
 router.post('/upload', upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {

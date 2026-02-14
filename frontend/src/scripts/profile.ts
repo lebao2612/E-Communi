@@ -53,6 +53,36 @@ export const useProfileLogic = () => {
         navigate(`/message/${userid}`)
     }
 
+    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            // 1. Upload to Cloudinary
+            const uploadRes = await api.post('/api/test/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            const imageUrl = uploadRes.data.imageUrl;
+
+            // 2. Update User Profile
+            const updateRes = await api.put('/api/users/update', { avatar: imageUrl });
+
+            // 3. Update Local State
+            setUserParam(prev => prev ? { ...prev, avatar: imageUrl } : undefined);
+            if (userLogin?._id === userParam?._id) {
+                setUserLogin(prev => prev ? { ...prev, avatar: imageUrl } : null);
+            }
+
+        } catch (error) {
+            console.error("Avatar upload failed:", error);
+            alert("Failed to upload avatar");
+        }
+    };
+
     return {
         userLogin,
         userParam,
@@ -60,5 +90,6 @@ export const useProfileLogic = () => {
         love,
         handleClickLove,
         handleButtonMessage,
+        handleAvatarUpload,
     }
 }
