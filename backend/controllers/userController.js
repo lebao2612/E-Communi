@@ -176,3 +176,79 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+
+// [POST] /api/users/follow/:id
+exports.followUser = async (req, res) => {
+  try {
+    if (!req.userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const userToFollow = await User.findById(req.params.id);
+    const currentUser = await User.findById(req.userId);
+
+    if (!userToFollow || !currentUser) return res.status(404).json({ error: 'User not found' });
+
+    if (userToFollow.followers.some(id => id.toString() === req.userId)) {
+      return res.status(400).json({ error: 'You are already following this user' });
+    }
+
+    await userToFollow.updateOne({ $push: { followers: req.userId } });
+    await currentUser.updateOne({ $push: { following: req.params.id } });
+
+    res.status(200).json({ message: 'User followed successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// [POST] /api/users/unfollow/:id
+exports.unfollowUser = async (req, res) => {
+  try {
+    if (!req.userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const userToUnfollow = await User.findById(req.params.id);
+    const currentUser = await User.findById(req.userId);
+
+    if (!userToUnfollow || !currentUser) return res.status(404).json({ error: 'User not found' });
+
+    if (!userToUnfollow.followers.some(id => id.toString() === req.userId)) {
+      return res.status(400).json({ error: 'You are not following this user' });
+    }
+
+    await userToUnfollow.updateOne({ $pull: { followers: req.userId } });
+    await currentUser.updateOne({ $pull: { following: req.params.id } });
+
+    res.status(200).json({ message: 'User unfollowed successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// [GET] /api/users/followers/:id
+exports.getFollowers = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate('followers', 'username fullname avatar');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    //console.log("Followers list: ", user.followers);
+
+    res.json(user.followers);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// [GET] /api/users/following/:id
+exports.getFollowing = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate('following', 'username fullname avatar');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    //console.log("Following list: ", user.following);
+
+    res.json(user.following);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}

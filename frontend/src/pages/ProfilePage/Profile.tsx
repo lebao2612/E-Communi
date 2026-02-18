@@ -15,6 +15,10 @@ const Profile = () => {
         setUserParam,
         setUserLogin,
         updateUserAvatar,
+        followers,
+        following,
+        handleFollow,
+        handleUnfollow,
     } = useProfileLogic();
 
     const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +66,10 @@ const Profile = () => {
                                 <div className='namePr'>
                                     <p className='name'>{userParam.fullname}</p>
                                     <p className='username'>@{userParam.username}</p>
+                                    <div className='followInfo'>
+                                        <p className='followers'> <span className='bold'>{followers.length}</span> followers</p>
+                                        <p className='following'> <span className='bold'>{following.length}</span> following</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -70,14 +78,27 @@ const Profile = () => {
                                     <i className="fa-solid fa-pen"></i>
                                     <p className='' onClick={() => handleButtonChangeProfile()}>Chỉnh sửa profile</p>
                                 </div>) :
-                                (<div className='messageFriend'>
-                                    <i className="fa-solid fa-message"></i>
-                                    <p
-                                        className=''
-                                        onClick={() => handleButtonMessage(userParam._id)}
-                                    >
-                                        Nhắn tin
-                                    </p>
+                                (<div className='actionButtons'>
+                                    <div className='messageFriend'>
+                                        <i className="fa-solid fa-message"></i>
+                                        <p
+                                            className=''
+                                            onClick={() => handleButtonMessage(userParam._id)}
+                                        >
+                                            Nhắn tin
+                                        </p>
+                                    </div>
+                                    {followers.some(u => u._id === userLogin?._id) ? (
+                                        <div className='unfollowBtn' onClick={handleUnfollow}>
+                                            <i className="fa-solid fa-user-minus"></i>
+                                            <p>Unfollow</p>
+                                        </div>
+                                    ) : (
+                                        <div className='followBtn' onClick={handleFollow}>
+                                            <i className="fa-solid fa-user-plus"></i>
+                                            <p>Follow</p>
+                                        </div>
+                                    )}
                                 </div>)
                             }
                         </div>

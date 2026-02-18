@@ -7,7 +7,6 @@
   color: $text-white;
   max-width: 1200px;
   margin: 0 auto;
-  /* căn giữa */
 
   .media-container {
     position: relative;
@@ -26,7 +25,7 @@
       position: absolute;
       top: 300px;
       padding: 0 40px;
-      width: calc(100% - 80px); // chuẩn
+      width: 100%;
 
       .avaGroup {
         display: flex;
@@ -70,6 +69,70 @@
             margin-top: 2px;
             font-style: italic;
           }
+
+          .followInfo {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+
+            .followers,
+            .following {
+              font-size: 16px;
+              color: $text-gray-secondary;
+
+              .bold {
+                font-weight: bold;
+                color: $text-white;
+                margin-right: 5px;
+              }
+            }
+          }
+        }
+      }
+
+      .actionButtons {
+        display: flex;
+        gap: 10px;
+        margin-top: 40px;
+
+        .messageFriend,
+        .followBtn,
+        .unfollowBtn {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+          padding: 10px 15px;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+          font-weight: 500;
+        }
+
+        .messageFriend {
+          color: #000;
+          background-color: $text-gray-light;
+
+          &:hover {
+            background-color: $hover-gray-dark;
+          }
+        }
+
+        .followBtn {
+          color: #fff;
+          background-color: $bg-main;
+
+          &:hover {
+            opacity: 0.9;
+          }
+        }
+
+        .unfollowBtn {
+          color: #fff;
+          background-color: #ff4d4f;
+
+          &:hover {
+            background-color: #d9363e;
+          }
         }
       }
 
@@ -84,21 +147,6 @@
       }
 
       .changeProfile:hover {
-        cursor: pointer;
-        background-color: $hover-gray-dark;
-      }
-
-      .messageFriend {
-        display: flex;
-        gap: 10px;
-        color: #000;
-        background-color: $text-gray-light;
-        padding: 10px;
-        border-radius: 5px;
-        margin-top: 40px;
-      }
-
-      .messageFriend:hover {
         cursor: pointer;
         background-color: $hover-gray-dark;
       }

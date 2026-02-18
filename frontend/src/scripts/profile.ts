@@ -104,6 +104,43 @@ export const useProfileLogic = () => {
         }
     }
 
+    const [followers, setFollowers] = useState<User[]>([]);
+    const [following, setFollowing] = useState<User[]>([]);
+
+    useEffect(() => {
+        if (userParam?._id) {
+            api.get(`/api/users/followers/${userParam._id}`)
+                .then(res => setFollowers(res.data))
+                .catch(err => console.error(err));
+
+            api.get(`/api/users/following/${userParam._id}`)
+                .then(res => setFollowing(res.data))
+                .catch(err => console.error(err));
+        }
+    }, [userParam?._id]);
+
+    const handleFollow = async () => {
+        if (!userParam?._id || !userLogin?._id) return;
+        try {
+            await api.post(`/api/users/follow/${userParam._id}`);
+            // Update local state
+            setFollowers(prev => [...prev, userLogin]);
+        } catch (error) {
+            console.error("Follow failed:", error);
+        }
+    }
+
+    const handleUnfollow = async () => {
+        if (!userParam?._id || !userLogin?._id) return;
+        try {
+            await api.post(`/api/users/unfollow/${userParam._id}`);
+            // Update local state
+            setFollowers(prev => prev.filter(u => u._id !== userLogin._id));
+        } catch (error) {
+            console.error("Unfollow failed:", error);
+        }
+    }
+
     return {
         userLogin,
         userParam,
@@ -117,5 +154,9 @@ export const useProfileLogic = () => {
         handleSaveProfile,
         setUserParam,
         setUserLogin,
+        followers,
+        following,
+        handleFollow,
+        handleUnfollow,
     }
 }
