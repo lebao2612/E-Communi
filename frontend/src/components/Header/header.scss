@@ -1,34 +1,36 @@
-.header{
-    background-color: #1A1A1A;
-    padding: 20px;
+@import "../../styles/variables.scss";
+
+.header {
+    background-color: $bg-main;
+    padding: 10px;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid $border-color;
 
-    .logo-container{
+    .logo-container {
         display: flex;
         align-items: center;
         gap: 30px;
         cursor: pointer;
-        color: #fff;
+        color: $text-white;
         font-weight: bold;
 
-        .home-logo{
-        width: 70px;
-        height: 70px;
+        .home-logo {
+            width: 100%;
+            height: 100%;
         }
 
-        .search-input{
-        border: none;
-        padding: 10px;
-        font-size: 14px;
-        border-radius: 10px;
-        color: #fff;
-        background-color: #282828;
+        .search-input {
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 10px;
+            color: $text-white;
+            background-color: $bg-card;
         }
     }
 
-    .nav-list{
+    .nav-list {
         display: flex;
         list-style: none;
         align-items: center;
@@ -36,14 +38,14 @@
         margin: 0;
         gap: 30px;
 
-        a{
+        a {
             cursor: pointer;
-            color: #fff;
+            color: $text-white;
             font-size: 20px;
             text-decoration: none;
 
-            &:hover{
-            color: #f0f0f0;
+            &:hover {
+                color: $text-link-hover;
             }
         }
     }

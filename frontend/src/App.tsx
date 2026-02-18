@@ -7,11 +7,12 @@ import Message from "./pages/MessagePage/Message";
 import Profile from "./pages/ProfilePage/Profile"
 import Setting from "./pages/SettingPage/Setting"
 import Register from "./pages/RegisterPage/Register";
-import "./styles/reset.scss"
+import ChangeProfile from "./pages/ChangeProfilePage/Changeprofile";
+import "./styles/global.scss"
 import "@fontsource/montserrat";
 
 function App() {
-  
+
   const location = useLocation();
   const hideHeaderRoutes = ['/login', '/register'];
   const shouldHideHeader = hideHeaderRoutes.includes(location.pathname);
@@ -21,8 +22,8 @@ function App() {
       {!shouldHideHeader && <Header />}
       <Routes>
         {/* Public routes */}
-        <Route path="/login" element = {<Login />} />
-        <Route path="/register" element = {< Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={< Register />} />
 
         {/* Protected routes */}
         <Route
@@ -33,35 +34,43 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route 
-          path="/message/:userId" 
-          element = {
+        <Route
+          path="/message/:userId"
+          element={
             <ProtectedRoute>
               <Message />
             </ProtectedRoute>
           }
         />
-        <Route 
-          path="/message" 
-          element = {
+        <Route
+          path="/message"
+          element={
             <ProtectedRoute>
               <Message />
             </ProtectedRoute>
           }
         />
-        <Route 
-          path="/:username" 
-          element = {
+        <Route
+          path="/:username"
+          element={
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
           }
         />
-        <Route 
-          path="/setting" 
-          element = {
+        <Route
+          path="/setting"
+          element={
             <ProtectedRoute>
               <Setting />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/changeprofile"
+          element={
+            <ProtectedRoute>
+              <ChangeProfile />
             </ProtectedRoute>
           }
         />

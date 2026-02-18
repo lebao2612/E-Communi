@@ -11,7 +11,25 @@ const Profile = () => {
         handleClickLove,
         handleButtonMessage,
         handleAvatarUpload,
+        handleButtonChangeProfile,
+        setUserParam,
+        setUserLogin,
+        updateUserAvatar,
     } = useProfileLogic();
+
+    const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const imageUrl = await handleAvatarUpload(event);
+        if (imageUrl) {
+            // Update Backend
+            await updateUserAvatar(imageUrl);
+
+            // Update Local State
+            setUserParam((prev: any) => prev ? { ...prev, avatar: imageUrl } : undefined);
+            if (userLogin?._id === userParam?._id) {
+                setUserLogin(prev => prev ? { ...prev, avatar: imageUrl } : null);
+            }
+        }
+    };
 
     console.log('userPost: ', userPosts);
 
@@ -32,7 +50,7 @@ const Profile = () => {
                                                 id="avatar-upload"
                                                 style={{ display: 'none' }}
                                                 accept="image/*"
-                                                onChange={handleAvatarUpload}
+                                                onChange={handleAvatarChange}
                                             />
                                             <label htmlFor="avatar-upload">
                                                 <i className="fa-solid fa-camera" style={{ cursor: 'pointer' }}></i>
@@ -50,7 +68,7 @@ const Profile = () => {
                             {userLogin?._id === userParam._id ?
                                 (<div className='changeProfile'>
                                     <i className="fa-solid fa-pen"></i>
-                                    <p className=''>Chỉnh sửa profile</p>
+                                    <p className='' onClick={() => handleButtonChangeProfile()}>Chỉnh sửa profile</p>
                                 </div>) :
                                 (<div className='messageFriend'>
                                     <i className="fa-solid fa-message"></i>

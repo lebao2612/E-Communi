@@ -79,5 +79,6 @@ export const useHomeLogic = () => {
         handlePostButtonClick,
         handleClickLove,
         handleProfileButtonClick,
+        setUser,
     }
 }

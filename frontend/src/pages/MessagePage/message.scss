@@ -1,65 +1,67 @@
-.messagePage{
+@import "../../styles/variables.scss";
+
+.messagePage {
     padding: 30px;
-    background-color: #1A1A1A;
+    background-color: $bg-main;
     padding: 20px;
     display: grid;
     gap: 20px;
     grid-template-columns: 1fr 2fr;
     height: 82vh;
 
-    .messageList{
-        background-color: rgba(80, 80, 80, 0.5);
+    .messageList {
+        background-color: $bg-overlay;
         border-radius: 10px;
-        
 
-        .messageTitle{
+
+        .messageTitle {
             display: flex;
             justify-content: space-between;
-            color: #fff;
+            color: $text-white;
             padding: 20px 40px;
             font-size: 20px;
             font-weight: bold;
 
-            .fa-pen-to-square{
+            .fa-pen-to-square {
                 cursor: pointer;
             }
-    
-            .fa-pen-to-square:hover{
-                color: #ccc;
+
+            .fa-pen-to-square:hover {
+                color: $text-gray-light;
             }
         }
 
-        .inputSearch{
+        .inputSearch {
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
 
-            .searchMess{
+            .searchMess {
                 border: none;
-                background-color: #282828;
+                background-color: $bg-card;
                 width: 75%;
                 padding: 10px 40px;
-                color: #fff;
+                color: $text-white;
                 border-radius: 10px;
             }
 
-            .fa-magnifying-glass{
+            .fa-magnifying-glass {
                 position: absolute;
                 left: 28px;
-                color: #fff;
+                color: $text-white;
                 padding: 4px;
             }
 
-            .fa-sliders{
+            .fa-sliders {
                 position: absolute;
                 right: 28px;
-                color: #fff;
+                color: $text-white;
             }
         }
 
-        .listFriendMessage{
-            //background-color: #fff;
+        .listFriendMessage {
+            //background-color: $text-white;
             margin-top: 20px;
             gap: 5px;
             height: 410px;
@@ -68,13 +70,14 @@
             flex-direction: column;
             overflow-y: scroll;
 
-            scrollbar-color: #717070 #2f2f2f;  /* thumb | track */
-            scrollbar-width: thin; 
-            
+            scrollbar-color: #717070 $bg-message-item;
+            /* thumb | track */
+            scrollbar-width: thin;
 
-            .friendMessage{
+
+            .friendMessage {
                 padding: 10px;
-                background-color: #2f2f2f;
+                background-color: $bg-message-item;
                 display: flex;
                 gap: 10px;
                 justify-content: space-between;
@@ -83,55 +86,55 @@
                 height: 50px;
                 border-radius: 10px;
 
-                .friendInfo{
+                .friendInfo {
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    
-                    .friend_ava{
+
+                    .friend_ava {
                         width: 40px;
                         height: 40px;
                         object-fit: cover;
                         border: 4px solid #000;
                         border-radius: 10px;
                     }
-    
-                    .friendName{
-                        color: #fff;
+
+                    .friendName {
+                        color: $text-white;
                         font-size: 20px;
                     }
                 }
 
-                .fa-camera{
-                    color: #fff;
+                .fa-camera {
+                    color: $text-white;
                     margin-right: 10px;
                     font-size: 24px;
                 }
-                
+
             }
 
-            .friendMessage:hover{
-                background-color: rgba(80, 80, 80, 0.5);
+            .friendMessage:hover {
+                background-color: $bg-overlay;
                 border-radius: 10px;
             }
         }
     }
 
-    .messageContent{
+    .messageContent {
         border-radius: 10px;
-        background-color: #0F0D0D;
+        background-color: $bg-darker;
         display: flex;
         flex-direction: column;
         overflow-y: auto;
 
-        .headerMessage{
+        .headerMessage {
             padding: 12px 16px 12px 12px;
-            background-color: rgba(80, 80, 80, 0.5);
+            background-color: $bg-overlay;
             border-radius: 10px 10px 0 0;
             display: flex;
             justify-content: space-between;
 
-            .friendInfo{
+            .friendInfo {
                 display: flex;
                 align-items: center;
                 border-radius: 12px;
@@ -139,7 +142,7 @@
                 gap: 10px;
                 cursor: pointer;
 
-                .avaFriend{
+                .avaFriend {
                     width: 50px;
                     height: 50px;
                     object-fit: cover;
@@ -147,64 +150,67 @@
                     border-radius: 10px;
                 }
 
-                .nameFriend{
-                    color: #fff;
+                .nameFriend {
+                    color: $text-white;
                     font-size: 20px;
                 }
             }
 
-            .friendInfo:hover{
-                background-color: rgba(80, 80, 80, 0.5);
+            .friendInfo:hover {
+                background-color: $bg-overlay;
             }
 
-            .actions{
+            .actions {
                 display: flex;
                 align-items: center;
                 gap: 40px;
-                color: #fff;
+                color: $text-white;
                 font-size: 20px;
             }
 
-            .fa-phone:hover{
+            .fa-phone:hover {
                 transform: scale(1.2);
-                color: #ccc;
+                color: $text-gray-light;
                 cursor: pointer;
             }
 
-            .fa-video:hover{
+            .fa-video:hover {
                 transform: scale(1.2);
-                color: #ccc;
+                color: $text-gray-light;
                 cursor: pointer;
             }
 
-            .fa-ellipsis-vertical:hover{
+            .fa-ellipsis-vertical:hover {
                 transform: scale(1.2);
-                color: #ccc;
+                color: $text-gray-light;
                 cursor: pointer;
             }
 
         }
 
-        .chatMessgae{
+        .chatMessgae {
             margin-top: 10px;
             flex: 1;
             display: flex;
             gap: 10px;
             flex-direction: column;
             overflow-y: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* Internet Explorer 10+ */
 
             &::-webkit-scrollbar {
-                display: none; /* Chrome, Safari and Opera */
+                display: none;
+                /* Chrome, Safari and Opera */
             }
 
-            .friendSend{
+            .friendSend {
                 display: flex;
                 gap: 8px;
                 align-items: center;
 
-                .avaMess{
+                .avaMess {
                     width: 20px;
                     height: 20px;
                     object-fit: contain;
@@ -212,7 +218,7 @@
                 }
             }
 
-            p{
+            p {
                 padding: 10px;
                 display: flex;
                 flex-wrap: wrap;
@@ -221,63 +227,63 @@
                 border-radius: 5px;
             }
 
-            .meSend{
+            .meSend {
                 margin-left: auto;
                 margin-right: 10px;
-                background-color: #efef48;
+                background-color: $bg-message-me;
             }
 
-            .youSend{
-                background-color: #aeadad;
+            .youSend {
+                background-color: $bg-message-you;
             }
         }
 
-        .inputMessage{
+        .inputMessage {
             display: flex;
-            color: #fff;
+            color: $text-white;
             align-items: center;
-            background-color: #212121;
+            background-color: $bg-input-area;
             padding: 20px 0;
             border-radius: 0 0 10px 10px;
 
-            .attachMessage{
+            .attachMessage {
                 flex: 1;
                 font-size: 24px;
                 display: flex;
                 justify-content: space-around;
 
-                .fa-face-smile{
+                .fa-face-smile {
                     cursor: pointer;
                 }
 
-                .fa-face-smile:hover{
+                .fa-face-smile:hover {
                     transform: scale(1.2);
-                    color: #ccc;
+                    color: $text-gray-light;
                     cursor: pointer;
                 }
 
-                .fa-file{
+                .fa-file {
                     cursor: pointer;
                 }
 
-                .fa-file:hover{
+                .fa-file:hover {
                     transform: scale(1.2);
-                    color: #ccc;
+                    color: $text-gray-light;
                     cursor: pointer;
                 }
             }
 
-            .inputText{
+            .inputText {
                 flex: 6;
-                background-color: rgba(80, 80, 80, 0.5);
+                background-color: $bg-overlay;
                 padding: 12px 20px;
                 border: none;
                 border-radius: 10px;
                 font-size: 16px;
-                color: #fff;
+                color: $text-white;
             }
 
-            .fa-paper-plane{
+            .fa-paper-plane {
                 font-size: 24px;
                 flex: 1;
                 display: flex;
@@ -285,14 +291,14 @@
                 cursor: pointer;
             }
 
-            .fa-paper-plane:hover{
-                color: #ccc;
+            .fa-paper-plane:hover {
+                color: $text-gray-light;
                 cursor: pointer;
             }
         }
     }
 }
 
-.choosenFriend{
-    background-color: rgba(80, 80, 80, 0.5) !important;
+.choosenFriend {
+    background-color: $bg-overlay !important;
 }

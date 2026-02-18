@@ -1,61 +1,62 @@
-.loginPage{
-    background-color: #1A1A1A;
+@import "../../styles/variables.scss";
+
+.loginPage {
+    background-color: $bg-main;
     height: 100vh;
     display: flex;
 
-    .loginForm{
-        padding:40px 80px;
-        background-color: #282828;
-        color: #fff;
+    .loginForm {
+        padding: 40px 80px;
+        background-color: $bg-card;
+        color: $text-white;
         margin: auto;
         display: flex;
         flex-direction: column;
 
-        .logoName{
+        .logoName {
             display: flex;
             align-items: center;
 
-            .nameApp{
+            .nameApp {
                 margin-left: 10px;
                 font-weight: 600;
                 font-style: italic;
-                background: linear-gradient(to right, #999801, #FFFD02);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;              
+                background: linear-gradient(to right, $highlight-yellow-dark, $highlight-yellow);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
             }
         }
 
-        .inputElement{
-            
+        .inputElement {
+
             flex: 1;
-            
-            .inputUsername{
+
+            .inputUsername {
                 width: 100%;
                 box-sizing: border-box;
-                color: #fff;
+                color: $text-white;
                 border: none;
-                border: 1px solid #fff;
+                border: 1px solid $text-white;
                 padding: 10px;
                 margin-bottom: 10px;
-                background-color: #282828;
+                background-color: $bg-card;
             }
         }
 
-        .comeback{
+        .comeback {
             margin-top: 20px;
             margin-bottom: 20px;
             font-weight: 600;
         }
 
-        .submitButton{
+        .submitButton {
             width: 100%;
             cursor: pointer;
             padding: 10px;
         }
     }
 
-    h2{
+    h2 {
         font-size: 30px;
     }
 }
-

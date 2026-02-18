@@ -34,7 +34,7 @@ function Header() {
         <div className="header">
             <div className="logo-container">
                 <img src={images.logo} alt="Logo" className="home-logo" />
-                <input type="text" placeholder="#Explore" className="search-input" />
+                {/* <input type="text" placeholder="#Explore" className="search-input" /> */}
             </div>
             <div className="nav-list">
                 <Link to="/" className="fa-solid fa-house is-choosen"></Link>

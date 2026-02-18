@@ -1,0 +1,34 @@
+// Background Colors
+$bg-main: #1A1A1A; // Main page background (Home, Login, Message, Header)
+$bg-card: #282828; // Component/Card background
+$bg-darker: #0F0D0D; // Darker background (Message content area)
+$bg-overlay: rgba(80, 80, 80, 0.5); // Semi-transparent overlay (Message list, inputs)
+$bg-input-area: #212121; // Message input area background
+$bg-message-item: #2f2f2f; // Individual message item background
+$bg-change-profile-container: #646464; // Change profile container background
+
+// Text Colors
+$text-white: #ffffff; // Standard white text
+$text-primary: #ffffff; // Primary text color (same as white for this dark theme)
+$text-gray-primary: #aca9a9; // Primary gray text (descriptions, inactive items)
+$text-gray-secondary: #8E8E8E; // Secondary gray text (tags, gradients)
+$text-gray-light: #ccc; // Light gray text (icons, borders, hover states)
+$border-color: #ccc; // Standard border color
+$text-link-hover: #f0f0f0; // Link hover color
+
+// Accents & Gradients
+$highlight-yellow: #FFFD02; // Bright yellow highlight (active states, gradients)
+$highlight-yellow-dark: #999801; // Darker yellow for gradients
+$highlight-red: red; // Red highlight (e.g. loved status)
+
+// Message Bubbles
+$bg-message-me: #efef48; // Background for messages sent by user
+$bg-message-you: #aeadad; // Background for messages received
+
+// Buttons & Interactions
+$hover-gray-dark: #888686; // Darker hover color (Profile actions)
+
+// Spacing (Existing)
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;

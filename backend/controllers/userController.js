@@ -132,7 +132,7 @@ exports.refreshToken = async (req, res) => {
 // [GET] /api/users/me
 exports.getMe = async (req, res) => {
   try {
-    console.log("req.userId = ", req.userId);
+    //console.log("req.userId = ", req.userId);
 
     if (!req.userId) {
       return res.status(401).json({ error: 'User ID not found' });

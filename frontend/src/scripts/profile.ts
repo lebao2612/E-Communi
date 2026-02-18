@@ -53,9 +53,9 @@ export const useProfileLogic = () => {
         navigate(`/message/${userid}`)
     }
 
-    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<string | null> => {
         const file = event.target.files?.[0];
-        if (!file) return;
+        if (!file) return null;
 
         const formData = new FormData();
         formData.append('image', file);
@@ -67,23 +67,42 @@ export const useProfileLogic = () => {
             });
 
             const imageUrl = uploadRes.data.imageUrl;
-
-            // 2. Update User Profile
-            const updateRes = await api.put('/api/users/update', { avatar: imageUrl });
-
-            console.log('updateRes: ', updateRes);
-
-            // 3. Update Local State
-            setUserParam(prev => prev ? { ...prev, avatar: imageUrl } : undefined);
-            if (userLogin?._id === userParam?._id) {
-                setUserLogin(prev => prev ? { ...prev, avatar: imageUrl } : null);
-            }
+            return imageUrl;
 
         } catch (error) {
             console.error("Avatar upload failed:", error);
             alert("Failed to upload avatar");
+            return null;
         }
     };
+
+    const handleButtonChangeProfile = () => {
+        navigate('/changeprofile');
+    }
+
+    const handleSaveProfile = (fullname: string, username: string, userBio: string,) => {
+        api.put('/api/users/update', {
+            fullname,
+            bio: userBio,
+        })
+            .then(response => {
+                console.log("Update profile success: ", response);
+                alert("Cập nhật thông tin thành công!");
+                navigate(`/${username}`);
+            })
+            .catch(error => {
+                console.log("Update profile failed: ", error);
+            })
+    }
+
+    const updateUserAvatar = async (avatarUrl: string) => {
+        try {
+            await api.put('/api/users/update', { avatar: avatarUrl });
+        } catch (error) {
+            console.error("Failed to update user avatar:", error);
+            alert("Failed to update avatar in profile");
+        }
+    }
 
     return {
         userLogin,
@@ -93,5 +112,10 @@ export const useProfileLogic = () => {
         handleClickLove,
         handleButtonMessage,
         handleAvatarUpload,
+        updateUserAvatar,
+        handleButtonChangeProfile,
+        handleSaveProfile,
+        setUserParam,
+        setUserLogin,
     }
 }
