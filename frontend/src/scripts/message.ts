@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect, ChangeEvent, useMemo, useCallback } from 'react';
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import api from "../api/axios";
 import { User } from '../types/user';
 import { Message } from '../types/message';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 let socket: Socket;
 
@@ -14,10 +16,12 @@ export const useMessageLogic = () => {
         []
     );
 
+    const navigate = useNavigate();
+
 
     const { userId: friendId } = useParams(); // sửa tên key cho đồng bộ
     const [allUsers, setAllUsers] = useState<User[]>([]);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const { user: currentUser } = useAuth(); // Retrieve global current user
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
@@ -26,7 +30,6 @@ export const useMessageLogic = () => {
 
     const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-    const navigate = useNavigate();
 
     const fetchMessages = useCallback((friendId: string) => {
         if (!currentUser) return;
@@ -39,12 +42,6 @@ export const useMessageLogic = () => {
             .catch(err => console.error("Error fetching messages:", err));
     }, [currentUser]);
 
-
-    useEffect(() => {
-        api.get('/api/users/me')
-            .then(res => setCurrentUser(res.data))
-            .catch(() => navigate('/login'));
-    }, [navigate]);
 
     // 🔌 Kết nối socket
     useEffect(() => {
@@ -72,7 +69,7 @@ export const useMessageLogic = () => {
     useEffect(() => {
         if (!currentUser) return;
 
-        api.get('/api/users')
+        api.get('/api/users/getAllUsers')
             .then(response => {
                 const users: User[] = response.data;
                 setAllUsers(users.filter(u => u._id !== currentUser._id));

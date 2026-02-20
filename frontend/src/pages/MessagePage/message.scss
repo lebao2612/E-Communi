@@ -24,10 +24,10 @@
 
             .fa-pen-to-square {
                 cursor: pointer;
-            }
 
-            .fa-pen-to-square:hover {
-                color: $text-gray-light;
+                &:hover {
+                    color: $text-gray-light;
+                }
             }
         }
 
@@ -86,6 +86,11 @@
                 height: 50px;
                 border-radius: 10px;
 
+                &:hover {
+                    background-color: $bg-overlay;
+                    border-radius: 10px;
+                }
+
                 .friendInfo {
                     display: flex;
                     align-items: center;
@@ -142,6 +147,10 @@
                 gap: 10px;
                 cursor: pointer;
 
+                &:hover {
+                    background-color: $bg-overlay;
+                }
+
                 .avaFriend {
                     width: 50px;
                     height: 50px;
@@ -166,26 +175,19 @@
                 gap: 40px;
                 color: $text-white;
                 font-size: 20px;
-            }
 
-            .fa-phone:hover {
-                transform: scale(1.2);
-                color: $text-gray-light;
-                cursor: pointer;
-            }
+                .fa-phone,
+                .fa-video,
+                .fa-ellipsis-vertical {
+                    transition: transform 0.2s, color 0.2s;
+                    cursor: pointer;
 
-            .fa-video:hover {
-                transform: scale(1.2);
-                color: $text-gray-light;
-                cursor: pointer;
+                    &:hover {
+                        transform: scale(1.2);
+                        color: $text-gray-light;
+                    }
+                }
             }
-
-            .fa-ellipsis-vertical:hover {
-                transform: scale(1.2);
-                color: $text-gray-light;
-                cursor: pointer;
-            }
-
         }
 
         .chatMessgae {
@@ -252,24 +254,15 @@
                 display: flex;
                 justify-content: space-around;
 
-                .fa-face-smile {
-                    cursor: pointer;
-                }
-
-                .fa-face-smile:hover {
-                    transform: scale(1.2);
-                    color: $text-gray-light;
-                    cursor: pointer;
-                }
-
+                .fa-face-smile,
                 .fa-file {
                     cursor: pointer;
-                }
+                    transition: transform 0.2s, color 0.2s;
 
-                .fa-file:hover {
-                    transform: scale(1.2);
-                    color: $text-gray-light;
-                    cursor: pointer;
+                    &:hover {
+                        transform: scale(1.2);
+                        color: $text-gray-light;
+                    }
                 }
             }
 
@@ -289,11 +282,11 @@
                 display: flex;
                 justify-content: center;
                 cursor: pointer;
-            }
+                transition: color 0.2s;
 
-            .fa-paper-plane:hover {
-                color: $text-gray-light;
-                cursor: pointer;
+                &:hover {
+                    color: $text-gray-light;
+                }
             }
         }
     }

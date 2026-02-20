@@ -13,7 +13,6 @@ const ChangeProfile = () => {
 
     const {
         user,
-        setUser,
     } = useHomeLogic();
 
     const [newFullName, setNewFullName] = useState(user?.fullname || '');

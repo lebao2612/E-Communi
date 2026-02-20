@@ -12,9 +12,8 @@ export const useHomeLogic = () => {
 
     const [love, setLove] = useState(false);
 
-    const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
-    const { isLoggedIn, loading: authLoading } = useAuth();
+    const { isLoggedIn, loading: authLoading, user } = useAuth();
 
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -29,16 +28,6 @@ export const useHomeLogic = () => {
             navigate('/login');
             return;
         }
-
-        api.get('/api/users/me')
-            .then(res => {
-                setUser(res.data);
-                console.log('Fetched user:', res.data);
-            })
-            .catch(err => {
-                console.error('Error fetching user:', err.response?.data);
-                navigate('/login');
-            });
     }, [navigate, isLoggedIn, authLoading]);
 
     // Fetch Suggested Users (Contacts)
@@ -88,7 +77,7 @@ export const useHomeLogic = () => {
                 fetchPosts();
             }
         }
-    }, [user]);
+    }, [user, fetchPosts, hasMore, allPosts]);
 
 
     const lastPostElementRef = useCallback((node: HTMLDivElement) => {
@@ -145,7 +134,6 @@ export const useHomeLogic = () => {
         handlePostButtonClick,
         handleClickLove,
         handleProfileButtonClick,
-        setUser,
         isModalOpen,
         setIsModalOpen,
         handlePostCreated,

@@ -46,13 +46,13 @@ exports.upPost = async (req, res) => {
 
         const { content, images, privacy } = req.body;
 
-        if (!content || !content.trim()) {
-            return res.status(400).json({ message: "Content is required" });
+        if ((!content || !content.trim()) && (!images || images.length === 0)) {
+            return res.status(400).json({ message: "Content or images are required" });
         }
 
         const newPost = new Post({
             user: req.userId,
-            content: content.trim(),
+            content: content ? content.trim() : "",
             images: images || [],
             privacy: privacy || 'public'
         });

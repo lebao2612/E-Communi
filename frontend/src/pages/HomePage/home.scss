@@ -179,12 +179,12 @@
                 }
               }
             }
-          }
 
-          .com-item:hover {
-            background-color: $text-gray-primary;
-            border-radius: 15px;
-            transform: scale(1.05);
+            &:hover {
+              background-color: $text-gray-primary;
+              border-radius: 15px;
+              transform: scale(1.05);
+            }
           }
         }
       }
@@ -206,10 +206,10 @@
             border: 2px $highlight-yellow solid;
             border-radius: 12px;
             cursor: pointer;
-          }
 
-          .friendStr:hover {
-            transform: scale(1.2)
+            &:hover {
+              transform: scale(1.2)
+            }
           }
         }
       }
@@ -242,121 +242,16 @@
         .sendIcon {
           color: $text-gray-primary;
           cursor: pointer;
-        }
 
-        .sendIcon:hover {
-          transform: scale(1.3);
-          color: $text-white;
+          &:hover {
+            transform: scale(1.3);
+            color: $text-white;
+          }
         }
       }
 
       .newfeed {
         margin-top: 20px;
-
-        .friendPost {
-          background-color: $bg-card;
-          border-radius: 15px;
-          padding: 30px;
-          margin-bottom: 20px;
-
-          .ownerPost {
-            display: flex;
-            gap: 10px;
-
-            .ownerAva {
-              width: 60px;
-              height: 60px;
-              object-fit: cover;
-              border: 5px $bg-main solid;
-              border-radius: 12px;
-            }
-
-            .ownerInfo {
-              line-height: 1.5;
-
-              .ownerTag {
-                color: $text-gray-secondary;
-              }
-
-              .ownerName {
-                color: $text-white;
-                font-weight: bold;
-                font-size: 20px;
-              }
-            }
-          }
-
-          .contentPost {
-            margin-top: 20px;
-            color: $text-white;
-
-            .des_content {}
-
-            .img_content {
-              margin-top: 10px;
-              width: 100%;
-              height: 400px;
-              object-fit: cover;
-            }
-          }
-
-          .interactPost {
-            margin-top: 20px;
-            display: flex;
-            gap: 20px;
-            color: $text-white;
-            font-size: 20px;
-
-            .love_icon {
-              cursor: pointer;
-              transition: transform 0.2s ease, color 0.3s ease;
-            }
-
-            .comment_icon {
-              cursor: pointer;
-            }
-
-          }
-
-          .break {
-            margin-top: 20px;
-            border: 1px $text-gray-primary solid;
-          }
-
-          .writeComment {
-            margin-top: 20px;
-            display: flex;
-            gap: 20px;
-            align-items: center;
-
-            .avaUser {
-              width: 35px;
-              height: 35px;
-              border: 3px $bg-main solid;
-              border-radius: 5px;
-            }
-
-            .inputComment {
-              border: none;
-              background-color: $bg-main;
-              width: 100%;
-              border-radius: 10px;
-              padding: 10px 20px;
-              color: $text-white;
-            }
-
-            .sendButton {
-              color: $text-white;
-              cursor: pointer;
-            }
-
-            .sendButton:hover {
-              transform: scale(1.4);
-            }
-          }
-        }
-
-
       }
     }
 
@@ -402,12 +297,4 @@
     }
 
   }
-}
-
-.is-choosen {
-  color: $highlight-yellow !important;
-}
-
-.is_loved {
-  color: $highlight-red;
 }

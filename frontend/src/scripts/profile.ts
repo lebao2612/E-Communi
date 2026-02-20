@@ -3,24 +3,20 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { User } from '../types/user';
 import { Post } from '../types/post';
+import { useAuth } from '../contexts/AuthContext';
 
 
 export const useProfileLogic = () => {
 
     const { username } = useParams();
     const navigate = useNavigate();
+    const { user: userLogin } = useAuth(); // Global logged in user
 
     const [userParam, setUserParam] = useState<User>();
-    const [userLogin, setUserLogin] = useState<User | null>(null);
     const [userPosts, setUserPosts] = useState<Post[]>([]);
 
     useEffect(() => {
-        api.get('/api/users/me')
-            .then(res => setUserLogin(res.data))
-            .catch(() => navigate('/login'));
-    }, [navigate]);
-
-    useEffect(() => {
+        if (!username) return;
         api.get(`/api/users/${username}`)
             .then(response => {
                 setUserParam(response.data)
@@ -153,7 +149,6 @@ export const useProfileLogic = () => {
         handleButtonChangeProfile,
         handleSaveProfile,
         setUserParam,
-        setUserLogin,
         followers,
         following,
         handleFollow,

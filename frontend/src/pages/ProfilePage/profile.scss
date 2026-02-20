@@ -48,11 +48,11 @@
             padding: 8px;
             border-radius: 50%;
             color: #000;
-          }
 
-          .fa-camera:hover {
-            cursor: pointer;
-            background-color: $hover-gray-dark;
+            &:hover {
+              cursor: pointer;
+              background-color: $hover-gray-dark;
+            }
           }
         }
 
@@ -144,11 +144,11 @@
         padding: 10px;
         border-radius: 5px;
         margin-top: 40px;
-      }
 
-      .changeProfile:hover {
-        cursor: pointer;
-        background-color: $hover-gray-dark;
+        &:hover {
+          cursor: pointer;
+          background-color: $hover-gray-dark;
+        }
       }
     }
   }
@@ -231,129 +231,6 @@
               cursor: pointer;
             }
           }
-        }
-      }
-    }
-
-    .friendPost {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-
-      .emptyPost {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
-        .fa-circle-exclamation {
-          font-size: 40px;
-        }
-
-        .alert {
-          margin-top: 10px;
-          font-size: 20px;
-        }
-      }
-
-      .eachPost {
-        background-color: $bg-card;
-        padding: 30px;
-        border-radius: 15px;
-
-        .ownerPost {
-          display: flex;
-          gap: 10px;
-
-          .ownerAva {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border: 5px $bg-main solid;
-            border-radius: 12px;
-          }
-
-          .ownerInfo {
-            line-height: 1.5;
-
-            .ownerTag {
-              color: $text-gray-secondary;
-            }
-
-            .ownerName {
-              color: $text-white;
-              font-weight: bold;
-              font-size: 20px;
-            }
-          }
-        }
-      }
-
-      .contentPost {
-        margin-top: 20px;
-        color: $text-white;
-
-        .des_content {}
-
-        .img_content {
-          margin-top: 10px;
-          width: 100%;
-          height: 400px;
-          object-fit: cover;
-        }
-      }
-
-      .interactPost {
-        margin-top: 20px;
-        display: flex;
-        gap: 20px;
-        color: $text-white;
-        font-size: 20px;
-
-        .love_icon {
-          cursor: pointer;
-          transition: transform 0.2s ease, color 0.3s ease;
-        }
-
-        .comment_icon {
-          cursor: pointer;
-        }
-
-      }
-
-      .break {
-        margin-top: 20px;
-        border: 1px $text-gray-primary solid;
-      }
-
-      .writeComment {
-        margin-top: 20px;
-        display: flex;
-        gap: 20px;
-        align-items: center;
-
-        .avaUser {
-          width: 35px;
-          height: 35px;
-          border: 3px $bg-main solid;
-          border-radius: 5px;
-        }
-
-        .inputComment {
-          border: none;
-          background-color: $bg-main;
-          width: 100%;
-          border-radius: 10px;
-          padding: 10px 20px;
-          color: $text-white;
-        }
-
-        .sendButton {
-          color: $text-white;
-          cursor: pointer;
-        }
-
-        .sendButton:hover {
-          transform: scale(1.4);
         }
       }
     }

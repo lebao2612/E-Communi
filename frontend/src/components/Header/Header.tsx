@@ -1,34 +1,10 @@
 import "./header.scss";
 import images from "../../assets/images/index";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import api from "../../api/axios";
 import { useAuth } from "../../contexts/AuthContext";
 
-interface User {
-    _id: string;
-    fullname?: string;
-    username: string;
-    email?: string;
-    createdAt?: string;
-    avatar?: string;
-}
-
 function Header() {
-
-    const [user, setUser] = useState<User | null>(null);
-    const { isLoggedIn, loading: authLoading } = useAuth();
-
-    useEffect(() => {
-        if (authLoading || !isLoggedIn) return;
-
-        api.get('/api/users/me')
-            .then(res => setUser(res.data))
-            .catch(err => {
-                console.error('Error fetching user in Header:', err.response?.data);
-                setUser(null);
-            })
-    }, [authLoading, isLoggedIn]);
+    const { user } = useAuth();
 
     return (
         <div className="header">

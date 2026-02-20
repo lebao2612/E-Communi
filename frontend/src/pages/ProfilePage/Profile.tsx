@@ -1,5 +1,6 @@
 import './profile.scss'
 import { useProfileLogic } from '../../scripts/profile';
+import Post from '../../components/Post/Post';
 
 const Profile = () => {
 
@@ -13,7 +14,6 @@ const Profile = () => {
         handleAvatarUpload,
         handleButtonChangeProfile,
         setUserParam,
-        setUserLogin,
         updateUserAvatar,
         followers,
         following,
@@ -29,9 +29,8 @@ const Profile = () => {
 
             // Update Local State
             setUserParam((prev: any) => prev ? { ...prev, avatar: imageUrl } : undefined);
-            if (userLogin?._id === userParam?._id) {
-                setUserLogin(prev => prev ? { ...prev, avatar: imageUrl } : null);
-            }
+            // Updating the context's logged-in user avatar is ideally handled via a global context update method. 
+            // For now, reloading or refetching works. 
         }
     };
 
@@ -140,40 +139,13 @@ const Profile = () => {
                                 </div>
                             ) : (
                                 userPosts.map((post) => (
-                                    <div className='eachPost' key={post._id}>
-                                        <div className="ownerPost">
-                                            <img src={userParam.avatar} alt="ownerAva" className="ownerAva" />
-                                            <div className="ownerInfo">
-                                                <p className="ownerTag">@{userParam.username}</p>
-                                                <p className="ownerName">{userParam.fullname}</p>
-                                            </div>
-                                        </div>
-                                        <div className="contentPost">
-                                            <p className="des_content"> {post.content} </p>
-                                            {post.images && post.images.map((image, index) => {
-                                                return (
-                                                    <img src={image} alt="myloveCouple" className="img_content" key={index} />
-                                                )
-                                            })}
-                                        </div>
-
-
-                                        <div className="interactPost">
-                                            {/* fa-solid se la cai de lam nhan nut love */}
-                                            <i
-                                                className={`fa-heart love_icon ${love === true ? 'fa-solid is_loved' : 'fa-regular'}`}
-                                                onClick={handleClickLove}
-                                            >
-                                            </i>
-                                            <i className="fa-regular fa-comment comment_icon"></i>
-                                        </div>
-                                        <div className="break"></div>
-                                        <div className="writeComment">
-                                            <img src={userLogin?.avatar} alt="avatar" className="avaUser" />
-                                            <input type="text" placeholder="Write your comment..." className="inputComment" />
-                                            <i className="fa-regular fa-paper-plane sendButton"></i>
-                                        </div>
-                                    </div>
+                                    <Post
+                                        key={post._id}
+                                        post={post}
+                                        currentUserAvatar={userLogin?.avatar}
+                                        love={love}
+                                        onLoveClick={handleClickLove}
+                                    />
                                 )))}
                         </div>
                     </div>

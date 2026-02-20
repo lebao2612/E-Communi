@@ -1,0 +1,212 @@
+.friendPost {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    background-color: #121212;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    color: #e0e0e0;
+
+    .ownerPost {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+
+        .ownerAva {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .ownerInfo {
+            display: flex;
+            flex-direction: column;
+
+            .ownerName {
+                font-weight: 600;
+                font-size: 1.1rem;
+                color: #ffffff;
+            }
+
+            .ownerTag {
+                font-size: 0.9rem;
+                color: #888;
+                margin-top: 0.2rem;
+            }
+        }
+    }
+
+    .contentPost {
+        margin-bottom: 1rem;
+
+        .des_content {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #d1d1d1;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            /* Keeps line breaks from text */
+        }
+    }
+
+    /* Images grid classes from Home.tsx */
+    .img_content {
+        width: 100%;
+        max-height: 500px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .post-images-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+
+        img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    }
+
+    .post-images-grid-3 {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 0.5rem;
+        height: 350px;
+
+        &>img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .side-images {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 0.5rem;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 8px;
+            }
+
+            .more-images-container {
+                position: relative;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+                .overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.6);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2rem;
+                    font-weight: bold;
+                    border-radius: 8px;
+                }
+            }
+        }
+    }
+
+    .interactPost {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+
+        i {
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.1s ease;
+
+            &:hover {
+                transform: scale(1.1);
+            }
+        }
+
+        .love_icon {
+            color: #aaa;
+
+            &.is_loved {
+                color: #e74c3c;
+            }
+        }
+
+        .comment_icon {
+            color: #aaa;
+
+            &:hover {
+                color: #3498db;
+            }
+        }
+    }
+
+    .break {
+        height: 1px;
+        background-color: #333;
+        margin: 1rem 0;
+    }
+
+    .writeComment {
+        display: flex;
+        align-items: center;
+
+        .avaUser {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .inputComment {
+            flex-grow: 1;
+            background-color: #222;
+            border: none;
+            border-radius: 20px;
+            padding: 0.8rem 1rem;
+            color: #e0e0e0;
+            outline: none;
+            transition: background-color 0.2s;
+
+            &::placeholder {
+                color: #777;
+            }
+
+            &:focus {
+                background-color: #333;
+            }
+        }
+
+        .sendButton {
+            margin-left: 1rem;
+            font-size: 1.2rem;
+            color: #4a90e2;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.1s ease;
+
+            &:hover {
+                color: #6fbaff;
+                transform: scale(1.1);
+            }
+        }
+    }
+}

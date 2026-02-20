@@ -88,7 +88,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, user
                         <select
                             className="privacy-selector"
                             value={privacy}
-                            onChange={(e) => setPrivacy(e.target.value)}
+                            onChange={(e) => {
+                                setPrivacy(e.target.value);
+                                console.log(e.target.value);
+                            }}
                         >
                             <option value="public">Public</option>
                             <option value="followers">Followers</option>

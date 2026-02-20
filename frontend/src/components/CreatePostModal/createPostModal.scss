@@ -1,3 +1,5 @@
+@import "../../styles/variables.scss";
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -12,7 +14,7 @@
     backdrop-filter: blur(5px);
 
     .modal-content {
-        background: #1e1e1e;
+        background: $bg-card;
         width: 100%;
         max-width: 600px;
         border-radius: 12px;
@@ -30,7 +32,7 @@
             padding-bottom: 10px;
 
             h3 {
-                color: #fff;
+                color: $text-white;
                 margin: 0;
                 font-size: 1.2rem;
             }
@@ -38,13 +40,13 @@
             .close-button {
                 background: none;
                 border: none;
-                color: #aaa;
+                color: $text-gray-light;
                 font-size: 1.5rem;
                 cursor: pointer;
                 transition: color 0.2s;
 
                 &:hover {
-                    color: #fff;
+                    color: $text-white;
                 }
             }
         }
@@ -62,7 +64,7 @@
             }
 
             .username {
-                color: #fff;
+                color: $text-white;
                 font-weight: 600;
             }
 
@@ -83,7 +85,7 @@
             min-height: 100px;
             background: transparent;
             border: none;
-            color: #fff;
+            color: $text-white;
             font-size: 1rem;
             resize: vertical;
             outline: none;

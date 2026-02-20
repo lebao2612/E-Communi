@@ -3,6 +3,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import images from "../../assets/images/index";
 import { useHomeLogic } from '../../scripts/home';
 import CreatePostModal from '../../components/CreatePostModal/CreatePostModal';
+import Post from '../../components/Post/Post';
 
 
 const Home = () => {
@@ -20,39 +21,6 @@ const Home = () => {
         lastPostElementRef,
         isLoadingPosts
     } = useHomeLogic();
-
-    // Render Logic for Images
-    const renderPostImages = (postImages: string[]) => {
-        if (!postImages || postImages.length === 0) return null;
-
-        if (postImages.length === 1) {
-            return <img src={postImages[0]} alt="Post" className="img_content" />;
-        }
-
-        if (postImages.length === 2) {
-            return (
-                <div className="post-images-grid-2">
-                    <img src={postImages[0]} alt="Post 1" />
-                    <img src={postImages[1]} alt="Post 2" />
-                </div>
-            );
-        }
-
-        return (
-            <div className="post-images-grid-3">
-                <img src={postImages[0]} alt="Post 1" />
-                <div className="side-images">
-                    <img src={postImages[1]} alt="Post 2" />
-                    <div className="more-images-container">
-                        <img src={postImages[2]} alt="Post 3" />
-                        {postImages.length > 3 && (
-                            <div className="overlay">+{postImages.length - 3}</div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     return (
         <div className="home">
@@ -179,44 +147,14 @@ const Home = () => {
                                     allPosts.map((post, index) => {
                                         const isLast = allPosts.length === index + 1;
                                         return (
-                                            <div
-                                                className="friendPost"
+                                            <Post
                                                 key={post._id}
-                                                ref={isLast ? lastPostElementRef : null}
-                                            >
-                                                <div className="ownerPost">
-                                                    <img src={post.user?.avatar} alt="ownerAva" className="ownerAva" />
-                                                    <div className="ownerInfo">
-                                                        <p className="ownerTag">@{post.user?.username}</p>
-                                                        <p className="ownerName">{post.user?.fullname}</p>
-                                                        <span style={{ fontSize: '0.8rem', color: '#777', marginLeft: '10px' }}>
-                                                            {post.privacy === 'public' ? <i className="fa-solid fa-globe"></i> : <i className="fa-solid fa-users"></i>}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="contentPost">
-                                                    <p className="des_content"> {post.content} </p>
-                                                    {renderPostImages(post.images || (post.image ? [post.image] : []))}
-                                                </div>
-
-                                                <div className="interactPost">
-                                                    <i
-                                                        className={`fa-heart love_icon ${love === true ? 'fa-solid is_loved' : 'fa-regular'}`}
-                                                        onClick={handleClickLove}
-                                                    >
-                                                    </i>
-                                                    <i className="fa-regular fa-comment comment_icon"></i>
-                                                </div>
-
-                                                <div className="break"></div>
-
-                                                <div className="writeComment">
-                                                    <img src={user.avatar} alt="avatar" className="avaUser" />
-                                                    <input type="text" placeholder="Write your comment..." className="inputComment" />
-                                                    <i className="fa-regular fa-paper-plane sendButton"></i>
-                                                </div>
-                                            </div>
+                                                post={post}
+                                                currentUserAvatar={user?.avatar}
+                                                love={love}
+                                                onLoveClick={handleClickLove}
+                                                lastPostElementRef={isLast ? lastPostElementRef : undefined}
+                                            />
                                         )
                                     })
                                 }
