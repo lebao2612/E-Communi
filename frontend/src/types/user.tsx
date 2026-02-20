@@ -8,4 +8,6 @@ export interface User {
     bio: string;
     createdAt: string;
     socialLinks: string[];
+    followers?: string[];
+    following?: string[];
 }

@@ -11,4 +11,6 @@ router.get('/getAllPosts', postController.getAllPosts);
 
 router.post('/upPost', authMiddleware, postController.upPost);
 
+router.get('/getNewsFeed', authMiddleware, postController.getNewsFeed);
+
 module.exports = router;

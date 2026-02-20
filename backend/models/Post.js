@@ -7,13 +7,19 @@ const postSchema = new mongoose.Schema({
         required: true,
     },
 
-    image: {
+    images: [{
         type: String,
-    },
+    }],
 
     content: {
         type: String,
         required: true,
+    },
+
+    privacy: {
+        type: String,
+        enum: ['public', 'followers'],
+        default: 'public'
     },
 
     createdAt: {

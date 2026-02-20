@@ -121,9 +121,9 @@ const Profile = () => {
                                 <h3 className=''>Ảnh</h3>
                                 <ul className='picGroup'>
                                     {
-                                        userPosts.map((postPic) => (postPic.image &&
+                                        userPosts.map((postPic) => (postPic.images && postPic.images.length > 0 &&
                                             <li className='eachPic' key={postPic._id}>
-                                                <img src={postPic.image} className='picPost' alt='picImg' />
+                                                <img src={postPic.images[0]} className='picPost' alt='picImg' />
                                             </li>
                                         ))
                                     }
@@ -150,7 +150,11 @@ const Profile = () => {
                                         </div>
                                         <div className="contentPost">
                                             <p className="des_content"> {post.content} </p>
-                                            {post.image && <img src={post.image} alt="myloveCouple" className="img_content" />}
+                                            {post.images && post.images.map((image, index) => {
+                                                return (
+                                                    <img src={image} alt="myloveCouple" className="img_content" key={index} />
+                                                )
+                                            })}
                                         </div>
 
 

@@ -1,0 +1,178 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+
+    .modal-content {
+        background: #1e1e1e;
+        width: 100%;
+        max-width: 600px;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+
+            h3 {
+                color: #fff;
+                margin: 0;
+                font-size: 1.2rem;
+            }
+
+            .close-button {
+                background: none;
+                border: none;
+                color: #aaa;
+                font-size: 1.5rem;
+                cursor: pointer;
+                transition: color 0.2s;
+
+                &:hover {
+                    color: #fff;
+                }
+            }
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+
+            .username {
+                color: #fff;
+                font-weight: 600;
+            }
+
+            .privacy-selector {
+                background: #333;
+                color: #fff;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 4px;
+                margin-left: auto;
+                cursor: pointer;
+                outline: none;
+            }
+        }
+
+        .post-input {
+            width: 100%;
+            min-height: 100px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            resize: vertical;
+            outline: none;
+
+            &::placeholder {
+                color: #777;
+            }
+        }
+
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+
+            .preview-item {
+                position: relative;
+                width: 100%;
+                aspect-ratio: 1;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 8px;
+                }
+
+                .remove-image {
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    background: rgba(0, 0, 0, 0.6);
+                    color: #fff;
+                    border: none;
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    font-size: 0.8rem;
+                }
+            }
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+
+            .upload-btn {
+                label {
+                    cursor: pointer;
+                    color: #4CAF50;
+                    font-size: 1.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+
+                    &:hover {
+                        opacity: 0.8;
+                    }
+                }
+            }
+
+            .post-submit-btn {
+                background: #0095f6;
+                color: #fff;
+                border: none;
+                padding: 8px 20px;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.2s;
+
+                &:disabled {
+                    background: #333;
+                    color: #777;
+                    cursor: not-allowed;
+                }
+
+                &:hover:not(:disabled) {
+                    background: #0081d6;
+                }
+            }
+        }
+    }
+}

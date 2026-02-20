@@ -10,7 +10,7 @@ router.put('/update', authMiddleware, userController.updateUser);
 
 
 // GET /api/users/
-router.get('/', userController.getAllUsers);
+router.get('/getAllUsers', userController.getAllUsers);
 
 //POST /api/users/login
 router.post('/login', userController.login);
