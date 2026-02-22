@@ -8,4 +8,6 @@ export interface Post {
     privacy?: string;
     content?: string;
     createdAt?: string;
+    likes?: string[];
+    comments?: string[] | any[];
 }

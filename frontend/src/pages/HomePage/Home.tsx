@@ -12,8 +12,6 @@ const Home = () => {
         allUsers,
         allPosts,
         user,
-        love,
-        handleClickLove,
         handleProfileButtonClick,
         isModalOpen,
         setIsModalOpen,
@@ -129,7 +127,6 @@ const Home = () => {
                                     className="inputPost"
                                     readOnly={true}
                                     onClick={() => setIsModalOpen(true)}
-                                    value="" // Just a placeholder now
                                     onChange={() => { }}
                                 />
                                 <i className="fa-solid fa-image sendIcon" onClick={() => setIsModalOpen(true)} />
@@ -151,8 +148,6 @@ const Home = () => {
                                                 key={post._id}
                                                 post={post}
                                                 currentUserAvatar={user?.avatar}
-                                                love={love}
-                                                onLoveClick={handleClickLove}
                                                 lastPostElementRef={isLast ? lastPostElementRef : undefined}
                                             />
                                         )

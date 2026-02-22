@@ -39,9 +39,12 @@ mongoose.connect(process.env.MONGO_URI)
 const userRoutes = require('./routes/userRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const postRoutes = require('./routes/postRoutes');
+const commentRoutes = require('./routes/commentRoutes');
+
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
 
 const uploadTestRoutes = require('./routes/uploadTest');
 app.use('/api/test', uploadTestRoutes);

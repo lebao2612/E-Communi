@@ -6,7 +6,10 @@ exports.getPostsByUserId = async (req, res) => {
     try {
         const user = req.query.user;
 
-        const posts = await Post.find({ user });
+        const posts = await Post.find({ user })
+            .sort({ createdAt: 1 })
+            .populate('user', 'username fullname avatar');
+
         if (!posts) {
             return res.status(404).json({ error: 'Post for user not found by userId' });
         }
@@ -133,3 +136,27 @@ exports.getNewsFeed = async (req, res) => {
     }
 }
 
+exports.toggleLike = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.userId;
+
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        const isLiked = post.likes.includes(userId);
+        if (isLiked) {
+            post.likes.pull(userId);
+        } else {
+            post.likes.push(userId);
+        }
+
+        await post.save();
+        res.status(200).json({ message: isLiked ? 'Unliked successfully' : 'Liked successfully', likes: post.likes });
+    } catch (err) {
+        console.error("Error in toggleLike:", err);
+        res.status(500).json({ error: err.message });
+    }
+}

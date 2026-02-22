@@ -8,8 +8,6 @@ const Profile = () => {
         userLogin,
         userParam,
         userPosts,
-        love,
-        handleClickLove,
         handleButtonMessage,
         handleAvatarUpload,
         handleButtonChangeProfile,
@@ -21,20 +19,15 @@ const Profile = () => {
         handleUnfollow,
     } = useProfileLogic();
 
+    console.log('login: ', userLogin);
+
     const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const imageUrl = await handleAvatarUpload(event);
         if (imageUrl) {
-            // Update Backend
             await updateUserAvatar(imageUrl);
-
-            // Update Local State
             setUserParam((prev: any) => prev ? { ...prev, avatar: imageUrl } : undefined);
-            // Updating the context's logged-in user avatar is ideally handled via a global context update method. 
-            // For now, reloading or refetching works. 
         }
     };
-
-    console.log('userPost: ', userPosts);
 
     return (
         <div className='profilePage'>
@@ -131,7 +124,7 @@ const Profile = () => {
                         </div>
 
 
-                        <div className="friendPost">
+                        <div className="newfeed">
                             {userPosts.length === 0 ? (
                                 <div className='emptyPost'>
                                     <i className="fa-solid fa-circle-exclamation"></i>
@@ -143,8 +136,6 @@ const Profile = () => {
                                         key={post._id}
                                         post={post}
                                         currentUserAvatar={userLogin?.avatar}
-                                        love={love}
-                                        onLoveClick={handleClickLove}
                                     />
                                 )))}
                         </div>

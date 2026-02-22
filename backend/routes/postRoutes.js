@@ -13,4 +13,6 @@ router.post('/upPost', authMiddleware, postController.upPost);
 
 router.get('/getNewsFeed', authMiddleware, postController.getNewsFeed);
 
+router.put('/:id/like', authMiddleware, postController.toggleLike);
+
 module.exports = router;

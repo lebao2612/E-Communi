@@ -24,16 +24,29 @@
             display: flex;
             flex-direction: column;
 
-            .ownerName {
-                font-weight: 600;
-                font-size: 1.1rem;
-                color: #ffffff;
-            }
-
             .ownerTag {
                 font-size: 0.9rem;
                 color: #888;
                 margin-top: 0.2rem;
+            }
+
+            .ownerMeta {
+                display: flex;
+                align-items: center;
+
+                .ownerName {
+                    font-weight: 600;
+                    font-size: 1.1rem;
+                    color: #ffffff;
+                    margin: 0;
+                }
+
+                .postDate,
+                .privacyIcon {
+                    font-size: 0.8rem;
+                    color: #777;
+                    margin-left: 10px;
+                }
             }
         }
     }
@@ -132,29 +145,40 @@
         gap: 1.5rem;
         margin-bottom: 1rem;
 
-        i {
-            font-size: 1.5rem;
+        .interact-action {
+            display: flex;
+            align-items: center;
+            gap: 5px;
             cursor: pointer;
-            transition: color 0.2s ease, transform 0.1s ease;
 
-            &:hover {
-                transform: scale(1.1);
+            .interact-count {
+                font-size: 0.9rem;
+                color: #aaa;
             }
-        }
 
-        .love_icon {
-            color: #aaa;
+            i {
+                font-size: 1.5rem;
+                transition: color 0.2s ease, transform 0.1s ease;
 
-            &.is_loved {
-                color: #e74c3c;
+                &:hover {
+                    transform: scale(1.1);
+                }
             }
-        }
 
-        .comment_icon {
-            color: #aaa;
+            .love_icon {
+                color: #aaa;
 
-            &:hover {
-                color: #3498db;
+                &.is_loved {
+                    color: #e74c3c;
+                }
+            }
+
+            .comment_icon {
+                color: #aaa;
+
+                &:hover {
+                    color: #3498db;
+                }
             }
         }
     }
@@ -163,6 +187,108 @@
         height: 1px;
         background-color: #333;
         margin: 1rem 0;
+    }
+
+    .commentsSection {
+        margin-bottom: 1rem;
+
+        .loadingComments {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .commentItem {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+
+            .commentAva {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+
+            .commentBubble {
+                background-color: #222;
+                padding: 8px 12px;
+                border-radius: 12px;
+                color: #eee;
+                flex-grow: 1;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+
+                .commentAuthor {
+                    font-weight: bold;
+                    font-size: 0.9rem;
+                    margin: 0 0 4px 0;
+                }
+
+
+
+                .commentContent {
+                    font-size: 0.9rem;
+                    margin: 0;
+                    white-space: pre-wrap;
+                }
+            }
+
+            .commentOptions {
+                position: relative;
+                display: flex;
+                align-items: center;
+                opacity: 0;
+                transition: opacity 0.2s;
+
+                .optionIcon {
+                    color: #777;
+                    cursor: pointer;
+                    padding: 5px;
+                    border-radius: 50%;
+
+                    &:hover {
+                        background-color: #333;
+                    }
+                }
+
+                .optionsMenu {
+                    display: none;
+                    position: absolute;
+                    right: 0;
+                    top: 100%;
+                    background-color: #1a1a1a;
+                    border: 1px solid #333;
+                    border-radius: 8px;
+                    padding: 0.5rem;
+                    z-index: 10;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+
+                    button {
+                        background: none;
+                        border: none;
+                        color: #e74c3c;
+                        cursor: pointer;
+                        padding: 0.5rem 1rem;
+                        font-size: 0.9rem;
+                        border-radius: 4px;
+                        white-space: nowrap;
+
+                        &:hover {
+                            background-color: #333;
+                        }
+                    }
+                }
+
+                &:hover .optionsMenu {
+                    display: block;
+                }
+            }
+
+            &:hover .commentOptions {
+                opacity: 1;
+            }
+        }
     }
 
     .writeComment {

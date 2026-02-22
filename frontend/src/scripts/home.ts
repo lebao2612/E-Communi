@@ -10,8 +10,6 @@ export const useHomeLogic = () => {
     const [allPosts, setAllPosts] = useState<Post[]>([]);
     const [postContent, setPostContent] = useState<string>("");
 
-    const [love, setLove] = useState(false);
-
     const navigate = useNavigate();
     const { isLoggedIn, loading: authLoading, user } = useAuth();
 
@@ -92,10 +90,6 @@ export const useHomeLogic = () => {
     }, [isLoadingPosts, hasMore, fetchPosts]);
 
 
-    const handleClickLove = () => {
-        setLove(!love);
-    }
-
     const handleProfileButtonClick = () => {
         navigate(`/${user?.username}`)
     }
@@ -128,11 +122,9 @@ export const useHomeLogic = () => {
         allUsers,
         allPosts,
         user,
-        love,
         postContent,
         setPostContent,
         handlePostButtonClick,
-        handleClickLove,
         handleProfileButtonClick,
         isModalOpen,
         setIsModalOpen,
