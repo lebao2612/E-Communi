@@ -9,6 +9,7 @@ const allowedOrigins = [
   "http://13.212.47.205",
   "https://ecommunity-frontend.s3.amazonaws.com",
   "http://ecommunity-frontend.s3-website-ap-southeast-1.amazonaws.com",   // production
+  "https://dsbzempbthi3k.cloudfront.net"
 ];
 
 const io = new Server(server, {
