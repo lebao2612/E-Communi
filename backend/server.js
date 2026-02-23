@@ -6,7 +6,6 @@ const server = http.createServer(app); // tạo server từ express app
 
 const allowedOrigins = [
   "http://localhost:3000",      // dev
-  "http://13.212.47.205",
   "https://ecommunity-frontend.s3.amazonaws.com",
   "http://ecommunity-frontend.s3-website-ap-southeast-1.amazonaws.com",   // production
   "https://dsbzempbthi3k.cloudfront.net"

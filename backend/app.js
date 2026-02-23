@@ -8,7 +8,6 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://13.212.47.205",
   "https://ecommunity-frontend.s3.amazonaws.com",
   "http://ecommunity-frontend.s3-website-ap-southeast-1.amazonaws.com"
 ];
