@@ -58,9 +58,7 @@ export const useProfileLogic = () => {
 
         try {
             // 1. Upload to Cloudinary
-            const uploadRes = await api.post('/api/test/upload', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const uploadRes = await api.post('/api/test/upload', formData);
 
             const imageUrl = uploadRes.data.imageUrl;
             return imageUrl;
