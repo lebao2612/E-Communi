@@ -8,6 +8,7 @@ import Profile from "./pages/ProfilePage/Profile"
 import Setting from "./pages/SettingPage/Setting"
 import Register from "./pages/RegisterPage/Register";
 import ChangeProfile from "./pages/ChangeProfilePage/Changeprofile";
+import Search from "./pages/SearchPage/Search";
 import "./styles/global.scss"
 import "@fontsource/montserrat";
 
@@ -31,6 +32,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <Search />
             </ProtectedRoute>
           }
         />

@@ -61,8 +61,8 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
-
-
 });
+
+userSchema.index({ username: 'text', fullname: 'text' });
 
 module.exports = mongoose.model('User', userSchema);
