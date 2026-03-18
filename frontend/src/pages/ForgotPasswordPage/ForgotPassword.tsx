@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import images from "../../assets/images/index";
-import api from '../../api/axios';
 import '../LoginPage/login.scss';
 
 const ForgotPassword = () => {
