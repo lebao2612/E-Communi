@@ -4,59 +4,171 @@
     background-color: $bg-main;
     height: 100vh;
     display: flex;
+    justify-content: center;
+    align-items: center;
 
     .loginForm {
-        padding: 40px 80px;
+        padding: 40px 50px;
         background-color: $bg-card;
         color: $text-white;
-        margin: auto;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         display: flex;
         flex-direction: column;
+        width: 100%;
+        max-width: 420px;
+        box-sizing: border-box;
 
         .logoName {
             display: flex;
             align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+
+            .home-logo {
+                width: 45px;
+                height: 45px;
+                object-fit: contain;
+                border-radius: 50%;
+            }
 
             .nameApp {
-                margin-left: 10px;
-                font-weight: 600;
+                margin-left: 12px;
+                font-size: 32px;
+                font-weight: 700;
                 font-style: italic;
                 background: linear-gradient(to right, $highlight-yellow-dark, $highlight-yellow);
+                background-clip: text;
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
+                margin-top: 0;
+                margin-bottom: 0;
             }
         }
 
-        .inputElement {
+        .comeback {
+            margin: 0 0 30px 0;
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 1px;
+            color: rgba($text-white, 0.9);
+        }
 
-            flex: 1;
+        .inputElement {
+            display: flex;
+            flex-direction: column;
+
+            label {
+                font-size: 14px;
+                margin-bottom: 8px;
+                color: rgba($text-white, 0.85);
+                font-weight: 500;
+            }
 
             .inputUsername {
                 width: 100%;
                 box-sizing: border-box;
                 color: $text-white;
-                border: none;
-                border: 1px solid $text-white;
-                padding: 10px;
-                margin-bottom: 10px;
-                background-color: $bg-card;
-            }
-        }
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 8px;
+                padding: 14px 16px;
+                margin-bottom: 20px;
+                background-color: rgba(255, 255, 255, 0.05);
+                transition: all 0.3s ease;
+                font-size: 15px;
 
-        .comeback {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            font-weight: 600;
+                &::placeholder {
+                    color: rgba($text-white, 0.4);
+                }
+
+                &:focus {
+                    outline: none;
+                    border-color: $highlight-yellow;
+                    background-color: rgba(255, 255, 255, 0.1);
+                    box-shadow: 0 0 0 3px rgba($highlight-yellow, 0.15);
+                }
+            }
+
+            .formActions {
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 25px;
+                margin-top: -10px;
+
+                .forgotPassword {
+                    font-size: 13px;
+                    color: rgba($text-white, 0.7);
+                    cursor: pointer;
+                    transition: color 0.3s ease;
+
+                    &:hover {
+                        color: $highlight-yellow;
+                        text-decoration: underline;
+                    }
+                }
+            }
+
+            .errorMessage {
+                color: #ff4d4f;
+                background-color: rgba(255, 77, 79, 0.1);
+                border: 1px solid rgba(255, 77, 79, 0.3);
+                border-radius: 6px;
+                padding: 10px;
+                font-size: 14px;
+                margin-top: -10px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
         }
 
         .submitButton {
             width: 100%;
             cursor: pointer;
-            padding: 10px;
-        }
-    }
+            padding: 14px;
+            background: linear-gradient(to right, $highlight-yellow-dark, $highlight-yellow);
+            color: #1a1a1a;
+            /* Dark text for contrast against yellow */
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
 
-    h2 {
-        font-size: 30px;
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba($highlight-yellow, 0.4);
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+
+            &:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+                transform: none;
+            }
+        }
+
+        .registerPrompt {
+            text-align: center;
+            font-size: 14px;
+            color: rgba($text-white, 0.7);
+
+            .registerLink {
+                color: $highlight-yellow;
+                font-weight: 600;
+                cursor: pointer;
+                margin-left: 6px;
+                transition: color 0.3s ease;
+
+                &:hover {
+                    color: lighten($highlight-yellow, 15%);
+                    text-decoration: underline;
+                }
+            }
+        }
     }
 }

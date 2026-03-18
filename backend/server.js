@@ -1,6 +1,7 @@
 const http = require('http'); // cần module này để tạo HTTP server
 const app = require('./app');
 const { Server } = require('socket.io');
+const { ExpressPeerServer } = require('peer');
 
 const server = http.createServer(app); // tạo server từ express app
 
@@ -10,6 +11,13 @@ const allowedOrigins = [
   "http://ecommunity-frontend.s3-website-ap-southeast-1.amazonaws.com",   // production
   "https://dsbzempbthi3k.cloudfront.net"
 ];
+
+// Tích hợp PeerJS Server
+const peerServer = ExpressPeerServer(server, {
+  debug: true,
+  path: '/'
+});
+app.use('/peerjs', peerServer);
 
 const io = new Server(server, {
   cors: {
@@ -31,6 +39,31 @@ io.on('connection', (socket) => {
     const { receiverId } = message;
     io.to(receiverId).emit('receiveMessage', message); // gửi cho người nhận
     console.log(`📨 Message sent to ${receiverId}`);
+  });
+
+  // WebRTC Signaling Events
+  socket.on('request_call', (data) => {
+    // data: { receiverId, callerId, callerName, callerAvatar, type }
+    io.to(data.receiverId).emit('incoming_call', data);
+    console.log(`📞 Call requested from ${data.callerId} to ${data.receiverId}`);
+  });
+
+  socket.on('accept_call', (data) => {
+    // data: { callerId, receiverId }
+    io.to(data.callerId).emit('call_accepted', data);
+    console.log(`✅ Call accepted from ${data.receiverId} by ${data.callerId}`);
+  });
+
+  socket.on('reject_call', (data) => {
+    // data: { callerId, receiverId }
+    io.to(data.callerId).emit('call_rejected', data);
+    console.log(`❌ Call rejected from ${data.receiverId} by ${data.callerId}`);
+  });
+
+  socket.on('end_call', (data) => {
+    // data: { toUserId }
+    io.to(data.toUserId).emit('call_ended');
+    console.log(`🛑 Call ended for ${data.toUserId}`);
   });
 
   socket.on('disconnect', () => {

@@ -53,12 +53,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
   }, [fetchUser]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setIsLoggedIn(false);
     setUser(null);
     setAccessToken('');
     localStorage.removeItem('refreshToken');
-  };
+  }, []);
+
+  useEffect(() => {
+    const handleLogoutEvent = () => {
+      logout();
+    };
+    window.addEventListener('auth:logout', handleLogoutEvent);
+    return () => {
+      window.removeEventListener('auth:logout', handleLogoutEvent);
+    };
+  }, [logout]);
 
   const markLoggedIn = () => {
     setIsLoggedIn(true);

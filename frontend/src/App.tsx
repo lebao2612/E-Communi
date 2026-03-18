@@ -7,6 +7,7 @@ import Message from "./pages/MessagePage/Message";
 import Profile from "./pages/ProfilePage/Profile"
 import Setting from "./pages/SettingPage/Setting"
 import Register from "./pages/RegisterPage/Register";
+import ForgotPassword from "./pages/ForgotPasswordPage/ForgotPassword";
 import ChangeProfile from "./pages/ChangeProfilePage/Changeprofile";
 import Search from "./pages/SearchPage/Search";
 import "./styles/global.scss"
@@ -15,7 +16,7 @@ import "@fontsource/montserrat";
 function App() {
 
   const location = useLocation();
-  const hideHeaderRoutes = ['/login', '/register'];
+  const hideHeaderRoutes = ['/login', '/register', '/forgot-password'];
   const shouldHideHeader = hideHeaderRoutes.includes(location.pathname);
 
   return (
@@ -25,6 +26,7 @@ function App() {
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={< Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Protected routes  */}
         <Route

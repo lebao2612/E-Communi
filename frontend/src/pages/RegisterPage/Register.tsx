@@ -60,7 +60,7 @@ const Register = () => {
         <h2 className='comeback'>CREATE ACCOUNT</h2>
 
         <div className='inputElement'>
-          <label>Username:</label><br />
+          <label>Username</label>
           <input
             type="text"
             className='inputUsername'
@@ -69,7 +69,7 @@ const Register = () => {
             placeholder="Enter username"
           />
 
-          <label>Full name:</label><br />
+          <label>Full name</label>
           <input
             type="text"
             className='inputUsername'
@@ -78,7 +78,7 @@ const Register = () => {
             placeholder="Enter full name"
           />
 
-          <label>Password:</label><br />
+          <label>Password</label>
           <input
             type="password"
             className='inputUsername'
@@ -87,7 +87,7 @@ const Register = () => {
             placeholder="Enter password"
           />
 
-          <label>Confirm password:</label><br />
+          <label>Confirm password</label>
           <input
             type="password"
             className='inputUsername'
@@ -96,7 +96,7 @@ const Register = () => {
             placeholder="Confirm password"
           />
 
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && <p className="errorMessage">{error}</p>}
         </div>
 
         <button
@@ -107,12 +107,9 @@ const Register = () => {
           {loading ? 'Đang đăng ký...' : 'Đăng ký'}
         </button>
 
-        <p
-          style={{ marginTop: 10, cursor: 'pointer', color: '#4da6ff' }}
-          onClick={() => navigate('/login')}
-        >
-          Already have an account? Login
-        </p>
+        <div className="registerPrompt">
+          Đã có tài khoản? <span className="registerLink" onClick={() => navigate('/login')}>Đăng nhập ngay</span>
+        </div>
 
       </div>
     </div>

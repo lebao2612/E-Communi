@@ -52,14 +52,14 @@ const Login = () => {
   return (
     <div className='loginPage'>
       <div className='loginForm'>
-        
+
         <div className='logoName'>
           <img src={images.logo} alt="Logo" className="home-logo" />
           <h2 className='nameApp'>BChat</h2>
         </div>
         <h2 className='comeback'>WELCOME BACK</h2>
         <div className='inputElement'>
-          <label htmlFor='username'>Username:</label><br/>
+          <label htmlFor='username'>Username</label>
           <input
             type="text"
             className='inputUsername'
@@ -68,7 +68,7 @@ const Login = () => {
             onChange={e => setUsername(e.target.value)}
             placeholder="Enter username"
           />
-          <label htmlFor='password'>Password:</label><br/>
+          <label htmlFor='password'>Password</label>
           <input
             type="password"
             className='inputUsername'
@@ -77,16 +77,23 @@ const Login = () => {
             onChange={e => setPassword(e.target.value)}
             placeholder="Enter password"
           />
-          
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+
+          <div className="formActions">
+            <span className="forgotPassword" onClick={() => navigate('/forgot-password')}>Quên mật khẩu?</span>
+          </div>
+
+          {error && <p className="errorMessage">{error}</p>}
         </div>
         <button
-          className='submitButton' 
+          className='submitButton'
           onClick={handleLogin}
           disabled={loading}
         >
           {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>
+        <div className="registerPrompt">
+          Chưa có tài khoản? <span className="registerLink" onClick={() => navigate('/register')}>Đăng ký ngay</span>
+        </div>
       </div>
     </div>
   );
