@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { io, Socket } from 'socket.io-client';
 import Peer, { MediaConnection } from 'peerjs';
 import { User } from '../types/user';
@@ -12,6 +12,62 @@ export interface CallData {
     receiverId: string;
     type: 'audio' | 'video';
 }
+
+const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+];
+
+const isValidIceServer = (value: unknown): value is RTCIceServer => {
+    if (!value || typeof value !== 'object') return false;
+
+    const candidate = value as RTCIceServer;
+    if (!candidate.urls) return false;
+
+    return typeof candidate.urls === 'string' || Array.isArray(candidate.urls);
+};
+
+const parseIceServers = (): RTCIceServer[] => {
+    const raw = process.env.REACT_APP_WEBRTC_ICE_SERVERS;
+    if (!raw) return DEFAULT_ICE_SERVERS;
+
+    try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return DEFAULT_ICE_SERVERS;
+
+        const validIceServers = parsed.filter(isValidIceServer);
+        return validIceServers.length > 0 ? validIceServers : DEFAULT_ICE_SERVERS;
+    } catch (error) {
+        console.warn('Invalid REACT_APP_WEBRTC_ICE_SERVERS format. Falling back to default STUN servers.');
+        return DEFAULT_ICE_SERVERS;
+    }
+};
+
+const getTwilioIceServers = async (apiUrl: string, accessToken: string): Promise<RTCIceServer[] | null> => {
+    try {
+        const response = await fetch(`${apiUrl}/api/webrtc/ice-servers`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data?.iceServers)) {
+            return null;
+        }
+
+        const validIceServers = data.iceServers.filter(isValidIceServer);
+        return validIceServers.length > 0 ? validIceServers : null;
+    } catch (error) {
+        console.warn('Failed to load Twilio ICE servers. Falling back to local ICE config.');
+        return null;
+    }
+};
 
 export const useWebRTC = () => {
     const { user: currentUser } = useAuth();
@@ -33,7 +89,9 @@ export const useWebRTC = () => {
     // Thử trích xuất port và host từ API_URL
     const urlObj = new URL(API_URL);
     const peerHost = urlObj.hostname;
-    const peerPort = urlObj.port ? parseInt(urlObj.port) : (urlObj.protocol === 'https:' ? 443 : 80);
+    const peerPort = urlObj.port ? parseInt(urlObj.port, 10) : undefined;
+    const isSecureConnection = urlObj.protocol === 'https:';
+    const fallbackIceServers = useMemo(() => parseIceServers(), []);
 
     const currentCall = useRef<MediaConnection | null>(null);
     const localStreamRef = useRef<MediaStream | null>(null);
@@ -45,63 +103,89 @@ export const useWebRTC = () => {
         const accessToken = getAccessToken();
         if (!accessToken) return;
 
-        const newSocket = io(API_URL, {
-            auth: {
-                token: accessToken,
-            }
-        });
-        setSocket(newSocket);
+        let mounted = true;
+        let newSocket: Socket | null = null;
+        let newPeer: Peer | null = null;
 
-        // Join room
-        newSocket.emit('join');
+        const bootstrapRealtime = async () => {
+            const twilioIceServers = await getTwilioIceServers(API_URL, accessToken);
+            const activeIceServers = twilioIceServers || fallbackIceServers;
 
-        const newPeer = new Peer(currentUser._id, {
-            host: peerHost,
-            port: peerPort,
-            path: '/peerjs',
-        });
-        setPeer(newPeer);
+            if (!mounted) return;
 
-        // --- SOCKET EVENTS ---
-        newSocket.on('incoming_call', (data: CallData) => {
-            setReceivingCall(true);
-            setCallerEnv(data);
-            setCurrentPartnerId(data.callerId);
-        });
-
-        newSocket.on('call_rejected', () => {
-            endCallLocally();
-        });
-
-        newSocket.on('call_ended', () => {
-            endCallLocally();
-        });
-
-        // --- PEER EVENTS ---
-        newPeer.on('call', (call) => {
-            currentCall.current = call;
-
-            // Nếu đã bấm accept_call (có local stream), thì tự động answer
-            if (localStreamRef.current) {
-                call.answer(localStreamRef.current);
-            } else {
-                // Nếu chưa có local stream (user chưa kip bấm answer) ta buộc phải tạm thời gọi answer(undefined) và set thủ công sau?
-                // Tuy nhiên theo flow thiết kế, 'accept_call' được bấm -> lấy stream -> mới báo Caller gọi -> call.answer là LUÔN có stream.
-            }
-
-            call.on('stream', (userVideoStream) => {
-                setRemoteStream(userVideoStream);
+            newSocket = io(API_URL, {
+                auth: {
+                    token: accessToken,
+                }
             });
-            call.on('close', () => {
+            setSocket(newSocket);
+
+            // Join room
+            newSocket.emit('join');
+
+            newPeer = new Peer(currentUser._id, {
+                host: peerHost,
+                ...(peerPort ? { port: peerPort } : {}),
+                secure: isSecureConnection,
+                path: '/peerjs',
+                config: {
+                    iceServers: activeIceServers,
+                },
+            });
+            setPeer(newPeer);
+
+            newSocket.on('connect_error', (error) => {
+                console.error('Socket connection error:', error.message);
+            });
+
+            newSocket.on('payload_error', (payload) => {
+                console.error('Socket payload error:', payload);
+            });
+
+            // --- SOCKET EVENTS ---
+            newSocket.on('incoming_call', (data: CallData) => {
+                setReceivingCall(true);
+                setCallerEnv(data);
+                setCurrentPartnerId(data.callerId);
+            });
+
+            newSocket.on('call_rejected', () => {
                 endCallLocally();
             });
-        });
+
+            newSocket.on('call_ended', () => {
+                endCallLocally();
+            });
+
+            // --- PEER EVENTS ---
+            newPeer.on('call', (call) => {
+                currentCall.current = call;
+
+                // Nếu đã bấm accept_call (có local stream), thì tự động answer
+                if (localStreamRef.current) {
+                    call.answer(localStreamRef.current);
+                } else {
+                    // Nếu chưa có local stream (user chưa kip bấm answer) ta buộc phải tạm thời gọi answer(undefined) và set thủ công sau?
+                    // Tuy nhiên theo flow thiết kế, 'accept_call' được bấm -> lấy stream -> mới báo Caller gọi -> call.answer là LUÔN có stream.
+                }
+
+                call.on('stream', (userVideoStream) => {
+                    setRemoteStream(userVideoStream);
+                });
+                call.on('close', () => {
+                    endCallLocally();
+                });
+            });
+        };
+
+        bootstrapRealtime();
 
         return () => {
-            newSocket.disconnect();
-            newPeer.destroy();
+            mounted = false;
+            newSocket?.disconnect();
+            newPeer?.destroy();
         };
-    }, [currentUser, API_URL, peerHost, peerPort]);
+    }, [currentUser, API_URL, peerHost, peerPort, isSecureConnection, fallbackIceServers]);
 
     const getMedia = useCallback(async (video: boolean) => {
         try {
@@ -124,7 +208,6 @@ export const useWebRTC = () => {
         setCurrentPartnerId(receiver._id);
 
         socket.emit('request_call', {
-            callerId: currentUser._id,
             callerName: currentUser.fullname,
             callerAvatar: currentUser.avatar || '',
             receiverId: receiver._id,
@@ -159,7 +242,6 @@ export const useWebRTC = () => {
 
         socket.emit('accept_call', {
             callerId: callerEnv.callerId,
-            receiverId: currentUser?._id
         });
     };
 
@@ -167,7 +249,6 @@ export const useWebRTC = () => {
         if (!callerEnv || !socket || !currentUser) return;
         socket.emit('reject_call', {
             callerId: callerEnv.callerId,
-            receiverId: currentUser._id
         });
         endCallLocally();
     };

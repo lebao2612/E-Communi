@@ -39,6 +39,21 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
+## WebRTC Production Environment
+
+For reliable audio/video call on deployed environments, configure these variables:
+
+- REACT_APP_API_URL: public HTTPS URL of your backend (Socket.IO + PeerJS)
+- REACT_APP_WEBRTC_ICE_SERVERS: JSON array of ICE servers (STUN/TURN)
+
+Example (see .env.example):
+
+REACT_APP_WEBRTC_ICE_SERVERS=[{"urls":["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302"]},{"urls":"turn:your-turn-domain.com:3478","username":"your_turn_username","credential":"your_turn_password"}]
+
+Notes:
+- STUN only is usually not enough on real networks; TURN is strongly recommended.
+- Use HTTPS for frontend and backend to avoid mixed-content and media restrictions.
+
 ## Learn More
 
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).

@@ -4,7 +4,16 @@ import './message.scss'
 import { useMessageLogic } from '../../scripts/message'
 import { useWebRTC } from '../../hooks/useWebRTC';
 
+const safePlay = (element: HTMLMediaElement | null) => {
+    if (!element) return;
 
+    const playPromise = element.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {
+            // Ignore autoplay rejections; user interaction will start playback later.
+        });
+    }
+};
 
 const Message = () => {
     const {
@@ -46,18 +55,22 @@ const Message = () => {
     useEffect(() => {
         if (localMediaRef.current) {
             localMediaRef.current.srcObject = localStream;
+            safePlay(localMediaRef.current);
         }
         if (localAudioRef.current) {
             localAudioRef.current.srcObject = localStream;
+            safePlay(localAudioRef.current);
         }
     }, [localStream]);
 
     useEffect(() => {
         if (remoteMediaRef.current) {
             remoteMediaRef.current.srcObject = remoteStream;
+            safePlay(remoteMediaRef.current);
         }
         if (remoteAudioRef.current) {
             remoteAudioRef.current.srcObject = remoteStream;
+            safePlay(remoteAudioRef.current);
         }
     }, [remoteStream]);
 
@@ -66,9 +79,6 @@ const Message = () => {
         (localStream && localStream.getVideoTracks().length > 0) ||
         (remoteStream && remoteStream.getVideoTracks().length > 0)
     );
-
-    console.log(messages)
-
 
     return (
         <div className='messagePage'>
