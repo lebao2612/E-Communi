@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./header.scss";
 import images from "../../assets/images/index";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import useDebounce from "../../hooks/useDebounce";
@@ -29,7 +29,7 @@ function Header() {
             try {
                 // Focus primarily on Users for the Header dropdown like Facebook
                 const response = await axios.get(
-                    `http://localhost:5000/api/search?q=${debouncedSearchTerm}&type=users`
+                    `${process.env.REACT_APP_API_URL}/api/search?q=${debouncedSearchTerm}&type=users`
                 );
 
                 if (response.data.success) {
@@ -133,10 +133,23 @@ function Header() {
             </div>
 
             <div className="nav-list">
-                <Link to="/" className="fa-solid fa-house"></Link>
-                <Link to={`/${user?.username}`} className="fa-solid fa-user"></Link>
-                <Link to="/message" className="fa-solid fa-message"></Link>
-                <Link to="/setting" className="fa-solid fa-gear"></Link>
+                <NavLink
+                    to="/"
+                    end
+                    className={({ isActive }) => `fa-solid fa-house${isActive ? " active" : ""}`}
+                ></NavLink>
+                <NavLink
+                    to={`/${user?.username}`}
+                    className={({ isActive }) => `fa-solid fa-user${isActive ? " active" : ""}`}
+                ></NavLink>
+                <NavLink
+                    to="/message"
+                    className={({ isActive }) => `fa-solid fa-message${isActive ? " active" : ""}`}
+                ></NavLink>
+                <NavLink
+                    to="/setting"
+                    className={({ isActive }) => `fa-solid fa-gear${isActive ? " active" : ""}`}
+                ></NavLink>
             </div>
 
             <img src={images.avatar} alt="logofill" className="header-avatar" />

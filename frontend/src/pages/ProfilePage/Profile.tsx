@@ -127,8 +127,8 @@ const Profile = () => {
                         <div className="newfeed">
                             {userPosts.length === 0 ? (
                                 <div className='emptyPost'>
-                                    <i className="fa-solid fa-circle-exclamation"></i>
-                                    <p className='alert'>No post</p>
+                                    <i className="iconEmpty fa-solid fa-circle-exclamation"></i>
+                                    <p className='textEmpty'>No post</p>
                                 </div>
                             ) : (
                                 userPosts.map((post) => (

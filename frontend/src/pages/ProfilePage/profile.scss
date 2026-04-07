@@ -1,9 +1,9 @@
 @import "../../styles/variables.scss";
 
 .profilePage {
-  padding: 30px 200px;
+  padding: 14px 12px;
   display: grid;
-  gap: 20px;
+  gap: 14px;
   color: $text-white;
   max-width: 1200px;
   margin: 0 auto;
@@ -12,7 +12,7 @@
     position: relative;
 
     .backgroundImg {
-      height: 350px;
+      height: 210px;
       width: 100%;
       object-fit: cover;
       border-radius: 10px;
@@ -20,24 +20,27 @@
 
     .infoGroup {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: absolute;
-      top: 300px;
-      padding: 0 40px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+      top: -34px;
+      padding: 0 10px;
       width: 100%;
 
       .avaGroup {
         display: flex;
+        width: 100%;
 
         .avaPr {
           position: relative;
 
           .avatarUser {
-            width: 150px;
-            height: 150px;
+            width: 96px;
+            height: 96px;
             border-radius: 50%;
             border: 4px $text-white solid;
+            object-fit: cover;
           }
 
           .fa-camera {
@@ -57,12 +60,12 @@
         }
 
         .namePr {
-          margin-left: 12px;
+          margin-left: 10px;
 
           .name {
-            margin-top: 80px;
+            margin-top: 22px;
             font-weight: 600;
-            font-size: 30px;
+            font-size: 22px;
           }
 
           .username {
@@ -77,7 +80,7 @@
 
             .followers,
             .following {
-              font-size: 16px;
+              font-size: 14px;
               color: $text-gray-secondary;
 
               .bold {
@@ -93,7 +96,9 @@
       .actionButtons {
         display: flex;
         gap: 10px;
-        margin-top: 40px;
+        margin-top: 0;
+        width: 100%;
+        flex-wrap: wrap;
 
         .messageFriend,
         .followBtn,
@@ -101,11 +106,13 @@
           display: flex;
           gap: 10px;
           align-items: center;
-          padding: 10px 15px;
+          padding: 10px 12px;
           border-radius: 5px;
           cursor: pointer;
           transition: background-color 0.2s ease;
           font-weight: 500;
+          min-width: 132px;
+          justify-content: center;
         }
 
         .messageFriend {
@@ -143,7 +150,7 @@
         background-color: $text-gray-light;
         padding: 10px;
         border-radius: 5px;
-        margin-top: 40px;
+        margin-top: 0;
 
         &:hover {
           cursor: pointer;
@@ -154,10 +161,10 @@
   }
 
   .listPost {
-    margin-top: 200px;
-    padding: 0 20px;
+    margin-top: 0;
+    padding: 0;
     display: grid;
-    grid-template-columns: 2fr 3fr;
+    grid-template-columns: 1fr;
     gap: 10px;
 
     .friendInfo {
@@ -237,6 +244,153 @@
 
     .newfeed {
       margin-bottom: 10px;
+
+      .emptyPost {
+        padding: 20px;
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+
+        .iconEmpty {
+          font-size: 40px;
+          color: $text-gray-secondary;
+        }
+
+        .textEmpty {
+          font-size: 16px;
+          color: $text-gray-secondary;
+        }
+      }
     }
   }
 }
+
+@include up(sm) {
+  .profilePage {
+    padding: 20px 24px;
+
+    .media-container {
+      .backgroundImg {
+        height: 280px;
+      }
+
+      .infoGroup {
+        position: absolute;
+        top: 225px;
+        padding: 0 24px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+
+        .avaGroup {
+          width: auto;
+
+          .avaPr .avatarUser {
+            width: 130px;
+            height: 130px;
+          }
+
+          .namePr {
+            .name {
+              margin-top: 62px;
+              font-size: 26px;
+            }
+
+            .followInfo {
+
+              .followers,
+              .following {
+                font-size: 15px;
+              }
+            }
+          }
+        }
+
+        .actionButtons {
+          width: auto;
+          margin-top: 28px;
+          flex-wrap: nowrap;
+        }
+
+        .changeProfile {
+          margin-top: 28px;
+        }
+      }
+    }
+
+    .listPost {
+      margin-top: 150px;
+    }
+  }
+}
+
+@include up(md) {
+  .profilePage {
+    padding: 30px 80px;
+    gap: 20px;
+
+    .media-container {
+      .backgroundImg {
+        height: 350px;
+      }
+
+      .infoGroup {
+        top: 300px;
+        padding: 0 40px;
+
+        .avaGroup {
+          .avaPr .avatarUser {
+            width: 150px;
+            height: 150px;
+          }
+
+          .namePr {
+            margin-left: 12px;
+
+            .name {
+              margin-top: 80px;
+              font-size: 30px;
+            }
+
+            .followInfo {
+
+              .followers,
+              .following {
+                font-size: 16px;
+              }
+            }
+          }
+        }
+
+        .actionButtons {
+          margin-top: 40px;
+
+          .messageFriend,
+          .followBtn,
+          .unfollowBtn {
+            padding: 10px 15px;
+            min-width: 0;
+          }
+        }
+
+        .changeProfile {
+          margin-top: 40px;
+        }
+      }
+    }
+
+    .listPost {
+      margin-top: 200px;
+      padding: 0 20px;
+      grid-template-columns: 2fr 3fr;
+    }
+  }
+}
+
+// @include up(lg) {
+//   .profilePage {
+//     padding: 30px 200px;
+//   }
+// }

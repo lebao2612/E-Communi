@@ -1,14 +1,41 @@
 @import './reset.scss';
 @import './variables.scss';
 
-// You can add other global styles here using the variables
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
 body {
     color: $text-primary;
-    // font-family: 'Montserrat', sans-serif; // Already imported in App.tsx but good to set here if needed
+    background:
+        radial-gradient(circle at 20% 0%, rgba(255, 253, 2, 0.08), transparent 40%),
+        linear-gradient(180deg, #161616 0%, #111 100%);
+    line-height: 1.4;
+    overflow-x: hidden;
 }
 
 * {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+@include down(sm) {
+    body {
+        padding-bottom: calc(70px + env(safe-area-inset-bottom));
+    }
 }

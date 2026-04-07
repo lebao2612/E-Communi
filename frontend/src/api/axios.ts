@@ -20,7 +20,7 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-export const setAccessToken = (token: string) => {
+export const setAccessToken = (token: string | null) => {
   accessToken = token;
 };
 
@@ -35,8 +35,12 @@ api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const originalRequest = err.config;
+    const status = err.response?.status;
+    const errorMessage = err.response?.data?.error;
+    const isRefreshRequest = originalRequest?.url?.includes('/api/users/refresh-token');
+    const isAuthFailure = status === 401 || (status === 403 && errorMessage === 'Invalid token');
 
-    if (err.response?.status === 401 && !originalRequest._retry) {
+    if (isAuthFailure && !originalRequest?._retry && !isRefreshRequest) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });

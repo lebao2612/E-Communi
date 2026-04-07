@@ -336,3 +336,91 @@
         }
     }
 }
+
+@media (max-width: 768px) {
+    .friendPost {
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+
+        .ownerPost {
+            .ownerAva {
+                width: 40px;
+                height: 40px;
+                margin-right: 0.75rem;
+            }
+
+            .ownerInfo {
+                .ownerMeta {
+                    flex-wrap: wrap;
+                    row-gap: 4px;
+
+                    .ownerName {
+                        font-size: 1rem;
+                    }
+                }
+            }
+        }
+
+        .post-images-grid-2 {
+            grid-template-columns: 1fr;
+
+            img {
+                height: 220px;
+            }
+        }
+
+        .post-images-grid-3 {
+            grid-template-columns: 1fr;
+            height: auto;
+
+            >img {
+                height: 220px;
+            }
+
+            .side-images {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: none;
+
+                img {
+                    height: 140px;
+                }
+            }
+        }
+
+        .interactPost {
+            justify-content: space-around;
+            gap: 0.5rem;
+        }
+
+        .commentsSection {
+            .commentItem {
+                .commentBubble {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .commentOptions {
+                    opacity: 1;
+                    align-self: flex-end;
+                }
+            }
+        }
+
+        .writeComment {
+            gap: 8px;
+
+            .avaUser {
+                margin-right: 0;
+            }
+
+            .inputComment {
+                min-width: 0;
+            }
+
+            .sendButton {
+                margin-left: 0;
+            }
+        }
+    }
+}

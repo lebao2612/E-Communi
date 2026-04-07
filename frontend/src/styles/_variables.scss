@@ -32,3 +32,55 @@ $hover-gray-dark: #888686; // Darker hover color (Profile actions)
 $spacing-sm: 8px;
 $spacing-md: 16px;
 $spacing-lg: 24px;
+
+// Breakpoints
+$bp-xs: 480px;
+$bp-sm: 768px;
+$bp-md: 1024px;
+$bp-lg: 1280px;
+
+@mixin down($breakpoint) {
+    @if $breakpoint ==xs {
+        @media (max-width: #{$bp-xs}) {
+            @content;
+        }
+    }
+
+    @else if $breakpoint ==sm {
+        @media (max-width: #{$bp-sm}) {
+            @content;
+        }
+    }
+
+    @else if $breakpoint ==md {
+        @media (max-width: #{$bp-md}) {
+            @content;
+        }
+    }
+
+    @else if $breakpoint ==lg {
+        @media (max-width: #{$bp-lg}) {
+            @content;
+        }
+    }
+}
+
+@mixin up($breakpoint) {
+    @if $breakpoint ==sm {
+        @media (min-width: #{$bp-sm + 1px}) {
+            @content;
+        }
+    }
+
+    @else if $breakpoint ==md {
+        @media (min-width: #{$bp-md + 1px}) {
+            @content;
+        }
+    }
+
+    @else if $breakpoint ==lg {
+        @media (min-width: #{$bp-lg + 1px}) {
+            @content;
+        }
+    }
+}

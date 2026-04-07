@@ -2,9 +2,10 @@
 
 .home {
   background-color: $bg-main;
+  min-height: calc(100vh - 70px);
 
   .home-container {
-    padding: 20px;
+    padding: 16px 12px;
     max-width: 2000px;
 
     margin: 0 auto;
@@ -12,8 +13,8 @@
 
   .main-content {
     display: grid;
-    grid-template-columns: 3fr 4fr 3fr;
-    gap: 20px;
+    grid-template-columns: 1fr;
+    gap: 16px;
     border-radius: 15px;
 
     .profile-container {
@@ -23,18 +24,20 @@
 
         .bg-image {
           width: 100%;
-          height: 450px;
+          height: 220px;
           border-radius: 10px;
           background: linear-gradient(210deg, $bg-card, $text-gray-secondary);
+          object-fit: cover;
         }
 
         .profile-info {
-          position: absolute;
-          top: 200px;
+          position: relative;
+          top: -26px;
           background: $bg-card;
           width: 100%;
           text-align: center;
           border-radius: 10px;
+          padding-bottom: 14px;
 
           .avatar-container {
             color: $bg-card;
@@ -60,22 +63,24 @@
             }
 
             .avatar-image {
-              border: 10px solid #000;
-              width: 139px;
-              height: 139px;
+              border: 6px solid #000;
+              width: 96px;
+              height: 96px;
               border-radius: 10px;
+              justify-self: center;
               position: relative;
-              top: -50px;
+              top: -30px;
+              object-fit: cover;
             }
           }
 
           .more-info {
             position: relative;
-            top: -30px;
+            top: -14px;
 
             .profile-name {
               color: $text-white;
-              font-size: 20px;
+              font-size: 18px;
               font-weight: bold;
             }
 
@@ -86,21 +91,21 @@
 
             .profile-description {
               color: $text-white;
-              font-size: 16px;
+              font-size: 14px;
               font-weight: 400;
               line-height: 1.5;
-              width: 80%;
-              margin: 20px auto;
+              width: 90%;
+              margin: 14px auto;
             }
 
             .follow-button {
-              padding: 12px 0;
-              margin-top: 15px;
+              padding: 10px 0;
+              margin-top: 12px;
               background: linear-gradient(180deg, $bg-card, $text-gray-secondary);
               border: none;
               border-radius: 10px;
               width: 80%;
-              font-size: 20px;
+              font-size: 16px;
               cursor: pointer;
               color: $text-white;
               opacity: 0.68;
@@ -119,13 +124,13 @@
       }
 
       .features {
-        margin-top: 150px;
+        margin-top: 10px;
 
         .head {
           color: $text-white;
-          font-size: 24px;
+          font-size: 18px;
           font-weight: bold;
-          margin-bottom: 30px;
+          margin-bottom: 12px;
         }
 
         .list-skill {
@@ -152,8 +157,8 @@
             cursor: pointer;
 
             .img-com {
-              width: 50px;
-              height: 50px;
+              width: 44px;
+              height: 44px;
             }
 
             .com-info {
@@ -191,18 +196,22 @@
     }
 
     .content-container {
+      order: -1;
 
       .listStr {
         display: flex;
-        gap: 40px;
-        margin: 10px;
+        gap: 10px;
+        margin: 2px 0;
+        overflow-x: auto;
+        padding-bottom: 6px;
 
         .strItem {
+          flex: 0 0 auto;
 
           .friendStr {
             padding: 5px;
-            width: 50px;
-            height: 50px;
+            width: 46px;
+            height: 46px;
             border: 2px $highlight-yellow solid;
             border-radius: 12px;
             cursor: pointer;
@@ -215,19 +224,20 @@
       }
 
       .statusPost {
-        margin-top: 80px;
+        margin-top: 12px;
         background-color: $bg-card;
-        padding: 20px;
+        padding: 12px;
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 10px;
         border-radius: 15px;
 
         .imgPost {
           border: 4px $bg-main solid;
-          height: 50px;
-          width: 50px;
+          height: 42px;
+          width: 42px;
           border-radius: 10px;
+          object-fit: cover;
         }
 
         .inputPost {
@@ -257,7 +267,7 @@
 
     .friends-container {
       background-color: $bg-card;
-      padding: 20px;
+      padding: 14px;
       border-radius: 15px;
 
       .contact-head {
@@ -267,7 +277,7 @@
       }
 
       .friendList {
-        margin-top: 20px;
+        margin-top: 12px;
 
         .eachFriend {
           padding: 0 10px;
@@ -296,5 +306,169 @@
       }
     }
 
+  }
+}
+
+@include up(sm) {
+  .home {
+    .home-container {
+      padding: 18px;
+    }
+
+    .main-content {
+      grid-template-columns: 1fr 1.2fr;
+      gap: 18px;
+
+      .content-container {
+        order: 0;
+      }
+
+      .friends-container {
+        grid-column: 1 / -1;
+      }
+
+      .profile-container {
+        .profile-header {
+          .bg-image {
+            height: 300px;
+          }
+
+          .profile-info {
+            position: absolute;
+            top: 140px;
+            padding-bottom: 0;
+
+            .avatar-container {
+              .avatar-image {
+                width: 118px;
+                height: 118px;
+                top: -40px;
+              }
+            }
+
+            .more-info {
+              top: -20px;
+
+              .profile-name {
+                font-size: 20px;
+              }
+
+              .profile-description {
+                font-size: 15px;
+              }
+            }
+          }
+        }
+
+        .features {
+          margin-top: 130px;
+        }
+      }
+
+      .content-container {
+        .listStr {
+          gap: 20px;
+
+          .strItem .friendStr {
+            width: 50px;
+            height: 50px;
+          }
+        }
+
+        .statusPost {
+          margin-top: 42px;
+          padding: 16px;
+
+          .imgPost {
+            width: 48px;
+            height: 48px;
+          }
+        }
+      }
+    }
+  }
+}
+
+@include up(md) {
+  .home {
+    .home-container {
+      padding: 20px;
+    }
+
+    .main-content {
+      grid-template-columns: 3fr 4fr 3fr;
+      gap: 20px;
+
+      .friends-container {
+        grid-column: auto;
+      }
+
+      .profile-container {
+        .profile-header {
+          .bg-image {
+            height: 450px;
+          }
+
+          .profile-info {
+            top: 200px;
+
+            .avatar-container .avatar-image {
+              border-width: 10px;
+              width: 139px;
+              height: 139px;
+              top: -50px;
+            }
+
+            .more-info {
+              top: -30px;
+
+              .profile-name {
+                font-size: 20px;
+              }
+
+              .profile-description {
+                width: 80%;
+                margin: 20px auto;
+                font-size: 16px;
+              }
+
+              .follow-button {
+                font-size: 20px;
+              }
+            }
+          }
+        }
+
+        .features {
+          margin-top: 150px;
+
+          .head {
+            font-size: 24px;
+            margin-bottom: 30px;
+          }
+        }
+      }
+
+      .content-container {
+        .statusPost {
+          margin-top: 80px;
+          padding: 20px;
+          gap: 20px;
+
+          .imgPost {
+            width: 50px;
+            height: 50px;
+          }
+        }
+      }
+
+      .friends-container {
+        padding: 20px;
+
+        .friendList {
+          margin-top: 20px;
+        }
+      }
+    }
   }
 }

@@ -17,6 +17,10 @@ const Message = () => {
         handleAvaClick,
         friendSearch,
         filterFriends,
+        isLoadingOlderMessages,
+        hasMoreMessages,
+        handleChatScroll,
+        chatContainerRef,
         chatEndRef
     } = useMessageLogic();
 
@@ -74,7 +78,13 @@ const Message = () => {
                         </div>
                     </div>
 
-                    <div className='chatMessgae'>
+                    <div className='chatMessgae' ref={chatContainerRef} onScroll={handleChatScroll}>
+                        {isLoadingOlderMessages && (
+                            <p className='chatHistoryState'>Loading older messages...</p>
+                        )}
+                        {!isLoadingOlderMessages && !hasMoreMessages && messages.length > 0 && (
+                            <p className='chatHistoryState'>You reached the beginning of this conversation.</p>
+                        )}
                         {messages.map((message) => (
                             message.user1 === currentUser?._id ? (
                                 <p className='meSend' key={message._id}>

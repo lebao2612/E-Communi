@@ -2,10 +2,11 @@
 
 .loginPage {
     background-color: $bg-main;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 24px 16px;
 
     .loginForm {
         padding: 40px 50px;
@@ -168,6 +169,52 @@
                     color: lighten($highlight-yellow, 15%);
                     text-decoration: underline;
                 }
+            }
+        }
+    }
+}
+
+@include down(sm) {
+    .loginPage {
+        align-items: flex-start;
+        padding-top: 8vh;
+
+        .loginForm {
+            padding: 28px 20px;
+            border-radius: 14px;
+
+            .logoName .nameApp {
+                font-size: 28px;
+            }
+
+            .comeback {
+                font-size: 20px;
+                margin-bottom: 22px;
+            }
+
+            .inputElement .inputUsername {
+                padding: 12px 14px;
+                margin-bottom: 16px;
+            }
+
+            .submitButton {
+                padding: 12px;
+            }
+        }
+    }
+}
+
+@include down(xs) {
+    .loginPage {
+        padding: 14px;
+        padding-top: 6vh;
+
+        .loginForm {
+            padding: 22px 16px;
+
+            .logoName .home-logo {
+                width: 38px;
+                height: 38px;
             }
         }
     }

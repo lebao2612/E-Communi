@@ -1,25 +1,31 @@
 @import "../../styles/variables.scss";
 
 .messagePage {
-    padding: 30px;
+    padding: 14px 12px;
     background-color: $bg-main;
-    padding: 20px;
     display: grid;
-    gap: 20px;
-    grid-template-columns: 1fr 2fr;
-    height: 90vh;
+    gap: 14px;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(260px, 38vh) minmax(0, 1fr);
+    height: calc(100vh - 72px);
+    max-height: calc(100vh - 72px);
+    overflow: hidden;
 
     .messageList {
         background-color: $bg-overlay;
         border-radius: 10px;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
 
 
         .messageTitle {
             display: flex;
             justify-content: space-between;
             color: $text-white;
-            padding: 20px 40px;
-            font-size: 20px;
+            padding: 14px;
+            font-size: 18px;
             font-weight: bold;
 
             .fa-pen-to-square {
@@ -40,32 +46,34 @@
             .searchMess {
                 border: none;
                 background-color: $bg-card;
-                width: 75%;
-                padding: 10px 40px;
+                width: calc(100% - 24px);
+                padding: 10px 34px;
                 color: $text-white;
                 border-radius: 10px;
             }
 
             .fa-magnifying-glass {
                 position: absolute;
-                left: 28px;
+                left: 18px;
                 color: $text-white;
                 padding: 4px;
             }
 
             .fa-sliders {
                 position: absolute;
-                right: 28px;
+                right: 18px;
                 color: $text-white;
             }
         }
 
         .listFriendMessage {
             //background-color: $text-white;
-            margin-top: 20px;
+            margin-top: 14px;
             gap: 5px;
-            height: 410px;
-            padding: 0 10px;
+            height: auto;
+            flex: 1;
+            min-height: 0;
+            padding: 0 8px 8px;
             display: flex;
             flex-direction: column;
             overflow-y: scroll;
@@ -95,6 +103,7 @@
                     display: flex;
                     align-items: center;
                     gap: 10px;
+                    min-width: 0;
 
                     .friend_ava {
                         width: 40px;
@@ -106,7 +115,10 @@
 
                     .friendName {
                         color: $text-white;
-                        font-size: 20px;
+                        font-size: 16px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
                     }
                 }
 
@@ -130,7 +142,9 @@
         background-color: $bg-darker;
         display: flex;
         flex-direction: column;
-        overflow-y: auto;
+        overflow: hidden;
+        min-height: 0;
+        max-height: 100%;
 
         .headerMessage {
             padding: 12px 16px 12px 12px;
@@ -152,8 +166,8 @@
                 }
 
                 .avaFriend {
-                    width: 50px;
-                    height: 50px;
+                    width: 42px;
+                    height: 42px;
                     object-fit: cover;
                     border: 4px solid #000;
                     border-radius: 10px;
@@ -161,7 +175,7 @@
 
                 .nameFriend {
                     color: $text-white;
-                    font-size: 20px;
+                    font-size: 16px;
                 }
             }
 
@@ -174,7 +188,7 @@
                 align-items: center;
                 gap: 40px;
                 color: $text-white;
-                font-size: 20px;
+                font-size: 18px;
 
                 .fa-phone,
                 .fa-video,
@@ -193,6 +207,7 @@
         .chatMessgae {
             margin-top: 10px;
             flex: 1;
+            min-height: 0;
             display: flex;
             gap: 10px;
             flex-direction: column;
@@ -220,13 +235,23 @@
                 }
             }
 
+            .chatHistoryState {
+                align-self: center;
+                font-size: 12px;
+                color: $text-gray-primary;
+                padding: 6px 10px;
+                border-radius: 999px;
+                background-color: rgba(255, 255, 255, 0.06);
+            }
+
             p {
                 padding: 10px;
                 display: flex;
                 flex-wrap: wrap;
-                max-width: 40%;
+                max-width: 78%;
                 width: fit-content;
                 border-radius: 5px;
+                line-height: 1.4;
             }
 
             .meSend {
@@ -245,14 +270,15 @@
             color: $text-white;
             align-items: center;
             background-color: $bg-input-area;
-            padding: 20px 0;
+            padding: 12px 8px;
             border-radius: 0 0 10px 10px;
+            gap: 8px;
 
             .attachMessage {
                 flex: 1;
-                font-size: 24px;
+                font-size: 18px;
                 display: flex;
-                justify-content: space-around;
+                justify-content: space-evenly;
 
                 .fa-face-smile,
                 .fa-file {
@@ -269,15 +295,16 @@
             .inputText {
                 flex: 6;
                 background-color: $bg-overlay;
-                padding: 12px 20px;
+                padding: 10px 14px;
                 border: none;
                 border-radius: 10px;
-                font-size: 16px;
+                font-size: 15px;
                 color: $text-white;
+                min-width: 0;
             }
 
             .fa-paper-plane {
-                font-size: 24px;
+                font-size: 18px;
                 flex: 1;
                 display: flex;
                 justify-content: center;
@@ -294,4 +321,92 @@
 
 .choosenFriend {
     background-color: $bg-overlay !important;
+}
+
+@include up(sm) {
+    .messagePage {
+        padding: 18px;
+        gap: 18px;
+        grid-template-rows: minmax(280px, 42vh) minmax(0, 1fr);
+
+        .messageList {
+            .messageTitle {
+                padding: 20px 24px;
+                font-size: 20px;
+            }
+
+            .inputSearch {
+                .searchMess {
+                    width: 85%;
+                    padding: 10px 40px;
+                }
+
+                .fa-magnifying-glass {
+                    left: 8%;
+                }
+
+                .fa-sliders {
+                    right: 8%;
+                }
+            }
+
+            .listFriendMessage {
+                height: auto;
+            }
+        }
+    }
+}
+
+@include up(md) {
+    .messagePage {
+        padding: 20px;
+        grid-template-columns: 1fr 2fr;
+        grid-template-rows: 1fr;
+        height: calc(100vh - 72px);
+        max-height: calc(100vh - 72px);
+
+        .messageContent {
+            min-height: 0;
+
+            .headerMessage {
+                .friendInfo {
+                    .avaFriend {
+                        width: 50px;
+                        height: 50px;
+                    }
+
+                    .nameFriend {
+                        font-size: 20px;
+                    }
+                }
+
+                .actions {
+                    font-size: 20px;
+                }
+            }
+
+            .chatMessgae p {
+                max-width: 40%;
+            }
+
+            .inputMessage {
+                padding: 20px 0;
+                gap: 0;
+
+                .attachMessage {
+                    font-size: 24px;
+                    justify-content: space-around;
+                }
+
+                .inputText {
+                    font-size: 16px;
+                    padding: 12px 20px;
+                }
+
+                .fa-paper-plane {
+                    font-size: 24px;
+                }
+            }
+        }
+    }
 }

@@ -176,3 +176,36 @@
         }
     }
 }
+
+@include down(sm) {
+    .search-page-container {
+        padding: 14px 12px;
+
+        .search-header .search-input {
+            padding: 12px 14px;
+            border-radius: 14px;
+        }
+
+        .search-tabs .tab-btn {
+            font-size: 14px;
+            padding: 10px 0;
+        }
+
+        .search-results .users-list .user-card {
+            padding: 12px;
+            align-items: flex-start;
+            gap: 10px;
+
+            .user-avatar {
+                width: 42px;
+                height: 42px;
+                margin-right: 0;
+            }
+
+            .follow-btn {
+                padding: 7px 12px;
+                font-size: 12px;
+            }
+        }
+    }
+}

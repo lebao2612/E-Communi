@@ -36,17 +36,46 @@ const sendMessage = async (req, res) => {
 const getMessagesBetweenUsers = async (req, res) => {
   try {
     const { user1, user2 } = req.params;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
+    const { before } = req.query;
 
-    const messages = await Message.find({
+    if (!mongoose.Types.ObjectId.isValid(user1) || !mongoose.Types.ObjectId.isValid(user2)) {
+      return res.status(400).json({ message: 'Invalid user IDs' });
+    }
+
+    const baseFilter = {
       $or: [
         { user1, user2 },
         { user1: user2, user2: user1 }
       ]
-    }).sort({ sentAt: 1 }); // sắp xếp theo thời gian gửi
+    };
+
+    let cursorFilter = {};
+    if (before) {
+      if (!mongoose.Types.ObjectId.isValid(before)) {
+        return res.status(400).json({ message: 'Invalid cursor' });
+      }
+      cursorFilter = { _id: { $lt: new mongoose.Types.ObjectId(before) } };
+    }
+
+    const query = { ...baseFilter, ...cursorFilter };
+    const fetchedMessages = await Message.find(query)
+      .sort({ _id: -1 })
+      .limit(limit);
+
+    // Reverse to keep chat display order oldest -> newest.
+    const messages = fetchedMessages.reverse();
+    const oldestMessage = messages[0] || null;
+    const hasMore = fetchedMessages.length === limit;
 
     res.status(200).json({
       message: 'Messages fetched successfully',
       data: messages,
+      pagination: {
+        limit,
+        hasMore,
+        nextCursor: oldestMessage ? oldestMessage._id : null,
+      }
     });
   } catch (error) {
     console.error('Error fetching messages:', error);
