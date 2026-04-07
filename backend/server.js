@@ -8,8 +8,10 @@ const allowedOrigins = [
   "http://localhost:3000",      // dev
   "https://ecommunity-frontend.s3.amazonaws.com",
   "http://ecommunity-frontend.s3-website-ap-southeast-1.amazonaws.com",   // production
-  "https://dsbzempbthi3k.cloudfront.net"
-];
+  "https://dsbzempbthi3k.cloudfront.net",
+  "https://d2a111o6b1tvez.cloudfront.net",
+  process.env.FE_URL,
+].filter(Boolean);
 
 initRealtimeServices({ app, server, allowedOrigins });
 

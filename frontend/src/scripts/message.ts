@@ -17,6 +17,11 @@ export const useMessageLogic = () => {
         []
     );
 
+    const REALTIME_URL = useMemo(
+        () => process.env.REACT_APP_REALTIME_URL || API_URL,
+        [API_URL]
+    );
+
     const navigate = useNavigate();
 
 
@@ -132,7 +137,7 @@ export const useMessageLogic = () => {
         const accessToken = getAccessToken();
         if (!accessToken) return;
 
-        socket = io(API_URL, {
+        socket = io(REALTIME_URL, {
             auth: {
                 token: accessToken,
             }
@@ -158,7 +163,7 @@ export const useMessageLogic = () => {
         return () => {
             socket.disconnect();
         };
-    }, [currentUser, API_URL]);
+    }, [currentUser, REALTIME_URL]);
 
     // 📥 Fetch all users
     useEffect(() => {

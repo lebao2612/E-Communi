@@ -20,22 +20,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 🧠 Debug secret trực tiếp
-      - name: Show secret value
-        run: |
-          echo SECRET VALUE: $REACT_APP_API_URL
-        env:
-          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
-
       - name: Inject .env files
         run: |
           rm -f .env .env.production
           echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env
+          echo "REACT_APP_REALTIME_URL=${{ secrets.REACT_APP_REALTIME_URL }}" >> .env
+          echo "REACT_APP_WEBRTC_ICE_SERVERS=${{ secrets.REACT_APP_WEBRTC_ICE_SERVERS }}" >> .env
           echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env.production
-
-      # 🧠 In nội dung file .env để kiểm tra
-      - name: Show .env content
-        run: cat .env
+          echo "REACT_APP_REALTIME_URL=${{ secrets.REACT_APP_REALTIME_URL }}" >> .env.production
+          echo "REACT_APP_WEBRTC_ICE_SERVERS=${{ secrets.REACT_APP_WEBRTC_ICE_SERVERS }}" >> .env.production
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -49,14 +42,6 @@ jobs:
 
       - name: Build React app
         run: npm run build
-
-      # 🧠 Kiểm tra bundle có chứa URL nào
-      - name: Check built JS for API URL
-        run: |
-          echo "Searching for http..."
-          grep -r "http://" build || true
-          echo "Searching for https..."
-          grep -r "https://" build || true
 
       - name: Deploy to S3
         run: |

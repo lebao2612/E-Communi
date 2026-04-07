@@ -85,6 +85,7 @@ export const useWebRTC = () => {
     const [currentPartnerId, setCurrentPartnerId] = useState<string | null>(null);
 
     const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+    const REALTIME_URL = process.env.REACT_APP_REALTIME_URL || API_URL;
 
     // Thử trích xuất port và host từ API_URL
     const urlObj = new URL(API_URL);
@@ -113,7 +114,7 @@ export const useWebRTC = () => {
 
             if (!mounted) return;
 
-            newSocket = io(API_URL, {
+            newSocket = io(REALTIME_URL, {
                 auth: {
                     token: accessToken,
                 }
@@ -185,7 +186,7 @@ export const useWebRTC = () => {
             newSocket?.disconnect();
             newPeer?.destroy();
         };
-    }, [currentUser, API_URL, peerHost, peerPort, isSecureConnection, fallbackIceServers]);
+    }, [currentUser, API_URL, REALTIME_URL, peerHost, peerPort, isSecureConnection, fallbackIceServers]);
 
     const getMedia = useCallback(async (video: boolean) => {
         try {
