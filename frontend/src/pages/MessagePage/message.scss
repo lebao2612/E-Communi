@@ -265,6 +265,74 @@
             }
         }
 
+        .callBanner {
+            margin: 10px 10px 0;
+            padding: 10px 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            color: $text-white;
+
+            p {
+                margin: 0;
+                font-size: 14px;
+            }
+
+            &.incoming {
+                background-color: rgba(255, 190, 11, 0.16);
+                border: 1px solid rgba(255, 190, 11, 0.4);
+            }
+
+            &.active {
+                background-color: rgba(6, 214, 160, 0.14);
+                border: 1px solid rgba(6, 214, 160, 0.4);
+            }
+
+            .callActions {
+                display: flex;
+                gap: 8px;
+            }
+
+            .callBtn {
+                border: none;
+                border-radius: 8px;
+                padding: 6px 10px;
+                color: $text-white;
+                cursor: pointer;
+                font-size: 13px;
+
+                &.accept {
+                    background-color: #069f7a;
+                }
+
+                &.reject,
+                &.end {
+                    background-color: #c43c4e;
+                }
+            }
+        }
+
+        .videoCallPanel {
+            margin: 10px;
+            border-radius: 10px;
+            background: #121212;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+
+            .videoRemote,
+            .videoLocal {
+                width: 100%;
+                max-height: 220px;
+                object-fit: cover;
+                border-radius: 8px;
+                background: #000;
+            }
+        }
+
         .inputMessage {
             display: flex;
             color: $text-white;

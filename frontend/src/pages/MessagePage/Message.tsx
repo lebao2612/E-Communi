@@ -1,6 +1,8 @@
+import { useEffect, useRef } from 'react';
 import images from '../../assets/images';
 import './message.scss'
 import { useMessageLogic } from '../../scripts/message'
+import { useWebRTC } from '../../hooks/useWebRTC';
 
 
 
@@ -23,6 +25,47 @@ const Message = () => {
         chatContainerRef,
         chatEndRef
     } = useMessageLogic();
+
+    const {
+        localStream,
+        remoteStream,
+        receivingCall,
+        callerEnv,
+        callAccepted,
+        callUser,
+        answerCall,
+        rejectCall,
+        leaveCall,
+    } = useWebRTC();
+
+    const localMediaRef = useRef<HTMLVideoElement | null>(null);
+    const remoteMediaRef = useRef<HTMLVideoElement | null>(null);
+    const localAudioRef = useRef<HTMLAudioElement | null>(null);
+    const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+
+    useEffect(() => {
+        if (localMediaRef.current) {
+            localMediaRef.current.srcObject = localStream;
+        }
+        if (localAudioRef.current) {
+            localAudioRef.current.srcObject = localStream;
+        }
+    }, [localStream]);
+
+    useEffect(() => {
+        if (remoteMediaRef.current) {
+            remoteMediaRef.current.srcObject = remoteStream;
+        }
+        if (remoteAudioRef.current) {
+            remoteAudioRef.current.srcObject = remoteStream;
+        }
+    }, [remoteStream]);
+
+    const isVideoCall = Boolean(
+        callerEnv?.type === 'video' ||
+        (localStream && localStream.getVideoTracks().length > 0) ||
+        (remoteStream && remoteStream.getVideoTracks().length > 0)
+    );
 
     console.log(messages)
 
@@ -72,11 +115,46 @@ const Message = () => {
                         </div>
 
                         <div className='actions'>
-                            <i className="fa-solid fa-phone"></i>
-                            <i className="fa-solid fa-video"></i>
+                            <i
+                                className="fa-solid fa-phone"
+                                onClick={() => userChoosen && callUser(userChoosen, 'audio')}
+                                title='Audio call'
+                            ></i>
+                            <i
+                                className="fa-solid fa-video"
+                                onClick={() => userChoosen && callUser(userChoosen, 'video')}
+                                title='Video call'
+                            ></i>
                             <i className="fa-solid fa-ellipsis-vertical"></i>
                         </div>
                     </div>
+
+                    {receivingCall && callerEnv && !callAccepted && (
+                        <div className='callBanner incoming'>
+                            <p>{callerEnv.callerName} is calling ({callerEnv.type})</p>
+                            <div className='callActions'>
+                                <button className='callBtn accept' onClick={answerCall}>Accept</button>
+                                <button className='callBtn reject' onClick={rejectCall}>Reject</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {callAccepted && (
+                        <div className='callBanner active'>
+                            <p>Call connected</p>
+                            <button className='callBtn end' onClick={leaveCall}>End call</button>
+                        </div>
+                    )}
+
+                    {callAccepted && isVideoCall && (
+                        <div className='videoCallPanel'>
+                            <video ref={remoteMediaRef} autoPlay playsInline className='videoRemote' />
+                            <video ref={localMediaRef} autoPlay playsInline muted className='videoLocal' />
+                        </div>
+                    )}
+
+                    <audio ref={localAudioRef} autoPlay muted />
+                    <audio ref={remoteAudioRef} autoPlay />
 
                     <div className='chatMessgae' ref={chatContainerRef} onScroll={handleChatScroll}>
                         {isLoadingOlderMessages && (

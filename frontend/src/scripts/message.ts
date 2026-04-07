@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, ChangeEvent, useMemo, useCallback, UIEvent } from 'react';
 import { useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import api from "../api/axios";
+import api, { getAccessToken } from "../api/axios";
 import { User } from '../types/user';
 import { Message } from '../types/message';
 import { useAuth } from '../contexts/AuthContext';
@@ -36,6 +36,18 @@ export const useMessageLogic = () => {
     const isFetchingMessagesRef = useRef(false);
     const nextCursorRef = useRef<string | null>(null);
     const activeFriendIdRef = useRef<string | null>(null);
+    const shouldAutoScrollRef = useRef(false);
+    const scrollBehaviorRef = useRef<'auto' | 'smooth'>('smooth');
+
+    const scrollToBottom = useCallback((smooth = true) => {
+        const container = chatContainerRef.current;
+        if (!container) return;
+
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: smooth ? 'smooth' : 'auto'
+        });
+    }, []);
 
 
     const fetchMessages = useCallback(async (friendId: string) => {
@@ -52,12 +64,10 @@ export const useMessageLogic = () => {
             const hasMore = Boolean(res.data?.pagination?.hasMore);
 
             setMessages(initialMessages);
+            shouldAutoScrollRef.current = true;
+            scrollBehaviorRef.current = 'auto';
             nextCursorRef.current = nextCursor;
             setHasMoreMessages(hasMore);
-
-            requestAnimationFrame(() => {
-                scrollToBottom(false);
-            });
         } catch (err) {
             console.error("Error fetching messages:", err);
         } finally {
@@ -119,9 +129,16 @@ export const useMessageLogic = () => {
     useEffect(() => {
         if (!currentUser) return;
 
-        socket = io(API_URL);
+        const accessToken = getAccessToken();
+        if (!accessToken) return;
 
-        socket.emit("join", currentUser._id);
+        socket = io(API_URL, {
+            auth: {
+                token: accessToken,
+            }
+        });
+
+        socket.emit("join");
 
         socket.on("receiveMessage", (message: Message) => {
             const activeFriendId = activeFriendIdRef.current;
@@ -133,9 +150,8 @@ export const useMessageLogic = () => {
 
             if (inCurrentConversation) {
                 setMessages(prev => [...prev, message]);
-                requestAnimationFrame(() => {
-                    scrollToBottom();
-                });
+                shouldAutoScrollRef.current = true;
+                scrollBehaviorRef.current = 'smooth';
             }
         });
 
@@ -198,9 +214,8 @@ export const useMessageLogic = () => {
                 });
 
                 setInputText('');
-                requestAnimationFrame(() => {
-                    scrollToBottom();
-                });
+                shouldAutoScrollRef.current = true;
+                scrollBehaviorRef.current = 'smooth';
             });
     };
 
@@ -216,11 +231,14 @@ export const useMessageLogic = () => {
         friend.fullname.toLowerCase().includes(friendSearch.toLowerCase())
     );
 
-    const scrollToBottom = (smooth = true) => {
-        if (chatEndRef.current) {
-            chatEndRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
-        }
-    };
+    useEffect(() => {
+        if (!shouldAutoScrollRef.current) return;
+
+        requestAnimationFrame(() => {
+            scrollToBottom(scrollBehaviorRef.current === 'smooth');
+            shouldAutoScrollRef.current = false;
+        });
+    }, [messages, scrollToBottom]);
 
     useEffect(() => {
         activeFriendIdRef.current = userChoosen?._id || null;

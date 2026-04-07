@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import Peer, { MediaConnection } from 'peerjs';
 import { User } from '../types/user';
 import { useAuth } from '../contexts/AuthContext';
+import { getAccessToken } from '../api/axios';
 
 export interface CallData {
     callerId: string;
@@ -41,11 +42,18 @@ export const useWebRTC = () => {
     useEffect(() => {
         if (!currentUser) return;
 
-        const newSocket = io(API_URL);
+        const accessToken = getAccessToken();
+        if (!accessToken) return;
+
+        const newSocket = io(API_URL, {
+            auth: {
+                token: accessToken,
+            }
+        });
         setSocket(newSocket);
 
         // Join room
-        newSocket.emit('join', currentUser._id);
+        newSocket.emit('join');
 
         const newPeer = new Peer(currentUser._id, {
             host: peerHost,
