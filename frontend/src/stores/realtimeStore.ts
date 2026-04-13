@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
 import { usePresenceStore } from './presenceStore';
+import { playNotificationSound } from '../utils/notificationSound';
 
 interface RealtimeState {
   socket: Socket | null;
@@ -66,6 +67,13 @@ export const useRealtimeStore = create<RealtimeState>((set) => ({
     socket.on('user_offline', (data: { userId: string }) => {
       console.log('⚫ User offline:', data.userId);
       usePresenceStore.getState().removeOnlineUser(data.userId);
+    });
+
+    // Global message listener - play notification sound for all incoming messages
+    socket.on('receiveMessage', (message: any) => {
+      console.log('📨 Message received:', message);
+      // Play notification sound regardless of which page user is on
+      playNotificationSound(0.3);
     });
 
     activeSocket = socket;

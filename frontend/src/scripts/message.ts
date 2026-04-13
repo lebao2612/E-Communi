@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useMessageStore } from '../stores/messageStore';
 import { useRealtimeStore } from '../stores/realtimeStore';
+import { playNotificationSound } from '../utils/notificationSound';
 
 const PAGE_SIZE = 20;
 
@@ -157,6 +158,9 @@ export const useMessageLogic = () => {
 
             const conversationFriendId = message.user1 === currentUser._id ? message.user2 : message.user1;
             appendMessage(conversationFriendId, message);
+
+            // Play notification sound
+            playNotificationSound(0.3);
 
             if (inCurrentConversation) {
                 shouldAutoScrollRef.current = true;
