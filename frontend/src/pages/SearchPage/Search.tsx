@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Post from "../../components/Post/Post";
 import useDebounce from "../../hooks/useDebounce";
 import { useAuth } from "../../contexts/AuthContext";
-import { User } from "../../types/user";
-import { Post as PostType } from "../../types/post";
+import { useSearchStore } from "../../stores/searchStore";
 import "./Search.scss";
 
 const Search = () => {
@@ -13,23 +11,34 @@ const Search = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const initialQuery = searchParams.get("q") || "";
 
-    const [searchTerm, setSearchTerm] = useState(initialQuery);
-    const [activeTab, setActiveTab] = useState<"users" | "posts">("users");
-    const [users, setUsers] = useState<User[]>([]);
-    const [posts, setPosts] = useState<PostType[]>([]);
-    const [loading, setLoading] = useState(false);
+    const searchTerm = useSearchStore((state) => state.query);
+    const activeTab = useSearchStore((state) => state.activeTab);
+    const users = useSearchStore((state) => state.users);
+    const posts = useSearchStore((state) => state.posts);
+    const loading = useSearchStore((state) => state.loading);
+    const setQuery = useSearchStore((state) => state.setQuery);
+    const setActiveTab = useSearchStore((state) => state.setActiveTab);
+    const fetchAllResults = useSearchStore((state) => state.fetchAllResults);
+    const clearResults = useSearchStore((state) => state.clearResults);
+    const addRecentSearch = useSearchStore((state) => state.addRecentSearch);
 
     useEffect(() => {
         const query = searchParams.get("q");
         if (query !== null && query !== searchTerm) {
-            setSearchTerm(query);
+            setQuery(query);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams]);
 
+    useEffect(() => {
+        if (initialQuery && initialQuery !== searchTerm) {
+            setQuery(initialQuery);
+        }
+    }, [initialQuery, searchTerm, setQuery]);
+
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setSearchTerm(value);
+        setQuery(value);
 
         if (value.trim()) {
             setSearchParams({ q: value });
@@ -41,32 +50,14 @@ const Search = () => {
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     useEffect(() => {
-        const fetchResults = async () => {
-            if (!debouncedSearchTerm.trim()) {
-                setUsers([]);
-                setPosts([]);
-                return;
-            }
+        if (!debouncedSearchTerm.trim()) {
+            clearResults();
+            return;
+        }
 
-            setLoading(true);
-            try {
-                const response = await axios.get(
-                    `http://localhost:5000/api/search?q=${debouncedSearchTerm}&type=all`
-                );
-
-                if (response.data.success) {
-                    setUsers(response.data.data.users || []);
-                    setPosts(response.data.data.posts || []);
-                }
-            } catch (error) {
-                console.error("Error fetching search results:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchResults();
-    }, [debouncedSearchTerm]);
+        addRecentSearch(debouncedSearchTerm);
+        void fetchAllResults(debouncedSearchTerm);
+    }, [debouncedSearchTerm, fetchAllResults, clearResults, addRecentSearch]);
 
     return (
         <div className="search-page-container">

@@ -287,10 +287,35 @@
           align-items: center;
           cursor: pointer;
 
-          .ava_eachFriend {
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+          .ava-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .ava_eachFriend {
+              border-radius: 50%;
+              width: 40px;
+              height: 40px;
+            }
+
+            .online-indicator {
+              position: absolute;
+              bottom: 0;
+              right: 0;
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              border: 2px solid $bg-card;
+
+              &.online {
+                background-color: #31a24c;
+              }
+
+              &.offline {
+                background-color: #95969c;
+              }
+            }
           }
 
           .name_eachFriend {

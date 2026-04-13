@@ -3,6 +3,8 @@ import images from '../../assets/images';
 import './message.scss'
 import { useMessageLogic } from '../../scripts/message'
 import { useWebRTC } from '../../hooks/useWebRTC';
+import IncomingCallModal from '../../components/IncomingCallModal/IncomingCallModal';
+import { usePresenceStore } from '../../stores/presenceStore';
 
 const safePlay = (element: HTMLMediaElement | null) => {
     if (!element) return;
@@ -47,6 +49,8 @@ const Message = () => {
         leaveCall,
     } = useWebRTC();
 
+    const onlineUserIds = usePresenceStore((state) => state.onlineUserIds);
+
     const localMediaRef = useRef<HTMLVideoElement | null>(null);
     const remoteMediaRef = useRef<HTMLVideoElement | null>(null);
     const localAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -82,6 +86,13 @@ const Message = () => {
 
     return (
         <div className='messagePage'>
+            <IncomingCallModal
+                isVisible={Boolean(receivingCall && callerEnv && !callAccepted)}
+                callerEnv={callerEnv}
+                onAccept={answerCall}
+                onReject={rejectCall}
+            />
+
             <div className='messageList'>
                 <div className='messageHeader'>
                     <div className='messageTitle'>
@@ -104,7 +115,12 @@ const Message = () => {
 
                             <div className='friendInfo'>
                                 <img src={friend.avatar || images.avaFriend} className='friend_ava' alt='FriendAva' />
-                                <p className='friendName'>{friend.fullname}</p>
+                                <div className='friendDetails'>
+                                    <p className='friendName'>{friend.fullname}</p>
+                                    {onlineUserIds.has(friend._id) ? (
+                                        <p className='onlineStatus'>Đang hoạt động</p>
+                                    ) : <p className='onlineStatus'>Không hoạt động</p>}
+                                </div>
                             </div>
 
                             <i className="fa-solid fa-camera"></i>
@@ -121,7 +137,14 @@ const Message = () => {
 
                         <div className='friendInfo' onClick={() => handleAvaClick(userChoosen)}>
                             <img src={userChoosen.avatar || images.avaFriend} alt='avaFriend' className='avaFriend' />
-                            <p className='nameFriend'>{userChoosen.fullname}</p>
+                            <div className='friendDetails'>
+                                <p className='nameFriend'>{userChoosen.fullname}</p>
+                                {onlineUserIds.has(userChoosen._id) ? (
+                                    <p className='onlineStatus'>Đang hoạt động</p>
+                                ) : (
+                                    <p className='onlineStatus'>Không hoạt động</p>
+                                )}
+                            </div>
                         </div>
 
                         <div className='actions'>
@@ -138,16 +161,6 @@ const Message = () => {
                             <i className="fa-solid fa-ellipsis-vertical"></i>
                         </div>
                     </div>
-
-                    {receivingCall && callerEnv && !callAccepted && (
-                        <div className='callBanner incoming'>
-                            <p>{callerEnv.callerName} is calling ({callerEnv.type})</p>
-                            <div className='callActions'>
-                                <button className='callBtn accept' onClick={answerCall}>Accept</button>
-                                <button className='callBtn reject' onClick={rejectCall}>Reject</button>
-                            </div>
-                        </div>
-                    )}
 
                     {callAccepted && (
                         <div className='callBanner active'>

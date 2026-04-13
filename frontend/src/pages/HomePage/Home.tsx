@@ -4,6 +4,7 @@ import images from "../../assets/images/index";
 import { useHomeLogic } from '../../scripts/home';
 import CreatePostModal from '../../components/CreatePostModal/CreatePostModal';
 import Post from '../../components/Post/Post';
+import { usePresenceStore } from '../../stores/presenceStore';
 
 
 const Home = () => {
@@ -19,6 +20,8 @@ const Home = () => {
         lastPostElementRef,
         isLoadingPosts
     } = useHomeLogic();
+
+    const onlineUserIds = usePresenceStore((state) => state.onlineUserIds);
 
     return (
         <div className="home">
@@ -163,7 +166,10 @@ const Home = () => {
                             <div className="friendList">
                                 {allUsers.map(friend => (
                                     <div key={friend._id} className="eachFriend">
-                                        <img src={friend.avatar || images.friend1} alt="avaFriend" className="ava_eachFriend" />
+                                        <div className="ava-wrapper">
+                                            <img src={friend.avatar || images.friend1} alt="avaFriend" className="ava_eachFriend" />
+                                            <span className={`online-indicator ${onlineUserIds.has(friend._id) ? 'online' : 'offline'}`}></span>
+                                        </div>
                                         <p className="name_eachFriend">{friend.fullname}</p>
                                     </div>
                                 ))}

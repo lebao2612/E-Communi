@@ -1,17 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { io, Socket } from 'socket.io-client';
 import Peer, { MediaConnection } from 'peerjs';
 import { User } from '../types/user';
 import { useAuth } from '../contexts/AuthContext';
 import { getAccessToken } from '../api/axios';
-
-export interface CallData {
-    callerId: string;
-    callerName: string;
-    callerAvatar: string;
-    receiverId: string;
-    type: 'audio' | 'video';
-}
+import { CallData, useWebRTCStore } from '../stores/webrtcStore';
+import { useRealtimeStore } from '../stores/realtimeStore';
 
 const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -71,21 +64,23 @@ const getTwilioIceServers = async (apiUrl: string, accessToken: string): Promise
 
 export const useWebRTC = () => {
     const { user: currentUser } = useAuth();
-    const [socket, setSocket] = useState<Socket | null>(null);
+    const socket = useRealtimeStore((state) => state.socket);
     const [peer, setPeer] = useState<Peer | null>(null);
 
-    const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-
-    const [receivingCall, setReceivingCall] = useState(false);
-    const [callerEnv, setCallerEnv] = useState<CallData | null>(null);
-    const [callAccepted, setCallAccepted] = useState(false);
-
-    // Lưu lại thông tin đối tác đang gọi điện để dễ dàng gửi event kết thúc
-    const [currentPartnerId, setCurrentPartnerId] = useState<string | null>(null);
+    const localStream = useWebRTCStore((state) => state.localStream);
+    const remoteStream = useWebRTCStore((state) => state.remoteStream);
+    const receivingCall = useWebRTCStore((state) => state.receivingCall);
+    const callerEnv = useWebRTCStore((state) => state.callerEnv);
+    const callAccepted = useWebRTCStore((state) => state.callAccepted);
+    const currentPartnerId = useWebRTCStore((state) => state.currentPartnerId);
+    const setLocalStream = useWebRTCStore((state) => state.setLocalStream);
+    const setRemoteStream = useWebRTCStore((state) => state.setRemoteStream);
+    const setIncomingCall = useWebRTCStore((state) => state.setIncomingCall);
+    const setCallAccepted = useWebRTCStore((state) => state.setCallAccepted);
+    const setCurrentPartnerId = useWebRTCStore((state) => state.setCurrentPartnerId);
+    const resetCallState = useWebRTCStore((state) => state.resetCallState);
 
     const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-    const REALTIME_URL = process.env.REACT_APP_REALTIME_URL || API_URL;
 
     // Thử trích xuất port và host từ API_URL
     const urlObj = new URL(API_URL);
@@ -97,7 +92,21 @@ export const useWebRTC = () => {
     const currentCall = useRef<MediaConnection | null>(null);
     const localStreamRef = useRef<MediaStream | null>(null);
 
-    // Initialize Socket and Peer
+    const endCallLocally = useCallback(() => {
+        resetCallState();
+
+        if (currentCall.current) {
+            currentCall.current.close();
+            currentCall.current = null;
+        }
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => track.stop());
+            localStreamRef.current = null;
+        }
+    }, [resetCallState]);
+
+    // Initialize Peer
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (!currentUser) return;
 
@@ -105,7 +114,6 @@ export const useWebRTC = () => {
         if (!accessToken) return;
 
         let mounted = true;
-        let newSocket: Socket | null = null;
         let newPeer: Peer | null = null;
 
         const bootstrapRealtime = async () => {
@@ -113,16 +121,6 @@ export const useWebRTC = () => {
             const activeIceServers = twilioIceServers || fallbackIceServers;
 
             if (!mounted) return;
-
-            newSocket = io(REALTIME_URL, {
-                auth: {
-                    token: accessToken,
-                }
-            });
-            setSocket(newSocket);
-
-            // Join room
-            newSocket.emit('join');
 
             newPeer = new Peer(currentUser._id, {
                 host: peerHost,
@@ -134,29 +132,6 @@ export const useWebRTC = () => {
                 },
             });
             setPeer(newPeer);
-
-            newSocket.on('connect_error', (error) => {
-                console.error('Socket connection error:', error.message);
-            });
-
-            newSocket.on('payload_error', (payload) => {
-                console.error('Socket payload error:', payload);
-            });
-
-            // --- SOCKET EVENTS ---
-            newSocket.on('incoming_call', (data: CallData) => {
-                setReceivingCall(true);
-                setCallerEnv(data);
-                setCurrentPartnerId(data.callerId);
-            });
-
-            newSocket.on('call_rejected', () => {
-                endCallLocally();
-            });
-
-            newSocket.on('call_ended', () => {
-                endCallLocally();
-            });
 
             // --- PEER EVENTS ---
             newPeer.on('call', (call) => {
@@ -183,11 +158,46 @@ export const useWebRTC = () => {
 
         return () => {
             mounted = false;
-            newSocket?.disconnect();
             newPeer?.destroy();
         };
-    }, [currentUser, API_URL, REALTIME_URL, peerHost, peerPort, isSecureConnection, fallbackIceServers]);
+    }, [
+        currentUser,
+        API_URL,
+        peerHost,
+        peerPort,
+        isSecureConnection,
+        fallbackIceServers,
+        endCallLocally,
+        setRemoteStream,
+    ]);
 
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleIncomingCall = (data: CallData) => {
+            setIncomingCall(data);
+        };
+
+        const handleCallRejected = () => {
+            endCallLocally();
+        };
+
+        const handleCallEnded = () => {
+            endCallLocally();
+        };
+
+        socket.on('incoming_call', handleIncomingCall);
+        socket.on('call_rejected', handleCallRejected);
+        socket.on('call_ended', handleCallEnded);
+
+        return () => {
+            socket.off('incoming_call', handleIncomingCall);
+            socket.off('call_rejected', handleCallRejected);
+            socket.off('call_ended', handleCallEnded);
+        };
+    }, [socket, setIncomingCall, endCallLocally]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const getMedia = useCallback(async (video: boolean) => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video, audio: true });
@@ -198,7 +208,7 @@ export const useWebRTC = () => {
             console.error("Failed to get media", err);
             return null;
         }
-    }, []);
+    }, [setLocalStream]);
 
     const callUser = async (receiver: User, type: 'audio' | 'video') => {
         if (!currentUser || !socket || !peer) return;
@@ -261,24 +271,6 @@ export const useWebRTC = () => {
             toUserId: currentPartnerId
         });
         endCallLocally();
-    };
-
-    const endCallLocally = () => {
-        setReceivingCall(false);
-        setCallAccepted(false);
-        setCallerEnv(null);
-        setCurrentPartnerId(null);
-
-        if (currentCall.current) {
-            currentCall.current.close();
-            currentCall.current = null;
-        }
-        if (localStreamRef.current) {
-            localStreamRef.current.getTracks().forEach(track => track.stop());
-            localStreamRef.current = null;
-        }
-        setLocalStream(null);
-        setRemoteStream(null);
     };
 
     const toggleAudio = () => {

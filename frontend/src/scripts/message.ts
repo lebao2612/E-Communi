@@ -1,48 +1,56 @@
-import { useState, useRef, useEffect, ChangeEvent, useMemo, useCallback, UIEvent } from 'react';
+import { useRef, useEffect, ChangeEvent, useMemo, useCallback, UIEvent } from 'react';
 import { useParams } from "react-router-dom";
-import { io, Socket } from "socket.io-client";
-import api, { getAccessToken } from "../api/axios";
+import api from "../api/axios";
 import { User } from '../types/user';
 import { Message } from '../types/message';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useMessageStore } from '../stores/messageStore';
+import { useRealtimeStore } from '../stores/realtimeStore';
 
-let socket: Socket;
 const PAGE_SIZE = 20;
 
 export const useMessageLogic = () => {
-
-    const API_URL = useMemo(
-        () => process.env.REACT_APP_API_URL || "http://localhost:5000",
-        []
-    );
-
-    const REALTIME_URL = useMemo(
-        () => process.env.REACT_APP_REALTIME_URL || API_URL,
-        [API_URL]
-    );
-
     const navigate = useNavigate();
 
 
     const { userId: friendId } = useParams(); // sửa tên key cho đồng bộ
-    const [allUsers, setAllUsers] = useState<User[]>([]);
     const { user: currentUser } = useAuth(); // Retrieve global current user
+    const socket = useRealtimeStore((state) => state.socket);
 
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [inputText, setInputText] = useState('');
-    const [userChoosen, setUserChoosen] = useState<User>();
-    const [friendSearch, setFriendSearch] = useState('');
-    const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false);
-    const [hasMoreMessages, setHasMoreMessages] = useState(true);
+    const allUsers = useMessageStore((state) => state.allUsers);
+    const selectedFriendId = useMessageStore((state) => state.selectedFriendId);
+    const messagesByFriendId = useMessageStore((state) => state.messagesByFriendId);
+    const hasMoreByFriendId = useMessageStore((state) => state.hasMoreByFriendId);
+    const loadingOlderByFriendId = useMessageStore((state) => state.loadingOlderByFriendId);
+    const inputText = useMessageStore((state) => state.inputText);
+    const friendSearch = useMessageStore((state) => state.friendSearch);
+    const setAllUsers = useMessageStore((state) => state.setAllUsers);
+    const setSelectedFriendId = useMessageStore((state) => state.setSelectedFriendId);
+    const setInputText = useMessageStore((state) => state.setInputText);
+    const setFriendSearch = useMessageStore((state) => state.setFriendSearch);
+    const setConversation = useMessageStore((state) => state.setConversation);
+    const appendMessage = useMessageStore((state) => state.appendMessage);
+    const prependOlderMessages = useMessageStore((state) => state.prependOlderMessages);
+    const setLoadingOlder = useMessageStore((state) => state.setLoadingOlder);
 
     const chatEndRef = useRef<HTMLDivElement | null>(null);
     const chatContainerRef = useRef<HTMLDivElement | null>(null);
     const isFetchingMessagesRef = useRef(false);
-    const nextCursorRef = useRef<string | null>(null);
     const activeFriendIdRef = useRef<string | null>(null);
     const shouldAutoScrollRef = useRef(false);
     const scrollBehaviorRef = useRef<'auto' | 'smooth'>('smooth');
+
+    const userChoosen = useMemo(
+        () => allUsers.find((user) => user._id === selectedFriendId),
+        [allUsers, selectedFriendId]
+    );
+    const messages = useMemo(
+        () => (selectedFriendId ? (messagesByFriendId[selectedFriendId] || []) : []),
+        [selectedFriendId, messagesByFriendId]
+    );
+    const isLoadingOlderMessages = selectedFriendId ? Boolean(loadingOlderByFriendId[selectedFriendId]) : false;
+    const hasMoreMessages = selectedFriendId ? (hasMoreByFriendId[selectedFriendId] ?? true) : true;
 
     const scrollToBottom = useCallback((smooth = true) => {
         const container = chatContainerRef.current;
@@ -55,72 +63,78 @@ export const useMessageLogic = () => {
     }, []);
 
 
-    const fetchMessages = useCallback(async (friendId: string) => {
+    const fetchMessages = useCallback(async (friendId: string, force = false) => {
         if (!currentUser) return;
+
+        const cachedMessages = useMessageStore.getState().messagesByFriendId[friendId] || [];
+        if (!force && cachedMessages.length > 0) {
+            return;
+        }
 
         try {
             isFetchingMessagesRef.current = true;
-            setIsLoadingOlderMessages(false);
-            setHasMoreMessages(true);
+            setLoadingOlder(friendId, false);
 
             const res = await api.get(`/api/messages/${currentUser._id}/${friendId}?limit=${PAGE_SIZE}`);
             const initialMessages: Message[] = res.data.data || [];
             const nextCursor = res.data?.pagination?.nextCursor || null;
             const hasMore = Boolean(res.data?.pagination?.hasMore);
 
-            setMessages(initialMessages);
+            setConversation(friendId, initialMessages, nextCursor, hasMore);
             shouldAutoScrollRef.current = true;
             scrollBehaviorRef.current = 'auto';
-            nextCursorRef.current = nextCursor;
-            setHasMoreMessages(hasMore);
         } catch (err) {
             console.error("Error fetching messages:", err);
         } finally {
             isFetchingMessagesRef.current = false;
         }
-    }, [currentUser]);
+    }, [currentUser, setConversation, setLoadingOlder]);
 
     const loadOlderMessages = useCallback(async () => {
-        if (!currentUser || !activeFriendIdRef.current || !nextCursorRef.current) return;
-        if (isFetchingMessagesRef.current || !hasMoreMessages) return;
+        const activeFriendId = activeFriendIdRef.current;
+        if (!currentUser || !activeFriendId) return;
+
+        const nextCursor = useMessageStore.getState().nextCursorByFriendId[activeFriendId];
+        const canLoadMore = useMessageStore.getState().hasMoreByFriendId[activeFriendId] ?? true;
+
+        if (!nextCursor || isFetchingMessagesRef.current || !canLoadMore) return;
 
         const container = chatContainerRef.current;
         if (!container) return;
 
         try {
             isFetchingMessagesRef.current = true;
-            setIsLoadingOlderMessages(true);
+            setLoadingOlder(activeFriendId, true);
 
             const previousScrollHeight = container.scrollHeight;
             const previousScrollTop = container.scrollTop;
 
             const res = await api.get(
-                `/api/messages/${currentUser._id}/${activeFriendIdRef.current}?limit=${PAGE_SIZE}&before=${nextCursorRef.current}`
+                `/api/messages/${currentUser._id}/${activeFriendId}?limit=${PAGE_SIZE}&before=${nextCursor}`
             );
 
             const olderMessages: Message[] = res.data.data || [];
-            const nextCursor = res.data?.pagination?.nextCursor || null;
-            const hasMore = Boolean(res.data?.pagination?.hasMore);
+            const nextCursorValue = res.data?.pagination?.nextCursor || null;
+            const hasMoreValue = Boolean(res.data?.pagination?.hasMore);
 
             if (olderMessages.length > 0) {
-                setMessages(prev => [...olderMessages, ...prev]);
+                prependOlderMessages(activeFriendId, olderMessages, nextCursorValue, hasMoreValue && olderMessages.length > 0);
 
                 requestAnimationFrame(() => {
                     if (!chatContainerRef.current) return;
                     const newScrollHeight = chatContainerRef.current.scrollHeight;
                     chatContainerRef.current.scrollTop = (newScrollHeight - previousScrollHeight) + previousScrollTop;
                 });
+            } else {
+                prependOlderMessages(activeFriendId, [], nextCursorValue, false);
             }
-
-            nextCursorRef.current = nextCursor;
-            setHasMoreMessages(hasMore && olderMessages.length > 0);
         } catch (err) {
             console.error("Error loading older messages:", err);
         } finally {
-            setIsLoadingOlderMessages(false);
+            setLoadingOlder(activeFriendId, false);
             isFetchingMessagesRef.current = false;
         }
-    }, [currentUser, hasMoreMessages]);
+    }, [currentUser, prependOlderMessages, setLoadingOlder]);
 
     const handleChatScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
         const target = e.currentTarget;
@@ -130,22 +144,10 @@ export const useMessageLogic = () => {
     }, [loadOlderMessages]);
 
 
-    // 🔌 Kết nối socket
     useEffect(() => {
-        if (!currentUser) return;
+        if (!currentUser || !socket) return;
 
-        const accessToken = getAccessToken();
-        if (!accessToken) return;
-
-        socket = io(REALTIME_URL, {
-            auth: {
-                token: accessToken,
-            }
-        });
-
-        socket.emit("join");
-
-        socket.on("receiveMessage", (message: Message) => {
+        const handleReceiveMessage = (message: Message) => {
             const activeFriendId = activeFriendIdRef.current;
             const inCurrentConversation = Boolean(
                 activeFriendId &&
@@ -153,17 +155,21 @@ export const useMessageLogic = () => {
                     (message.user2 === currentUser._id && message.user1 === activeFriendId))
             );
 
+            const conversationFriendId = message.user1 === currentUser._id ? message.user2 : message.user1;
+            appendMessage(conversationFriendId, message);
+
             if (inCurrentConversation) {
-                setMessages(prev => [...prev, message]);
                 shouldAutoScrollRef.current = true;
                 scrollBehaviorRef.current = 'smooth';
             }
-        });
+        };
+
+        socket.on("receiveMessage", handleReceiveMessage);
 
         return () => {
-            socket.disconnect();
+            socket.off("receiveMessage", handleReceiveMessage);
         };
-    }, [currentUser, REALTIME_URL]);
+    }, [currentUser, socket, appendMessage]);
 
     // 📥 Fetch all users
     useEffect(() => {
@@ -175,7 +181,7 @@ export const useMessageLogic = () => {
                 setAllUsers(users.filter(u => u._id !== currentUser._id));
             })
             .catch(console.error);
-    }, [currentUser]);
+    }, [currentUser, setAllUsers]);
 
     // ✅ Auto chọn friend từ URL
     useEffect(() => {
@@ -183,17 +189,15 @@ export const useMessageLogic = () => {
 
         const found = allUsers.find(user => user._id === friendId);
         if (found) {
-            setUserChoosen(found);
-            activeFriendIdRef.current = found._id;
+            setSelectedFriendId(found._id);
             fetchMessages(found._id);
         }
-    }, [friendId, allUsers, currentUser, fetchMessages]);
+    }, [friendId, allUsers, currentUser, fetchMessages, setSelectedFriendId]);
 
 
     const handleChooseFriend = (friend: User) => {
         window.history.pushState({}, "", `/message/${friend._id}`);
-        setUserChoosen(friend);
-        activeFriendIdRef.current = friend._id;
+        setSelectedFriendId(friend._id);
         fetchMessages(friend._id);
     };
 
@@ -210,13 +214,15 @@ export const useMessageLogic = () => {
         api.post('/api/messages/send', newMessage)
             .then(res => {
                 const savedMessage = res.data.data;
-                setMessages(prev => [...prev, savedMessage]);
+                appendMessage(userChoosen._id, savedMessage);
 
                 // Gửi socket tới người nhận
-                socket.emit("sendMessage", {
-                    ...savedMessage,
-                    receiverId: userChoosen._id,
-                });
+                if (socket) {
+                    socket.emit("sendMessage", {
+                        ...savedMessage,
+                        receiverId: userChoosen._id,
+                    });
+                }
 
                 setInputText('');
                 shouldAutoScrollRef.current = true;
@@ -246,8 +252,8 @@ export const useMessageLogic = () => {
     }, [messages, scrollToBottom]);
 
     useEffect(() => {
-        activeFriendIdRef.current = userChoosen?._id || null;
-    }, [userChoosen]);
+        activeFriendIdRef.current = selectedFriendId;
+    }, [selectedFriendId]);
 
     return {
         currentUser,

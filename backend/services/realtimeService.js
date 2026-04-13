@@ -44,6 +44,9 @@ const initRealtimeServices = ({ app, server, allowedOrigins }) => {
         }
     });
 
+    // Presence tracking: userId -> Set(socketId)
+    const onlineUsers = new Map();
+
     io.use((socket, next) => {
         const token = extractSocketToken(socket);
 
@@ -65,6 +68,23 @@ const initRealtimeServices = ({ app, server, allowedOrigins }) => {
         console.log('🔌 User connected:', socket.id);
         socket.join(socket.userId);
         console.log(`✅ Authenticated user ${socket.userId} joined their room`);
+
+        // Presence: Add user to online tracking
+        if (!onlineUsers.has(socket.userId)) {
+            onlineUsers.set(socket.userId, new Set());
+        }
+        const userSockets = onlineUsers.get(socket.userId);
+        const wasOffline = userSockets.size === 0;
+        userSockets.add(socket.id);
+
+        // If user was offline, broadcast user_online
+        if (wasOffline) {
+            io.emit('user_online', { userId: socket.userId });
+            console.log(`🟢 User ${socket.userId} is now online`);
+        }
+
+        // Send current online users list to new connection
+        socket.emit('online_users', Array.from(onlineUsers.keys()));
 
         socket.on('join', () => {
             // Keep backward compatibility with existing FE flow.
@@ -158,7 +178,20 @@ const initRealtimeServices = ({ app, server, allowedOrigins }) => {
         });
 
         socket.on('disconnect', () => {
-            console.log('❌ User disconnected');
+            console.log('❌ User disconnected:', socket.id);
+
+            // Presence: Remove socket from user's active set
+            const userSockets = onlineUsers.get(socket.userId);
+            if (userSockets) {
+                userSockets.delete(socket.id);
+                
+                // If no more sockets, user is completely offline
+                if (userSockets.size === 0) {
+                    onlineUsers.delete(socket.userId);
+                    io.emit('user_offline', { userId: socket.userId });
+                    console.log(`⚫ User ${socket.userId} is now offline`);
+                }
+            }
         });
     });
 

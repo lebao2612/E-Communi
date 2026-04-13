@@ -111,11 +111,29 @@
                         object-fit: cover;
                         border: 4px solid #000;
                         border-radius: 10px;
+                        flex-shrink: 0;
+                    }
+
+                    .friendDetails {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2px;
+                        min-width: 0;
                     }
 
                     .friendName {
                         color: $text-white;
                         font-size: 16px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        margin: 0;
+                    }
+
+                    .onlineStatus {
+                        color: $text-gray-light;
+                        font-size: 12px;
+                        margin: 0;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
@@ -171,11 +189,25 @@
                     object-fit: cover;
                     border: 4px solid #000;
                     border-radius: 10px;
+                    flex-shrink: 0;
+                }
+
+                .friendDetails {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
                 }
 
                 .nameFriend {
                     color: $text-white;
                     font-size: 16px;
+                    margin: 0;
+                }
+
+                .onlineStatus {
+                    color: $text-gray-light;
+                    font-size: 12px;
+                    margin: 0;
                 }
             }
 

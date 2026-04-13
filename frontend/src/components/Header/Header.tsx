@@ -3,47 +3,28 @@ import "./header.scss";
 import images from "../../assets/images/index";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import axios from "axios";
 import useDebounce from "../../hooks/useDebounce";
+import { useSearchStore } from "../../stores/searchStore";
 
 function Header() {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [searchTerm, setSearchTerm] = useState("");
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [users, setUsers] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
+
+    const searchTerm = useSearchStore((state) => state.query);
+    const users = useSearchStore((state) => state.users);
+    const loading = useSearchStore((state) => state.loading);
+    const setQuery = useSearchStore((state) => state.setQuery);
+    const fetchUsersOnly = useSearchStore((state) => state.fetchUsersOnly);
+    const addRecentSearch = useSearchStore((state) => state.addRecentSearch);
     const searchRef = useRef<HTMLDivElement>(null);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     // Fetch search results
     useEffect(() => {
-        const fetchResults = async () => {
-            if (!debouncedSearchTerm.trim()) {
-                setUsers([]);
-                return;
-            }
-
-            setLoading(true);
-            try {
-                // Focus primarily on Users for the Header dropdown like Facebook
-                const response = await axios.get(
-                    `${process.env.REACT_APP_API_URL}/api/search?q=${debouncedSearchTerm}&type=users`
-                );
-
-                if (response.data.success) {
-                    setUsers(response.data.data.users || []);
-                }
-            } catch (error) {
-                console.error("Error fetching search results:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchResults();
-    }, [debouncedSearchTerm]);
+        void fetchUsersOnly(debouncedSearchTerm);
+    }, [debouncedSearchTerm, fetchUsersOnly]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -62,8 +43,9 @@ function Header() {
     const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && searchTerm.trim()) {
             navigate(`/search?q=${searchTerm}`);
+            addRecentSearch(searchTerm);
             setIsSearchOpen(false);
-            setSearchTerm("");
+            setQuery("");
         }
     };
 
@@ -82,7 +64,7 @@ function Header() {
                             placeholder="Search E-Community"
                             className="search-input"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => setQuery(e.target.value)}
                             onFocus={() => setIsSearchOpen(true)}
                             onKeyDown={handleSearchSubmit}
                         />
@@ -120,6 +102,7 @@ function Header() {
                                 onClick={() => {
                                     if (searchTerm.trim()) {
                                         navigate(`/search?q=${searchTerm}`);
+                                        addRecentSearch(searchTerm);
                                         setIsSearchOpen(false);
                                     }
                                 }}
