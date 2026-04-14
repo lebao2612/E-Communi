@@ -5,6 +5,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import useDebounce from "../../hooks/useDebounce";
 import { useSearchStore } from "../../stores/searchStore";
+import { useMessageStore } from "../../stores/messageStore";
 
 function Header() {
     const { user } = useAuth();
@@ -17,6 +18,7 @@ function Header() {
     const setQuery = useSearchStore((state) => state.setQuery);
     const fetchUsersOnly = useSearchStore((state) => state.fetchUsersOnly);
     const addRecentSearch = useSearchStore((state) => state.addRecentSearch);
+    const unreadCountByFriendId = useMessageStore((state) => state.unreadCountByFriendId);
     const searchRef = useRef<HTMLDivElement>(null);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -48,6 +50,8 @@ function Header() {
             setQuery("");
         }
     };
+
+    const hasUnreadMessages = Object.values(unreadCountByFriendId).some((count) => count > 0);
 
     return (
         <div className="header">
@@ -127,8 +131,11 @@ function Header() {
                 ></NavLink>
                 <NavLink
                     to="/message"
-                    className={({ isActive }) => `fa-solid fa-message${isActive ? " active" : ""}`}
-                ></NavLink>
+                    className={({ isActive }) => `nav-icon message-icon${isActive ? " active" : ""}`}
+                >
+                    <i className="fa-solid fa-message"></i>
+                    {hasUnreadMessages && <span className="message-badge"></span>}
+                </NavLink>
                 <NavLink
                     to="/setting"
                     className={({ isActive }) => `fa-solid fa-gear${isActive ? " active" : ""}`}

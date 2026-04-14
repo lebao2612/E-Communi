@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
 import { usePresenceStore } from './presenceStore';
 import { playNotificationSound } from '../utils/notificationSound';
+import { useMessageStore } from './messageStore';
+import { useAuthStore } from './authStore';
 
 interface RealtimeState {
   socket: Socket | null;
@@ -72,6 +74,22 @@ export const useRealtimeStore = create<RealtimeState>((set) => ({
     // Global message listener - play notification sound for all incoming messages
     socket.on('receiveMessage', (message: any) => {
       console.log('📨 Message received:', message);
+      const currentUserId = useAuthStore.getState().user?._id;
+      const conversationFriendId = currentUserId && message.user1 === currentUserId
+        ? message.user2
+        : message.user1;
+
+      useMessageStore.getState().appendMessage(conversationFriendId, message);
+
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+      const selectedFriendId = useMessageStore.getState().selectedFriendId;
+      const isMessagePage = currentPath.startsWith('/message');
+      const isActiveConversation = isMessagePage && selectedFriendId === conversationFriendId;
+
+      if (!isActiveConversation) {
+        useMessageStore.getState().incrementUnreadCount(conversationFriendId);
+      }
+
       // Play notification sound regardless of which page user is on
       playNotificationSound(0.3);
     });

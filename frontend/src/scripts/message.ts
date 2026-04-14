@@ -33,6 +33,7 @@ export const useMessageLogic = () => {
     const appendMessage = useMessageStore((state) => state.appendMessage);
     const prependOlderMessages = useMessageStore((state) => state.prependOlderMessages);
     const setLoadingOlder = useMessageStore((state) => state.setLoadingOlder);
+    const resetUnreadCount = useMessageStore((state) => state.resetUnreadCount);
 
     const chatEndRef = useRef<HTMLDivElement | null>(null);
     const chatContainerRef = useRef<HTMLDivElement | null>(null);
@@ -66,8 +67,17 @@ export const useMessageLogic = () => {
     const fetchMessages = useCallback(async (friendId: string, force = false) => {
         if (!currentUser) return;
 
-        const cachedMessages = useMessageStore.getState().messagesByFriendId[friendId] || [];
-        if (!force && cachedMessages.length > 0) {
+        resetUnreadCount(friendId);
+        const storeState = useMessageStore.getState();
+        const cachedMessages = storeState.messagesByFriendId[friendId] || [];
+        const hasHydratedConversation = Object.prototype.hasOwnProperty.call(
+            storeState.hasMoreByFriendId,
+            friendId
+        );
+
+        if (!force && cachedMessages.length > 0 && hasHydratedConversation) {
+            shouldAutoScrollRef.current = true;
+            scrollBehaviorRef.current = 'auto';
             return;
         }
 
@@ -88,7 +98,7 @@ export const useMessageLogic = () => {
         } finally {
             isFetchingMessagesRef.current = false;
         }
-    }, [currentUser, setConversation, setLoadingOlder]);
+    }, [currentUser, resetUnreadCount, setConversation, setLoadingOlder]);
 
     const loadOlderMessages = useCallback(async () => {
         const activeFriendId = activeFriendIdRef.current;
@@ -155,9 +165,6 @@ export const useMessageLogic = () => {
                     (message.user2 === currentUser._id && message.user1 === activeFriendId))
             );
 
-            const conversationFriendId = message.user1 === currentUser._id ? message.user2 : message.user1;
-            appendMessage(conversationFriendId, message);
-
             if (inCurrentConversation) {
                 shouldAutoScrollRef.current = true;
                 scrollBehaviorRef.current = 'smooth';
@@ -169,7 +176,7 @@ export const useMessageLogic = () => {
         return () => {
             socket.off("receiveMessage", handleReceiveMessage);
         };
-    }, [currentUser, socket, appendMessage]);
+    }, [currentUser, socket]);
 
     // 📥 Fetch all users
     useEffect(() => {
@@ -194,9 +201,19 @@ export const useMessageLogic = () => {
         }
     }, [friendId, allUsers, currentUser, fetchMessages, setSelectedFriendId]);
 
+    useEffect(() => {
+        if (!currentUser) return;
+        if (friendId) return;
+
+        setSelectedFriendId(null);
+        activeFriendIdRef.current = null;
+    }, [friendId, currentUser, setSelectedFriendId]);
+
 
     const handleChooseFriend = (friend: User) => {
         window.history.pushState({}, "", `/message/${friend._id}`);
+        shouldAutoScrollRef.current = true;
+        scrollBehaviorRef.current = 'auto';
         setSelectedFriendId(friend._id);
         fetchMessages(friend._id);
     };

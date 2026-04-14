@@ -169,6 +169,10 @@
             font-size: 20px;
             text-decoration: none;
             transition: color 0.2s;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
 
             &:hover {
                 color: $text-link-hover;
@@ -176,6 +180,22 @@
 
             &.active {
                 color: $highlight-yellow;
+            }
+        }
+
+        .message-icon {
+            position: relative;
+
+            .message-badge {
+                position: absolute;
+                top: -2px;
+                right: -2px;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: #31a24c;
+                border: 2px solid $bg-main;
+                box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
             }
         }
     }

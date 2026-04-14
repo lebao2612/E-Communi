@@ -9,6 +9,7 @@ interface MessageStoreState {
   nextCursorByFriendId: Record<string, string | null>;
   hasMoreByFriendId: Record<string, boolean>;
   loadingOlderByFriendId: Record<string, boolean>;
+  unreadCountByFriendId: Record<string, number>;
   inputText: string;
   friendSearch: string;
   setAllUsers: (users: User[]) => void;
@@ -19,6 +20,8 @@ interface MessageStoreState {
   appendMessage: (friendId: string, message: Message) => void;
   prependOlderMessages: (friendId: string, olderMessages: Message[], nextCursor: string | null, hasMore: boolean) => void;
   setLoadingOlder: (friendId: string, value: boolean) => void;
+  incrementUnreadCount: (friendId: string) => void;
+  resetUnreadCount: (friendId: string) => void;
 }
 
 export const useMessageStore = create<MessageStoreState>((set) => ({
@@ -28,6 +31,7 @@ export const useMessageStore = create<MessageStoreState>((set) => ({
   nextCursorByFriendId: {},
   hasMoreByFriendId: {},
   loadingOlderByFriendId: {},
+  unreadCountByFriendId: {},
   inputText: '',
   friendSearch: '',
 
@@ -88,6 +92,22 @@ export const useMessageStore = create<MessageStoreState>((set) => ({
       loadingOlderByFriendId: {
         ...state.loadingOlderByFriendId,
         [friendId]: value,
+      },
+    })),
+
+  incrementUnreadCount: (friendId) =>
+    set((state) => ({
+      unreadCountByFriendId: {
+        ...state.unreadCountByFriendId,
+        [friendId]: (state.unreadCountByFriendId[friendId] || 0) + 1,
+      },
+    })),
+
+  resetUnreadCount: (friendId) =>
+    set((state) => ({
+      unreadCountByFriendId: {
+        ...state.unreadCountByFriendId,
+        [friendId]: 0,
       },
     })),
 }));
