@@ -4,6 +4,7 @@ import { usePresenceStore } from './presenceStore';
 import { playNotificationSound } from '../utils/notificationSound';
 import { useMessageStore } from './messageStore';
 import { useAuthStore } from './authStore';
+import api from '../api/axios';
 
 interface RealtimeState {
   socket: Socket | null;
@@ -41,6 +42,15 @@ export const useRealtimeStore = create<RealtimeState>((set) => ({
     socket.on('connect', () => {
       socket.emit('join');
       set({ connected: true });
+
+      void api.get('/api/messages/unread/summary')
+        .then((res) => {
+          const summary = res.data?.data || {};
+          useMessageStore.getState().setUnreadCountByFriendId(summary);
+        })
+        .catch((error) => {
+          console.error('Failed to hydrate unread summary:', error);
+        });
     });
 
     socket.on('disconnect', () => {
@@ -105,6 +115,7 @@ export const useRealtimeStore = create<RealtimeState>((set) => ({
       activeSocket.disconnect();
       activeSocket = null;
     }
+    useMessageStore.getState().resetAllUnreadCounts();
     set({ socket: null, connected: false });
   },
 }));

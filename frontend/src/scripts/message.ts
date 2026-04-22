@@ -63,11 +63,25 @@ export const useMessageLogic = () => {
         });
     }, []);
 
+    const markConversationAsRead = useCallback(async (targetFriendId: string) => {
+        if (!currentUser) return;
+
+        resetUnreadCount(targetFriendId);
+
+        try {
+            console.log('Calling markConversationAsRead API for friendId:', targetFriendId);
+            const response = await api.patch(`/api/messages/read/${targetFriendId}`);
+            console.log('markConversationAsRead response:', response.data);
+        } catch (error: any) {
+            console.error('Error marking conversation as read:', error?.response?.data || error?.message || error);
+        }
+    }, [currentUser, resetUnreadCount]);
+
 
     const fetchMessages = useCallback(async (friendId: string, force = false) => {
         if (!currentUser) return;
 
-        resetUnreadCount(friendId);
+        void markConversationAsRead(friendId);
         const storeState = useMessageStore.getState();
         const cachedMessages = storeState.messagesByFriendId[friendId] || [];
         const hasHydratedConversation = Object.prototype.hasOwnProperty.call(
@@ -98,7 +112,7 @@ export const useMessageLogic = () => {
         } finally {
             isFetchingMessagesRef.current = false;
         }
-    }, [currentUser, resetUnreadCount, setConversation, setLoadingOlder]);
+    }, [currentUser, markConversationAsRead, setConversation, setLoadingOlder]);
 
     const loadOlderMessages = useCallback(async () => {
         const activeFriendId = activeFriendIdRef.current;

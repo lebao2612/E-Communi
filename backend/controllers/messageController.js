@@ -83,7 +83,90 @@ const getMessagesBetweenUsers = async (req, res) => {
   }
 };
 
+const getUnreadSummary = async (req, res) => {
+  try {
+    const currentUserId = req.userId;
+
+    const summary = await Message.aggregate([
+      {
+        $match: {
+          user2: new mongoose.Types.ObjectId(currentUserId),
+          isRead: { $ne: true },
+        }
+      },
+      {
+        $group: {
+          _id: '$user1',
+          count: { $sum: 1 },
+        }
+      }
+    ]);
+
+    const unreadCountByFriendId = summary.reduce((acc, row) => {
+      acc[String(row._id)] = row.count;
+      return acc;
+    }, {});
+
+    res.status(200).json({
+      message: 'Unread summary fetched successfully',
+      data: unreadCountByFriendId,
+    });
+  } catch (error) {
+    console.error('Error fetching unread summary:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const markConversationAsRead = async (req, res) => {
+  try {
+    const friendId = req.params.friendId;
+    const currentUserId = req.userId;
+
+    console.log('markConversationAsRead called:', { friendId, currentUserId, params: req.params });
+
+    if (!friendId || !currentUserId) {
+      return res.status(400).json({ message: 'Missing friendId or userId' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(friendId)) {
+      return res.status(400).json({ message: 'Invalid friend ID' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(currentUserId)) {
+      return res.status(400).json({ message: 'Invalid current user ID' });
+    }
+
+    const result = await Message.updateMany(
+      {
+        user1: new mongoose.Types.ObjectId(friendId),
+        user2: new mongoose.Types.ObjectId(currentUserId),
+        isRead: { $ne: true },
+      },
+      {
+        $set: {
+          isRead: true,
+          readAt: new Date(),
+        }
+      }
+    );
+
+    console.log('Update result:', result);
+
+    res.status(200).json({
+      message: 'Conversation marked as read',
+      data: {
+        modifiedCount: result.modifiedCount,
+      }
+    });
+  } catch (error) {
+    console.error('Error marking conversation as read:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   sendMessage,
   getMessagesBetweenUsers,
+  getUnreadSummary,
+  markConversationAsRead,
 };

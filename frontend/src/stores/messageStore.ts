@@ -22,6 +22,8 @@ interface MessageStoreState {
   setLoadingOlder: (friendId: string, value: boolean) => void;
   incrementUnreadCount: (friendId: string) => void;
   resetUnreadCount: (friendId: string) => void;
+  setUnreadCountByFriendId: (data: Record<string, number>) => void;
+  resetAllUnreadCounts: () => void;
 }
 
 export const useMessageStore = create<MessageStoreState>((set) => ({
@@ -110,4 +112,10 @@ export const useMessageStore = create<MessageStoreState>((set) => ({
         [friendId]: 0,
       },
     })),
+
+  setUnreadCountByFriendId: (data) =>
+    set({ unreadCountByFriendId: { ...data } }),
+
+  resetAllUnreadCounts: () =>
+    set({ unreadCountByFriendId: {} }),
 }));

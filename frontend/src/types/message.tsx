@@ -3,5 +3,7 @@ export interface Message {
     user1: string;
     user2: string;
     content: string;
-    sendAt?: string;
+    sentAt?: string;
+    isRead?: boolean;
+    readAt?: string | null;
 }
