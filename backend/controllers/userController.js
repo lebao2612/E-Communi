@@ -7,11 +7,13 @@ const {
   generateRefreshToken
 } = require('../utils/jwt');
 
+const SAFE_USER_SELECT = '-password -refreshToken';
+
 
 // [GET] /api/users/
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().select(SAFE_USER_SELECT);
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -23,7 +25,7 @@ exports.getUserByUsername = async (req, res) => {
   const { username } = req.params;
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }).select(SAFE_USER_SELECT);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
   } catch (err) {
@@ -61,7 +63,9 @@ exports.register = async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ message: 'User registered successfully', user: newUser });
+    const safeUser = await User.findById(newUser._id).select(SAFE_USER_SELECT);
+
+    res.status(201).json({ message: 'User registered successfully', user: safeUser });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -138,7 +142,7 @@ exports.getMe = async (req, res) => {
       return res.status(401).json({ error: 'User ID not found' });
     }
 
-    const user = await User.findById(req.userId).select('-password -refreshToken');
+    const user = await User.findById(req.userId).select(SAFE_USER_SELECT);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -165,7 +169,7 @@ exports.updateUser = async (req, res) => {
       }
     });
 
-    const user = await User.findByIdAndUpdate(userId, actualUpdates, { new: true }).select('-password -refreshToken');
+    const user = await User.findByIdAndUpdate(userId, actualUpdates, { new: true }).select(SAFE_USER_SELECT);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });

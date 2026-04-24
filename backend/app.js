@@ -44,6 +44,7 @@ const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const webrtcRoutes = require('./routes/webrtcRoutes');
+const uploadTestRoutes = require('./routes/uploadTest');
 
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
@@ -52,7 +53,6 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/webrtc', webrtcRoutes);
 
-const uploadTestRoutes = require('./routes/uploadTest');
 app.use('/api/test', uploadTestRoutes);
 
 module.exports = app;

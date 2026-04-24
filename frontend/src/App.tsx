@@ -11,7 +11,7 @@ import ForgotPassword from "./pages/ForgotPasswordPage/ForgotPassword";
 import ChangeProfile from "./pages/ChangeProfilePage/Changeprofile";
 import Search from "./pages/SearchPage/Search";
 import "./styles/global.scss"
-import "@fontsource/montserrat";
+import "@fontsource/montserrat/index.css";
 
 function App() {
 

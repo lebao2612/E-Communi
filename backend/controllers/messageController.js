@@ -5,7 +5,8 @@ const Message = require('../models/Message');
 // Gửi tin nhắn giữa 2 user
 const sendMessage = async (req, res) => {
   try {
-    const { user1, user2, content } = req.body;
+    const { user2, content } = req.body;
+    const user1 = req.userId;
 
     if (!user1 || !user2 || !content) {
       return res.status(400).json({ message: 'Missing required fields' });
