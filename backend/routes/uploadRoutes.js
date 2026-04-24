@@ -3,6 +3,7 @@ const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const { upload, uploadToCloudinary, hasValidImageSignature } = require('../middleware/uploadMiddleware');
+const { moderateImageBuffer } = require('../services/contentModerationService');
 
 const uploadLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -22,6 +23,31 @@ router.post('/upload', authMiddleware, uploadLimiter, upload.single('image'), as
             return res.status(400).json({ message: 'Invalid image file content' });
         }
 
+        const moderation = await moderateImageBuffer(req.file.buffer);
+        if (moderation.enabled && moderation.blocked) {
+            console.warn('[UPLOAD_MODERATION] BLOCKED', {
+                userId: req.userId,
+                threshold: moderation.threshold,
+                scores: moderation.scores,
+                mimetype: req.file.mimetype,
+            });
+            return res.status(403).json({
+                message: 'Image rejected by content moderation policy',
+                moderation: {
+                    threshold: moderation.threshold,
+                    scores: moderation.scores,
+                },
+            });
+        }
+
+        console.log('[UPLOAD_MODERATION] ALLOWED', {
+            userId: req.userId,
+            enabled: moderation.enabled,
+            threshold: moderation.threshold,
+            scores: moderation.scores,
+            mimetype: req.file.mimetype,
+        });
+
         const result = await uploadToCloudinary(req.file.buffer);
 
         res.status(200).json({
@@ -36,6 +62,18 @@ router.post('/upload', authMiddleware, uploadLimiter, upload.single('image'), as
 
         if (error.message && error.message.includes('Only JPEG, PNG, WEBP, or GIF')) {
             return res.status(400).json({ message: error.message });
+        }
+
+        if (error.code === 'MODERATION_CONFIG_ERROR') {
+            return res.status(503).json({ message: error.message });
+        }
+
+        if (error.code === 'MODERATION_AUTH_ERROR') {
+            return res.status(403).json({ message: error.message });
+        }
+
+        if (error.code === 'MODERATION_RATE_LIMIT') {
+            return res.status(429).json({ message: error.message });
         }
 
         console.error('Upload error:', error);

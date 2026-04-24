@@ -39,7 +39,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, user
                 const uploadPromises = images.map(async (image) => {
                     const formData = new FormData();
                     formData.append('image', image);
-                    const res = await api.post('/api/test/upload', formData);
+                    const res = await api.post('/api/uploads/upload', formData);
                     return res.data.imageUrl;
                 });
                 imageUrls = await Promise.all(uploadPromises);
