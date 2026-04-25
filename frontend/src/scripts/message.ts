@@ -99,7 +99,7 @@ export const useMessageLogic = () => {
             isFetchingMessagesRef.current = true;
             setLoadingOlder(friendId, false);
 
-            const res = await api.get(`/api/messages/${currentUser._id}/${friendId}?limit=${PAGE_SIZE}`);
+            const res = await api.get(`/api/messages/${friendId}?limit=${PAGE_SIZE}`);
             const initialMessages: Message[] = res.data.data || [];
             const nextCursor = res.data?.pagination?.nextCursor || null;
             const hasMore = Boolean(res.data?.pagination?.hasMore);
@@ -134,7 +134,7 @@ export const useMessageLogic = () => {
             const previousScrollTop = container.scrollTop;
 
             const res = await api.get(
-                `/api/messages/${currentUser._id}/${activeFriendId}?limit=${PAGE_SIZE}&before=${nextCursor}`
+                `/api/messages/${activeFriendId}?limit=${PAGE_SIZE}&before=${nextCursor}`
             );
 
             const olderMessages: Message[] = res.data.data || [];

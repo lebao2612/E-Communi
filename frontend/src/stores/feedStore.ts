@@ -26,7 +26,7 @@ export const useFeedStore = create<FeedStoreState>((set, get) => ({
 
   fetchSuggestedUsers: async (currentUserId) => {
     try {
-      const res = await api.get('/api/users/getAllUsers');
+      const res = await api.get('/api/users');
       const users: User[] = res.data.users || res.data || [];
       set({ allUsers: users.filter((u) => u._id !== currentUserId) });
     } catch (error) {
@@ -41,7 +41,7 @@ export const useFeedStore = create<FeedStoreState>((set, get) => ({
     set({ isLoadingPosts: true });
 
     try {
-      const res = await api.get(`/api/posts/getNewsFeed?page=${page}&limit=${FEED_PAGE_SIZE}`);
+      const res = await api.get(`/api/posts/feed?page=${page}&limit=${FEED_PAGE_SIZE}`);
       const newPosts: Post[] = res.data.data || [];
 
       const existingIds = new Set(allPosts.map((post) => post._id));
@@ -63,7 +63,7 @@ export const useFeedStore = create<FeedStoreState>((set, get) => ({
     set({ isLoadingPosts: true });
 
     try {
-      const res = await api.get(`/api/posts/getNewsFeed?page=1&limit=${FEED_PAGE_SIZE}`);
+      const res = await api.get(`/api/posts/feed?page=1&limit=${FEED_PAGE_SIZE}`);
       const firstPagePosts: Post[] = res.data.data || [];
 
       set({

@@ -1,8 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
-dotenv.config();
 
 const app = express();
 
@@ -25,18 +22,6 @@ app.use(cors({
 
 app.use(express.json());
 
-if (!process.env.MONGO_URI) {
-  console.error('❌ MONGO_URI is missing')
-  process.exit(1)
-}
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => {
-    console.error('❌ MongoDB error:', err.message)
-    process.exit(1)
-  })
-
 // Sử dụng route
 const userRoutes = require('./routes/userRoutes');
 const messageRoutes = require('./routes/messageRoutes');
@@ -45,6 +30,7 @@ const commentRoutes = require('./routes/commentRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const webrtcRoutes = require('./routes/webrtcRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const errorHandler = require('./middleware/errorHandler');
 
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
@@ -53,5 +39,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/webrtc', webrtcRoutes);
 app.use('/api/uploads', uploadRoutes);
+
+app.use(errorHandler);
 
 module.exports = app;

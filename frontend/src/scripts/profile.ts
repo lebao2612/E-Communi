@@ -29,7 +29,7 @@ export const useProfileLogic = () => {
 
     useEffect(() => {
         api.get('/api/posts/getPostById', {
-            params: { user: userParam?._id }
+            params: { userId: userParam?._id }
         })
             .then(response => {
                 setUserPosts(response.data.data)
@@ -75,7 +75,7 @@ export const useProfileLogic = () => {
     }
 
     const handleSaveProfile = (fullname: string, username: string, userBio: string,) => {
-        api.put('/api/users/update', {
+        api.patch('/api/users/me', {
             fullname,
             bio: userBio,
         })
@@ -91,7 +91,7 @@ export const useProfileLogic = () => {
 
     const updateUserAvatar = async (avatarUrl: string) => {
         try {
-            await api.put('/api/users/update', { avatar: avatarUrl });
+            await api.patch('/api/users/me', { avatar: avatarUrl });
         } catch (error) {
             console.error("Failed to update user avatar:", error);
             alert("Failed to update avatar in profile");

@@ -1,319 +1,107 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-const {
-  generateAccessToken,
-  generateRefreshToken
-} = require('../utils/jwt');
-
-const SAFE_USER_SELECT = '-password -refreshToken';
+const userService = require('../services/userService');
+const asyncHandler = require('../utils/asyncHandler');
 
 
 // [GET] /api/users/
-exports.getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find().select(SAFE_USER_SELECT);
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+exports.getAllUsers = asyncHandler(async (req, res) => {
+  const users = await userService.getAllUsers();
+  res.json(users);
+});
 
 // [GET] /api/users/:username
-exports.getUserByUsername = async (req, res) => {
-  const { username } = req.params;
-
-  try {
-    const user = await User.findOne({ username }).select(SAFE_USER_SELECT);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
+exports.getUserByUsername = asyncHandler(async (req, res) => {
+  const user = await userService.getUserByUsername(req.validated.username);
+  res.json(user);
+});
 
 
 // [POST] /api/users/register
-exports.register = async (req, res) => {
-  try {
-    const { username, fullname, password, confirmPassword, avatar } = req.body;
+exports.register = asyncHandler(async (req, res) => {
+  const result = await userService.register({
+    username: req.validated.username,
+    fullname: req.validated.fullname,
+    password: req.validated.password,
+    confirmPassword: req.validated.confirmPassword,
+    avatar: req.validated.avatar,
+  });
 
-    if (!username || !password || !confirmPassword || !fullname)
-      return res.status(400).json({ error: 'Missing fields' });
-
-    if (password !== confirmPassword)
-      return res.status(400).json({ error: 'Passwords do not match' });
-
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
-      username,
-      fullname,
-      password: hashedPassword,
-      avatar: avatar || undefined
-    });
-
-    console.log('newUser created (before save): ', newUser);
-
-    await newUser.save();
-
-    const safeUser = await User.findById(newUser._id).select(SAFE_USER_SELECT);
-
-    res.status(201).json({ message: 'User registered successfully', user: safeUser });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+  res.status(201).json(result);
+});
 
 //[POST] /api/users/login
-exports.login = async (req, res) => {
-  try {
-    const { username, password } = req.body;
+exports.login = asyncHandler(async (req, res) => {
+  const result = await userService.login({
+    username: req.validated.username,
+    password: req.validated.password,
+  });
 
-    if (!username) {
-      return res.status(400).json({ error: 'Username is required' });
-    }
-
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(401).json({ error: 'Invalid password' });
-
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
-
-    user.refreshToken = refreshToken;
-    await user.save();
-
-    res.json({
-      accessToken,
-      refreshToken
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
+  res.json(result);
+});
 
 // [POST] /api/users/refresh-token
-exports.refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
-  if (!refreshToken)
-    return res.status(401).json({ error: 'No refresh token' });
-
-  try {
-    const payload = jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET
-    );
-
-    const user = await User.findById(payload.userId);
-    if (!user || user.refreshToken !== refreshToken)
-      return res.status(403).json({ error: 'Invalid refresh token' });
-
-    const newAccessToken = jwt.sign(
-      { userId: user._id },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '15m' }
-    );
-
-    res.json({ accessToken: newAccessToken });
-  } catch (err) {
-    res.status(403).json({ error: 'Token expired or invalid' });
-  }
-};
+exports.refreshToken = asyncHandler(async (req, res) => {
+  const result = await userService.refreshToken(req.validated.refreshToken);
+  res.json(result);
+});
 
 // [GET] /api/users/me
-exports.getMe = async (req, res) => {
-  try {
-    //console.log("req.userId = ", req.userId);
-
-    if (!req.userId) {
-      return res.status(401).json({ error: 'User ID not found' });
-    }
-
-    const user = await User.findById(req.userId).select(SAFE_USER_SELECT);
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+exports.getMe = asyncHandler(async (req, res) => {
+  const user = await userService.getMe(req.userId);
+  res.json(user);
+});
 
 // [PUT] /api/users/update
-exports.updateUser = async (req, res) => {
-  try {
-    const userId = req.userId;
-    const updates = req.body;
-
-    const allowedUpdates = ['fullname', 'bio', 'avatar', 'coverImage'];
-    const actualUpdates = {};
-
-    Object.keys(updates).forEach(key => {
-      if (allowedUpdates.includes(key)) {
-        actualUpdates[key] = updates[key];
-      }
-    });
-
-    const user = await User.findByIdAndUpdate(userId, actualUpdates, { new: true }).select(SAFE_USER_SELECT);
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+exports.updateUser = asyncHandler(async (req, res) => {
+  const user = await userService.updateUser({ userId: req.userId, updates: req.validated.updates });
+  res.json(user);
+});
 
 
 
 // [POST] /api/users/follow/:id
-exports.followUser = async (req, res) => {
-  try {
-    if (!req.userId) return res.status(401).json({ error: 'Unauthorized' });
+exports.followUser = asyncHandler(async (req, res) => {
+  const result = await userService.followUser({
+    currentUserId: req.userId,
+    targetUserId: req.validated.userId,
+  });
 
-    const userToFollow = await User.findById(req.params.id);
-    const currentUser = await User.findById(req.userId);
-
-    if (!userToFollow || !currentUser) return res.status(404).json({ error: 'User not found' });
-
-    if (userToFollow.followers.some(id => id.toString() === req.userId)) {
-      return res.status(400).json({ error: 'You are already following this user' });
-    }
-
-    await userToFollow.updateOne({ $push: { followers: req.userId } });
-    await currentUser.updateOne({ $push: { following: req.params.id } });
-
-    res.status(200).json({ message: 'User followed successfully' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
+  res.status(200).json(result);
+});
 
 // [POST] /api/users/unfollow/:id
-exports.unfollowUser = async (req, res) => {
-  try {
-    if (!req.userId) return res.status(401).json({ error: 'Unauthorized' });
+exports.unfollowUser = asyncHandler(async (req, res) => {
+  const result = await userService.unfollowUser({
+    currentUserId: req.userId,
+    targetUserId: req.validated.userId,
+  });
 
-    const userToUnfollow = await User.findById(req.params.id);
-    const currentUser = await User.findById(req.userId);
-
-    if (!userToUnfollow || !currentUser) return res.status(404).json({ error: 'User not found' });
-
-    if (!userToUnfollow.followers.some(id => id.toString() === req.userId)) {
-      return res.status(400).json({ error: 'You are not following this user' });
-    }
-
-    await userToUnfollow.updateOne({ $pull: { followers: req.userId } });
-    await currentUser.updateOne({ $pull: { following: req.params.id } });
-
-    res.status(200).json({ message: 'User unfollowed successfully' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
+  res.status(200).json(result);
+});
 
 // [GET] /api/users/followers/:id
-exports.getFollowers = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).populate('followers', 'username fullname avatar');
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    //console.log("Followers list: ", user.followers);
-
-    res.json(user.followers);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
+exports.getFollowers = asyncHandler(async (req, res) => {
+  const followers = await userService.getFollowers(req.validated.userId);
+  res.json(followers);
+});
 
 // [GET] /api/users/following/:id
-exports.getFollowing = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).populate('following', 'username fullname avatar');
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    //console.log("Following list: ", user.following);
-
-    res.json(user.following);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
+exports.getFollowing = asyncHandler(async (req, res) => {
+  const following = await userService.getFollowing(req.validated.userId);
+  res.json(following);
+});
 
 //[POST] /api/users/forgot-password
-exports.forgotPassword = async (req, res) => {
-  try {
-    const { username } = req.body;
-
-    if (!username) {
-      return res.status(400).json({ error: "Username is required!" });
-    }
-
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(400).json({ error: "User not found!" });
-    }
-
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 15 * 60 * 1000;
-    await user.save();
-
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-
-    await sendEmail({
-      to: user.email,
-      subject: 'Reset Password',
-      text: `Click the link to reset your password: ${resetUrl}`
-    });
-
-    res.json({ message: 'Reset link sent to your email' });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
+exports.forgotPassword = asyncHandler(async (req, res) => {
+  const result = await userService.forgotPassword(req.validated.username);
+  res.json(result);
+});
 
 //[POST] /api/users/reset-password
-exports.resetPassword = async (req, res) => {
-  try {
-    const { token, password } = req.body;
+exports.resetPassword = asyncHandler(async (req, res) => {
+  const result = await userService.resetPassword({
+    token: req.validated.token,
+    password: req.validated.password,
+  });
 
-    if (!token || !password) {
-      return res.status(400).json({ error: "Token and password are required!" });
-    }
-
-    const user = await User.findOne({ resetToken: token, resetTokenExpiry: { $gt: Date.now() } });
-    if (!user) {
-      return res.status(400).json({ error: "Invalid or expired token!" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
-    await user.save();
-
-    res.json({ message: 'Password reset successfully' });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
+  res.json(result);
+});

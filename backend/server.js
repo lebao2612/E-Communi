@@ -1,6 +1,11 @@
 const http = require('http'); // cần module này để tạo HTTP server
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 const app = require('./app');
 const { initRealtimeServices } = require('./services/realtimeService');
+const { connectDatabase } = require('./config/database');
 
 const server = http.createServer(app); // tạo server từ express app
 
@@ -13,9 +18,20 @@ const allowedOrigins = [
   process.env.FE_URL,
 ].filter(Boolean);
 
-initRealtimeServices({ app, server, allowedOrigins });
-
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
-});
+
+const startServer = async () => {
+  try {
+    await connectDatabase();
+    initRealtimeServices({ app, server, allowedOrigins });
+
+    server.listen(PORT, () => {
+      console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('❌ Server bootstrap failed:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
