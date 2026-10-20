@@ -1,5 +1,6 @@
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
+const { createNotification } = require('./notificationService');
 const { createHttpError, ensureObjectId } = require('../utils/errorHelpers');
 
 const addComment = async ({ postId, userId, content }) => {
@@ -28,6 +29,14 @@ const addComment = async ({ postId, userId, content }) => {
     await post.save();
 
     await newComment.populate('user', 'username fullname avatar');
+
+    createNotification({
+        recipientId: post.user,
+        senderId: userId,
+        type: 'comment',
+        postId: post._id,
+        commentId: newComment._id,
+    }).catch((err) => console.error('Comment notification error:', err));
 
     return {
         message: 'Comment added successfully',

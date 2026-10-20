@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
 const VALID_CALL_TYPES = new Set(['audio', 'video']);
+let ioInstance = null;
 
 const isValidObjectId = (value) => {
     if (typeof value !== 'string') return false;
@@ -37,12 +38,14 @@ const initRealtimeServices = ({ app, server, allowedOrigins }) => {
     });
     app.use('/peerjs', peerServer);
 
-    const io = new Server(server, {
+    ioInstance = new Server(server, {
         cors: {
             origin: allowedOrigins,
             methods: ['GET', 'POST'],
+            credentials: true,
         }
     });
+    const io = ioInstance;
 
     // Presence tracking: userId -> Set(socketId)
     const onlineUsers = new Map();
@@ -198,6 +201,9 @@ const initRealtimeServices = ({ app, server, allowedOrigins }) => {
     return io;
 };
 
+const getIO = () => ioInstance;
+
 module.exports = {
     initRealtimeServices,
+    getIO,
 };

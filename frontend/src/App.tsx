@@ -10,6 +10,7 @@ import Register from "./pages/RegisterPage/Register";
 import ForgotPassword from "./pages/ForgotPasswordPage/ForgotPassword";
 import ChangeProfile from "./pages/ChangeProfilePage/Changeprofile";
 import Search from "./pages/SearchPage/Search";
+import PostDetailPage from "./pages/PostDetailPage/PostDetailPage";
 import "./styles/global.scss"
 import "@fontsource/montserrat/index.css";
 
@@ -34,6 +35,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post/:postId"
+          element={
+            <ProtectedRoute>
+              <PostDetailPage />
             </ProtectedRoute>
           }
         />

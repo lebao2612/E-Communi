@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
+const { swaggerUi, specs } = require('./swagger');
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -30,6 +31,7 @@ const commentRoutes = require('./routes/commentRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const webrtcRoutes = require('./routes/webrtcRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 app.use('/api/users', userRoutes);
@@ -39,7 +41,8 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/webrtc', webrtcRoutes);
 app.use('/api/uploads', uploadRoutes);
-
+app.use('/api/notifications', notificationRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use(errorHandler);
 
 module.exports = app;

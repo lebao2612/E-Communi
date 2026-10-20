@@ -1,16 +1,29 @@
+import logo from './logo.svg';
+import avatar from './avatar.svg';
+import background from './bg.svg';
+import avaCom from './avaCom.svg';
+import avaFriend from './avaFriend.svg';
+import chungsubin from './chungsubin.jpg';
+import couple from './couple.webp';
+import friend1 from './friend1.svg';
+import friend2 from './friend2.svg';
+import anhnen from './anhnen.jpg';
+import mylove from './mylove.jpg';
+import ace from './aotuong.jpg';
+
 const images = {
-    logo: require('./logo.svg').default,
-    avatar: require('./avatar.svg').default,
-    background: require('./bg.svg').default,
-    avaCom: require('./avaCom.svg').default,
-    avaFriend: require('./avaFriend.svg').default,
-    chungsubin: require('./chungsubin.jpg'),
-    couple: require('./couple.webp'),
-    friend1: require('./friend1.svg').default,
-    friend2: require('./friend2.svg').default,
-    anhnen: require('./anhnen.jpg'),
-    mylove: require('./mylove.jpg'),
-    ace: require('./aotuong.jpg'),
-}
+  logo,
+  avatar,
+  background,
+  avaCom,
+  avaFriend,
+  chungsubin,
+  couple,
+  friend1,
+  friend2,
+  anhnen,
+  mylove,
+  ace,
+};
 
 export default images;

@@ -6,47 +6,49 @@
     align-items: center;
     padding: 40px 20px;
     min-height: 100vh;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 40, 0.9) 100%);
+    background: $bg-main;
 
     .change-profile-header {
-        padding: 40px 20px 60px;
+        padding: 20px 20px 40px;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 12px;
         text-align: center;
+        position: relative;
+        z-index: 1;
 
         .change-profile-title {
-            font-size: 48px;
+            font-size: 36px;
             font-weight: 800;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: $text-white;
+            margin: 0;
         }
 
         .change-profile-subtitle {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 500;
-            color: $text-gray-primary;
-            opacity: 0.85;
-            max-width: 500px;
+            color: $text-gray-secondary;
+            max-width: 480px;
+            margin: 0;
         }
     }
 
     .change-profile-container {
-        background: linear-gradient(135deg, $bg-change-profile-container 0%, rgba(30, 30, 50, 0.8) 100%);
+        background: $glass-bg;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         display: flex;
         flex-direction: column;
         align-items: center;
         border-radius: 24px;
         width: 100%;
-        max-width: 520px;
-        padding: 50px 40px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(10px);
+        max-width: 540px;
+        padding: 44px 40px;
+        box-shadow: $shadow-xl;
+        border: 1px solid $glass-border;
+        position: relative;
+        z-index: 1;
 
         .change-profile-content {
             width: 100%;
@@ -55,37 +57,34 @@
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                margin-bottom: 40px;
+                margin-bottom: 36px;
 
                 .change-profile-avatar-img {
-                    width: 140px;
-                    height: 140px;
+                    width: 130px;
+                    height: 130px;
                     object-fit: cover;
                     border-radius: 50%;
-                    border: 3px solid $highlight-yellow-dark;
-                    box-shadow: 0 8px 32px rgba(167, 167, 2, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+                    border: 3px solid rgba(255, 255, 255, 0.15);
+                    box-shadow: 0 0 24px rgba(99, 102, 241, 0.4);
                     transition: all 0.3s ease;
                 }
 
                 .change-profile-avatar-button {
-                    margin-top: 20px;
-                    padding: 12px 28px;
-                    background: linear-gradient(135deg, $highlight-yellow-dark 0%, #8a8a01 100%);
-                    color: $highlight-yellow;
-                    font-weight: 700;
-                    font-size: 15px;
-                    border: none;
-                    border-radius: 10px;
+                    margin-top: 18px;
+                    padding: 10px 24px;
+                    background: rgba(255, 255, 255, 0.08);
+                    color: $accent-indigo-light;
+                    font-weight: 600;
+                    font-size: 14px;
+                    border: 1px solid rgba(99, 102, 241, 0.3);
+                    border-radius: 12px;
                     cursor: pointer;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    text-transform: capitalize;
-                    letter-spacing: 0.3px;
-                    box-shadow: 0 4px 16px rgba(167, 167, 2, 0.25);
 
                     &:hover {
-                        background: linear-gradient(135deg, #a7a702 0%, #7f7f01 100%);
+                        background: rgba(99, 102, 241, 0.2);
+                        color: #ffffff;
                         transform: translateY(-2px);
-                        box-shadow: 0 6px 24px rgba(167, 167, 2, 0.35);
                     }
 
                     &:active {
@@ -95,56 +94,51 @@
             }
 
             .change-profile-info {
-                margin-bottom: 20px;
+                margin-bottom: 24px;
 
                 .change-profile-info-item {
-                    margin-bottom: 26px;
+                    margin-bottom: 22px;
                     width: 100%;
                     display: flex;
                     flex-direction: column;
 
                     .change-profile-info-item-title {
-                        font-size: 16px;
-                        font-weight: 700;
-                        margin-bottom: 10px;
-                        color: #ffffff;
-                        text-transform: capitalize;
-                        letter-spacing: 0.2px;
+                        font-size: 13px;
+                        font-weight: 600;
+                        margin-bottom: 8px;
+                        color: $text-gray-secondary;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
                     }
 
                     .change-profile-info-item-input,
                     .change-profile-info-item-textarea {
-                        padding: 14px 16px;
-                        border: 1px solid rgba(255, 255, 255, 0.12);
+                        padding: 14px 18px;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
                         border-radius: 12px;
-                        background-color: rgba($bg-card, 0.8);
+                        background: rgba(255, 255, 255, 0.04);
                         color: $text-white;
-                        font-size: 16px;
+                        font-size: 15px;
                         font-weight: 500;
                         width: 100%;
-                        transition: all 0.3s ease;
+                        box-sizing: border-box;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                         font-family: inherit;
 
                         &::placeholder {
-                            color: rgba($text-white, 0.5);
+                            color: $text-gray-muted;
                         }
 
                         &:focus {
                             outline: none;
-                            border-color: $highlight-yellow-dark;
-                            background-color: rgba($bg-card, 1);
-                            box-shadow: 0 0 0 3px rgba(167, 167, 2, 0.15), 0 0 0 1px $highlight-yellow-dark;
-                        }
-
-                        &:hover:not(:disabled) {
-                            border-color: rgba(255, 255, 255, 0.2);
-                            background-color: rgba($bg-card, 0.95);
+                            border-color: rgba(99, 102, 241, 0.7);
+                            background: rgba(255, 255, 255, 0.08);
+                            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
                         }
 
                         &:disabled {
-                            opacity: 0.6;
+                            opacity: 0.5;
                             cursor: not-allowed;
-                            background-color: rgba($bg-card, 0.5);
                         }
                     }
 
@@ -159,28 +153,24 @@
 
         .change-profile-footer-button {
             padding: 14px 32px;
-            background: linear-gradient(135deg, $highlight-yellow-dark 0%, #8a8a01 100%);
-            color: $highlight-yellow;
+            background: $accent-gradient;
+            color: #1a1a1a;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 16px;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             width: 100%;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-transform: capitalize;
-            letter-spacing: 0.5px;
-            box-shadow: 0 8px 24px rgba(167, 167, 2, 0.3);
+            box-shadow: 0 4px 16px rgba(255, 253, 2, 0.25);
 
             &:hover {
-                background: linear-gradient(135deg, #a7a702 0%, #7f7f01 100%);
                 transform: translateY(-2px);
-                box-shadow: 0 12px 32px rgba(167, 167, 2, 0.4);
+                box-shadow: 0 8px 24px rgba(255, 253, 2, 0.4);
             }
 
             &:active {
                 transform: translateY(0);
-                box-shadow: 0 4px 16px rgba(167, 167, 2, 0.3);
             }
         }
     }
@@ -188,41 +178,39 @@
 
 @media (max-width: 640px) {
     .change-profile {
-        padding: 20px;
+        padding: 20px 16px;
 
         .change-profile-header {
-            padding: 30px 0 40px;
-            gap: 8px;
+            padding: 20px 0 30px;
 
             .change-profile-title {
-                font-size: 36px;
+                font-size: 30px;
             }
 
             .change-profile-subtitle {
-                font-size: 16px;
+                font-size: 14px;
             }
         }
 
         .change-profile-container {
-            max-width: 100%;
-            padding: 30px 24px;
+            padding: 28px 20px;
             border-radius: 20px;
 
             .change-profile-content {
                 .change-profile-avatar {
-                    margin-bottom: 30px;
+                    margin-bottom: 28px;
 
                     .change-profile-avatar-img {
-                        width: 120px;
-                        height: 120px;
+                        width: 110px;
+                        height: 110px;
                     }
                 }
             }
 
             .change-profile-footer-button {
                 padding: 12px 24px;
-                font-size: 16px;
+                font-size: 15px;
             }
         }
     }
-}
+}

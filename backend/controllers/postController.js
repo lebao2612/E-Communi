@@ -39,3 +39,8 @@ exports.toggleLike = asyncHandler(async (req, res) => {
 
     res.status(200).json(result);
 });
+
+exports.getSinglePost = asyncHandler(async (req, res) => {
+    const result = await postService.getSinglePostById(req.validated.postId);
+    res.status(200).json(result);
+});

@@ -47,7 +47,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, user
 
             // 2. Create Post
             const token = localStorage.getItem('token');
-            await api.post('/api/posts/upPost', {
+            await api.post('/api/posts', {
                 content,
                 images: imageUrls,
                 privacy

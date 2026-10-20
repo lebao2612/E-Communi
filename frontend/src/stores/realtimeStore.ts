@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { usePresenceStore } from './presenceStore';
 import { playNotificationSound } from '../utils/notificationSound';
 import { useMessageStore } from './messageStore';
+import { useNotificationStore } from './notificationStore';
 import { useAuthStore } from './authStore';
 import api from '../api/axios';
 
@@ -43,6 +44,8 @@ export const useRealtimeStore = create<RealtimeState>((set) => ({
       socket.emit('join');
       set({ connected: true });
 
+      void useNotificationStore.getState().fetchUnreadCount();
+
       void api.get('/api/messages/unread/summary')
         .then((res) => {
           const summary = res.data?.data || {};
@@ -63,6 +66,13 @@ export const useRealtimeStore = create<RealtimeState>((set) => ({
 
     socket.on('payload_error', (payload) => {
       console.error('Socket payload error:', payload);
+    });
+
+    // Realtime notification listener
+    socket.on('new_notification', (notification: any) => {
+      console.log('🔔 New notification received:', notification);
+      useNotificationStore.getState().addRealtimeNotification(notification);
+      playNotificationSound(0.2);
     });
 
     // Presence events

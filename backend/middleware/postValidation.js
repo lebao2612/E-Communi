@@ -41,7 +41,7 @@ const validateGetNewsFeedQuery = (req, res, next) => {
 };
 
 const validateGetPostsByUserQuery = (req, res, next) => {
-    const { user } = req.query;
+    const user = req.query.user || req.query.userId;
 
     if (!user || !mongoose.Types.ObjectId.isValid(user)) {
         return next(createHttpError('Invalid userId', 400));

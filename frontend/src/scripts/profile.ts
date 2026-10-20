@@ -28,8 +28,9 @@ export const useProfileLogic = () => {
 
 
     useEffect(() => {
+        if (!userParam?._id) return;
         api.get('/api/posts/getPostById', {
-            params: { userId: userParam?._id }
+            params: { userId: userParam._id, user: userParam._id }
         })
             .then(response => {
                 setUserPosts(response.data.data)

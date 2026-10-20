@@ -1,4 +1,5 @@
 const userService = require('../services/userService');
+const authService = require('../services/authService');
 const asyncHandler = require('../utils/asyncHandler');
 
 
@@ -17,7 +18,7 @@ exports.getUserByUsername = asyncHandler(async (req, res) => {
 
 // [POST] /api/users/register
 exports.register = asyncHandler(async (req, res) => {
-  const result = await userService.register({
+  const result = await authService.register({
     username: req.validated.username,
     fullname: req.validated.fullname,
     password: req.validated.password,
@@ -30,7 +31,7 @@ exports.register = asyncHandler(async (req, res) => {
 
 //[POST] /api/users/login
 exports.login = asyncHandler(async (req, res) => {
-  const result = await userService.login({
+  const result = await authService.login({
     username: req.validated.username,
     password: req.validated.password,
   });
@@ -40,7 +41,7 @@ exports.login = asyncHandler(async (req, res) => {
 
 // [POST] /api/users/refresh-token
 exports.refreshToken = asyncHandler(async (req, res) => {
-  const result = await userService.refreshToken(req.validated.refreshToken);
+  const result = await authService.refreshToken(req.validated.refreshToken);
   res.json(result);
 });
 

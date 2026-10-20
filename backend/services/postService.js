@@ -112,6 +112,8 @@ const createPost = async ({ userId, content, images = [], privacy = 'public' }) 
     };
 };
 
+const { createNotification } = require('./notificationService');
+
 const toggleLike = async ({ postId, userId }) => {
     ensureObjectId(postId, 'postId');
     ensureObjectId(userId, 'userId');
@@ -130,9 +132,38 @@ const toggleLike = async ({ postId, userId }) => {
 
     await post.save();
 
+    if (!isLiked) {
+        createNotification({
+            recipientId: post.user,
+            senderId: userId,
+            type: 'like',
+            postId: post._id,
+        }).catch((err) => console.error('Like notification error:', err));
+    }
+
     return {
         message: isLiked ? 'Unliked successfully' : 'Liked successfully',
         likes: post.likes,
+    };
+};
+
+const getSinglePostById = async (postId) => {
+    ensureObjectId(postId, 'postId');
+
+    const post = await Post.findById(postId)
+        .populate('user', 'username fullname avatar')
+        .populate({
+            path: 'comments',
+            populate: { path: 'user', select: 'username fullname avatar' },
+        });
+
+    if (!post) {
+        throw createHttpError('Post not found', 404);
+    }
+
+    return {
+        message: 'Post fetched successfully',
+        post,
     };
 };
 
@@ -142,4 +173,5 @@ module.exports = {
     createPost,
     getNewsFeedForUser,
     toggleLike,
+    getSinglePostById,
 };

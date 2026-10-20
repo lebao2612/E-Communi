@@ -1,34 +1,51 @@
-// Background Colors
-$bg-main: #1A1A1A; // Main page background (Home, Login, Message, Header)
-$bg-card: #282828; // Component/Card background
-$bg-darker: #0F0D0D; // Darker background (Message content area)
-$bg-overlay: rgba(80, 80, 80, 0.5); // Semi-transparent overlay (Message list, inputs)
-$bg-input-area: #212121; // Message input area background
-$bg-message-item: #2f2f2f; // Individual message item background
-$bg-change-profile-container: #646464; // Change profile container background
+// E-Community Original Clean Dark & Yellow Theme
+$bg-main: #1A1A1A;                          // Main dark background (#1A1A1A)
+$bg-dark: #1A1A1A;                          // Main dark background
+$bg-card: #282828;                          // Card background (#282828)
+$bg-card-hover: #323232;                    // Card hover background
+$bg-darker: #0F0D0D;                        // Darker background
+$bg-overlay: rgba(80, 80, 80, 0.4);         // Overlay background
+$bg-input-area: #212121;                     // Input area background
+$bg-message-item: #2f2f2f;                  // Message item background
+$bg-change-profile-container: #282828;
 
-// Text Colors
-$text-white: #ffffff; // Standard white text
-$text-primary: #ffffff; // Primary text color (same as white for this dark theme)
-$text-gray-primary: #aca9a9; // Primary gray text (descriptions, inactive items)
-$text-gray-secondary: #8E8E8E; // Secondary gray text (tags, gradients)
-$text-gray-light: #ccc; // Light gray text (icons, borders, hover states)
-$border-color: #ccc; // Standard border color
-$text-link-hover: #f0f0f0; // Link hover color
+// Clean Dark Surfaces & Shadows
+$glass-bg: #282828;
+$glass-border: rgba(255, 255, 255, 0.1);
+$border-color: rgba(255, 255, 255, 0.12);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+$shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.6);
 
-// Accents & Gradients
-$highlight-yellow: #FFFD02; // Bright yellow highlight (active states, gradients)
-$highlight-yellow-dark: #999801; // Darker yellow for gradients
-$highlight-red: red; // Red highlight (e.g. loved status)
+// Text & Typography
+$text-white: #ffffff;                       // Primary white text
+$text-primary: #ffffff;
+$text-gray-primary: #aca9a9;               // Subtitle gray text
+$text-gray-secondary: #8E8E8E;             // Secondary gray text
+$text-gray-muted: #8E8E8E;
+$text-gray-light: #ccc;                     // Light gray text
+$text-link-hover: #ffffff;
+
+// Original Accents (Warm Gold/Amber Theme - Non-glaring)
+$highlight-yellow: #eab308;                 // Warm amber gold (Soft & readable)
+$highlight-yellow-dark: #ca8a04;            // Rich dark amber
+$highlight-red: #ff4d4f;                    // Red highlight (Likes / Heart)
+$accent-primary: #eab308;
+$accent-gradient: #eab308;                  // Solid warm gold color
+$accent-indigo: #eab308;
+$accent-indigo-light: #eab308;
+$accent-emerald: #31a24c;
+$status-online: #31a24c;                    // Online status green
 
 // Message Bubbles
-$bg-message-me: #efef48; // Background for messages sent by user
-$bg-message-you: #aeadad; // Background for messages received
+$bg-message-me: #eab308;                    // Sent message background (Warm Gold)
+$bg-message-you: #383838;                   // Received message background (Dark gray)
 
-// Buttons & Interactions
-$hover-gray-dark: #888686; // Darker hover color (Profile actions)
+// Interactions
+$hover-gray-dark: #383838;
 
-// Spacing (Existing)
+// Spacing
 $spacing-sm: 8px;
 $spacing-md: 16px;
 $spacing-lg: 24px;
@@ -40,25 +57,22 @@ $bp-md: 1024px;
 $bp-lg: 1280px;
 
 @mixin down($breakpoint) {
-    @if $breakpoint ==xs {
+    @if $breakpoint == xs {
         @media (max-width: #{$bp-xs}) {
             @content;
         }
     }
-
-    @else if $breakpoint ==sm {
+    @else if $breakpoint == sm {
         @media (max-width: #{$bp-sm}) {
             @content;
         }
     }
-
-    @else if $breakpoint ==md {
+    @else if $breakpoint == md {
         @media (max-width: #{$bp-md}) {
             @content;
         }
     }
-
-    @else if $breakpoint ==lg {
+    @else if $breakpoint == lg {
         @media (max-width: #{$bp-lg}) {
             @content;
         }
@@ -66,19 +80,17 @@ $bp-lg: 1280px;
 }
 
 @mixin up($breakpoint) {
-    @if $breakpoint ==sm {
+    @if $breakpoint == sm {
         @media (min-width: #{$bp-sm + 1px}) {
             @content;
         }
     }
-
-    @else if $breakpoint ==md {
+    @else if $breakpoint == md {
         @media (min-width: #{$bp-md + 1px}) {
             @content;
         }
     }
-
-    @else if $breakpoint ==lg {
+    @else if $breakpoint == lg {
         @media (min-width: #{$bp-lg + 1px}) {
             @content;
         }

@@ -196,7 +196,7 @@ export const useMessageLogic = () => {
     useEffect(() => {
         if (!currentUser) return;
 
-        api.get('/api/users/getAllUsers')
+        api.get('/api/users/')
             .then(response => {
                 const users: User[] = response.data;
                 setAllUsers(users.filter(u => u._id !== currentUser._id));

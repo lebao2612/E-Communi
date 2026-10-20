@@ -1,7 +1,7 @@
 @import "../../styles/variables.scss";
 
 .settingPage {
-    background-color: $bg-main;
+    background: $bg-dark;
     min-height: calc(100vh - 70px);
     display: flex;
     justify-content: center;
@@ -11,33 +11,33 @@
 
     .settingContainer {
         width: 100%;
-        max-width: 600px;
-        background-color: $bg-card;
-        border-radius: 16px;
+        max-width: 620px;
+        background: $glass-bg;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid $glass-border;
+        border-radius: 24px;
         padding: 40px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        box-shadow: $shadow-xl;
         display: flex;
         flex-direction: column;
-        gap: 30px;
+        gap: 32px;
 
         .settingHeader {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 24px;
 
             h2 {
-                margin: 0 0 10px 0;
-                font-size: 28px;
-                font-weight: 700;
-                background: linear-gradient(to right, $highlight-yellow-dark, $highlight-yellow);
-                -webkit-background-clip: text;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
+                margin: 0 0 8px 0;
+                font-size: 26px;
+                font-weight: 800;
+                color: $text-white;
             }
 
             p {
                 margin: 0;
                 font-size: 14px;
-                color: $text-gray-primary;
+                color: $text-gray-secondary;
             }
         }
 
@@ -46,28 +46,29 @@
             flex-direction: column;
 
             h3 {
-                font-size: 14px;
+                font-size: 12px;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                color: $text-gray-secondary;
-                margin: 0 0 15px 0;
+                color: $text-gray-muted;
+                font-weight: 600;
+                margin: 0 0 16px 0;
             }
 
             .settingItem {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                padding: 15px;
-                background-color: rgba(255, 255, 255, 0.03);
-                border-radius: 10px;
-                margin-bottom: 15px;
+                padding: 16px 20px;
+                background: rgba(255, 255, 255, 0.03);
+                border-radius: 14px;
+                margin-bottom: 12px;
                 cursor: pointer;
-                transition: all 0.3s ease;
-                border: 1px solid rgba(255, 255, 255, 0.05);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border: 1px solid rgba(255, 255, 255, 0.06);
 
                 &:hover {
-                    background-color: rgba(255, 255, 255, 0.08);
-                    border-color: rgba($highlight-yellow, 0.3);
+                    background: rgba(255, 255, 255, 0.07);
+                    border-color: rgba(99, 102, 241, 0.4);
                     transform: translateX(4px);
                 }
 
@@ -78,52 +79,54 @@
                 .itemInfo {
                     display: flex;
                     flex-direction: column;
-                    gap: 6px;
+                    gap: 4px;
 
                     .itemTitle {
-                        font-size: 16px;
+                        font-size: 15px;
                         font-weight: 600;
                         color: $text-white;
                     }
 
                     .itemDesc {
                         font-size: 13px;
-                        color: $text-gray-primary;
+                        color: $text-gray-secondary;
                     }
                 }
 
                 i {
-                    color: $text-gray-primary;
-                    font-size: 16px;
-                    transition: color 0.3s ease;
+                    color: $text-gray-secondary;
+                    font-size: 15px;
+                    transition: all 0.3s ease;
                 }
 
                 &:hover i {
-                    color: $highlight-yellow;
+                    color: $accent-indigo-light;
+                    transform: translateX(2px);
                 }
             }
         }
 
         .logoutButton {
-            margin-top: 20px;
+            margin-top: 12px;
             padding: 16px;
-            border-radius: 10px;
-            border: none;
-            background-color: rgba(255, 77, 79, 0.1);
-            color: #ff4d4f;
-            font-size: 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            background: rgba(244, 63, 94, 0.1);
+            color: #f43f5e;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
 
             &:hover {
-                background-color: #ff4d4f;
-                color: $text-white;
-                box-shadow: 0 4px 15px rgba(255, 77, 79, 0.4);
+                background: linear-gradient(135deg, #f43f5e, #e11d48);
+                color: #ffffff;
+                border-color: transparent;
+                box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4);
                 transform: translateY(-2px);
             }
 
@@ -136,12 +139,12 @@
 
 @include down(sm) {
     .settingPage {
-        padding: 20px 12px;
+        padding: 20px 14px;
 
         .settingContainer {
-            padding: 22px 16px;
-            gap: 20px;
-            border-radius: 14px;
+            padding: 24px 20px;
+            gap: 24px;
+            border-radius: 20px;
 
             .settingHeader {
                 h2 {
@@ -150,25 +153,22 @@
             }
 
             .settingSection .settingItem {
-                align-items: flex-start;
-                gap: 10px;
+                padding: 14px 16px;
 
                 .itemInfo {
                     .itemTitle {
-                        font-size: 15px;
+                        font-size: 14px;
                     }
 
                     .itemDesc {
                         font-size: 12px;
-                        line-height: 1.4;
                     }
                 }
             }
 
             .logoutButton {
-                margin-top: 8px;
                 padding: 14px;
             }
         }
     }
-}
+}

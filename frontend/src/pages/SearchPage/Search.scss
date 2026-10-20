@@ -1,32 +1,33 @@
 @import "../../styles/variables.scss";
 
 .search-page-container {
-    max-width: 600px;
+    max-width: 680px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 24px 20px;
     min-height: 100vh;
-    background-color: $bg-main;
+    background: $bg-dark;
     color: $text-white;
 
     .search-header {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
 
         .search-input {
             width: 100%;
-            padding: 15px 20px;
-            font-size: 16px;
-            border: 1px solid $border-color;
-            border-radius: 30px;
+            padding: 14px 22px;
+            font-size: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
             outline: none;
-            transition: all 0.3s ease;
-            background-color: $bg-card;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.04);
             color: $text-white;
             font-family: inherit;
+            box-sizing: border-box;
 
             &:focus {
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-                background-color: lighten($bg-card, 5%);
+                border-color: rgba(99, 102, 241, 0.6);
+                box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+                background: rgba(255, 255, 255, 0.08);
             }
 
             &::placeholder {
@@ -37,20 +38,23 @@
 
     .search-tabs {
         display: flex;
-        border-bottom: 1px solid $border-color;
-        margin-bottom: 20px;
+        gap: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 24px;
+        padding-bottom: 4px;
 
         .tab-btn {
             flex: 1;
             padding: 12px 0;
             background: none;
             border: none;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            color: $text-gray-primary;
+            color: $text-gray-secondary;
             cursor: pointer;
             position: relative;
-            transition: color 0.3s ease;
+            transition: all 0.2s ease;
+            border-radius: 10px;
 
             &.active {
                 color: $text-white;
@@ -58,17 +62,18 @@
                 &::after {
                     content: '';
                     position: absolute;
-                    bottom: -1px;
-                    left: 0;
-                    width: 100%;
+                    bottom: -5px;
+                    left: 20%;
+                    width: 60%;
                     height: 3px;
-                    background-color: $text-white;
-                    border-radius: 3px 3px 0 0;
+                    background: $accent-gradient;
+                    border-radius: 3px;
                 }
             }
 
             &:hover:not(.active) {
-                color: $text-gray-light;
+                color: $text-white;
+                background: rgba(255, 255, 255, 0.04);
             }
         }
     }
@@ -76,44 +81,52 @@
     .search-results {
         .loading-spinner {
             text-align: center;
-            padding: 40px;
-            color: $text-gray-primary;
-            font-size: 16px;
+            padding: 48px;
+            color: $text-gray-secondary;
+            font-size: 15px;
         }
 
         .no-results,
         .search-empty-state {
             text-align: center;
-            padding: 40px;
-            color: $text-gray-primary;
-            font-size: 16px;
+            padding: 48px 20px;
+            color: $text-gray-secondary;
+            font-size: 15px;
+            background: $glass-bg;
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid $glass-border;
         }
 
         .users-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 14px;
 
             .user-card {
                 display: flex;
                 align-items: center;
-                padding: 15px;
-                border: 1px solid $border-color;
-                background-color: $bg-card;
-                border-radius: 12px;
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                padding: 16px;
+                border: 1px solid $glass-border;
+                background: $glass-bg;
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-radius: 16px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
                 &:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                    box-shadow: $shadow-md;
+                    border-color: rgba(255, 255, 255, 0.15);
                 }
 
                 .user-avatar {
-                    width: 50px;
-                    height: 50px;
+                    width: 52px;
+                    height: 52px;
                     border-radius: 50%;
                     object-fit: cover;
-                    margin-right: 15px;
+                    margin-right: 16px;
+                    border: 2px solid rgba(255, 255, 255, 0.1);
                 }
 
                 .user-info {
@@ -126,21 +139,22 @@
                         text-decoration: none;
                         font-size: 16px;
                         margin-bottom: 2px;
+                        transition: color 0.2s ease;
 
                         &:hover {
-                            text-decoration: underline;
+                            color: $highlight-yellow;
                         }
                     }
 
                     .user-username {
-                        font-size: 14px;
-                        color: $text-gray-primary;
+                        font-size: 13px;
+                        color: $text-gray-secondary;
                         margin: 0 0 4px 0;
                     }
 
                     .user-bio {
                         font-size: 13px;
-                        color: $text-gray-secondary;
+                        color: $text-gray-muted;
                         margin: 0;
                         display: -webkit-box;
                         -webkit-line-clamp: 2;
@@ -152,18 +166,20 @@
                 }
 
                 .follow-btn {
-                    padding: 8px 16px;
-                    background-color: #3b82f6;
-                    color: $text-white;
+                    padding: 8px 18px;
+                    background: $accent-gradient;
+                    color: #1a1a1a;
                     border: none;
                     border-radius: 20px;
-                    font-weight: 600;
+                    font-weight: 700;
                     cursor: pointer;
                     font-size: 13px;
-                    transition: background-color 0.2s ease;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(255, 253, 2, 0.25);
 
                     &:hover {
-                        background-color: darken(#3b82f6, 10%);
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 18px rgba(255, 253, 2, 0.4);
                     }
                 }
             }
@@ -172,18 +188,18 @@
         .posts-list {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
     }
 }
 
 @include down(sm) {
     .search-page-container {
-        padding: 14px 12px;
+        padding: 16px 12px;
 
         .search-header .search-input {
-            padding: 12px 14px;
-            border-radius: 14px;
+            padding: 12px 16px;
+            font-size: 14px;
         }
 
         .search-tabs .tab-btn {
@@ -192,20 +208,19 @@
         }
 
         .search-results .users-list .user-card {
-            padding: 12px;
-            align-items: flex-start;
-            gap: 10px;
+            padding: 14px;
+            align-items: center;
 
             .user-avatar {
-                width: 42px;
-                height: 42px;
-                margin-right: 0;
+                width: 44px;
+                height: 44px;
+                margin-right: 12px;
             }
 
             .follow-btn {
-                padding: 7px 12px;
+                padding: 7px 14px;
                 font-size: 12px;
             }
         }
     }
-}
+}

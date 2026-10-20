@@ -1,10 +1,10 @@
 @import "../../styles/variables.scss";
 
 .messagePage {
-    padding: 14px 12px;
-    background-color: $bg-main;
+    padding: 16px;
+    background: $bg-dark;
     display: grid;
-    gap: 14px;
+    gap: 16px;
     grid-template-columns: 1fr;
     grid-template-rows: minmax(260px, 38vh) minmax(0, 1fr);
     height: calc(100vh - 72px);
@@ -12,27 +12,35 @@
     overflow: hidden;
 
     .messageList {
-        background-color: $bg-overlay;
-        border-radius: 10px;
+        background: $glass-bg;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid $glass-border;
+        border-radius: 20px;
         min-height: 0;
         display: flex;
         flex-direction: column;
         overflow: hidden;
-
+        box-shadow: $shadow-lg;
 
         .messageTitle {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             color: $text-white;
-            padding: 14px;
+            padding: 16px 20px;
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
             .fa-pen-to-square {
                 cursor: pointer;
+                color: $text-gray-secondary;
+                transition: color 0.2s ease, transform 0.2s ease;
 
                 &:hover {
-                    color: $text-gray-light;
+                    color: $accent-indigo-light;
+                    transform: scale(1.1);
                 }
             }
         }
@@ -42,75 +50,98 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            padding: 12px 16px;
 
             .searchMess {
-                border: none;
-                background-color: $bg-card;
-                width: calc(100% - 24px);
-                padding: 10px 34px;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(255, 255, 255, 0.04);
+                width: 100%;
+                padding: 10px 40px;
                 color: $text-white;
-                border-radius: 10px;
+                border-radius: 20px;
+                font-size: 14px;
+                outline: none;
+                transition: all 0.3s ease;
+
+                &:focus {
+                    background: rgba(255, 255, 255, 0.08);
+                    border-color: rgba(99, 102, 241, 0.5);
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+                }
+
+                &::placeholder {
+                    color: $text-gray-secondary;
+                }
             }
 
             .fa-magnifying-glass {
                 position: absolute;
-                left: 18px;
-                color: $text-white;
-                padding: 4px;
+                left: 28px;
+                color: $text-gray-secondary;
+                font-size: 14px;
+                pointer-events: none;
             }
 
             .fa-sliders {
                 position: absolute;
-                right: 18px;
-                color: $text-white;
+                right: 28px;
+                color: $text-gray-secondary;
+                cursor: pointer;
+                transition: color 0.2s ease;
+
+                &:hover {
+                    color: $text-white;
+                }
             }
         }
 
         .listFriendMessage {
-            //background-color: $text-white;
-            margin-top: 14px;
-            gap: 5px;
+            gap: 6px;
             height: auto;
             flex: 1;
             min-height: 0;
-            padding: 0 8px 8px;
+            padding: 8px 12px 12px;
             display: flex;
             flex-direction: column;
-            overflow-y: scroll;
-
-            scrollbar-color: #717070 $bg-message-item;
-            /* thumb | track */
-            scrollbar-width: thin;
-
+            overflow-y: auto;
 
             .friendMessage {
-                padding: 10px;
-                background-color: $bg-message-item;
+                padding: 10px 14px;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid transparent;
                 display: flex;
-                gap: 10px;
+                gap: 12px;
                 justify-content: space-between;
                 align-items: center;
                 cursor: pointer;
-                height: 50px;
-                border-radius: 10px;
+                height: 60px;
+                border-radius: 14px;
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
                 &:hover {
-                    background-color: $bg-overlay;
-                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.06);
+                    border-color: rgba(255, 255, 255, 0.08);
+                    transform: translateX(2px);
+                }
+
+                &.choosenFriend {
+                    background: rgba(255, 253, 2, 0.12) !important;
+                    border-color: rgba(255, 253, 2, 0.4) !important;
+                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
                 }
 
                 .friendInfo {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
+                    gap: 12px;
                     min-width: 0;
 
                     .friend_ava {
-                        width: 40px;
-                        height: 40px;
+                        width: 44px;
+                        height: 44px;
                         object-fit: cover;
-                        border: 4px solid #000;
-                        border-radius: 10px;
+                        border: 2px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 50%;
                         flex-shrink: 0;
                     }
 
@@ -123,7 +154,8 @@
 
                     .friendName {
                         color: $text-white;
-                        font-size: 16px;
+                        font-size: 15px;
+                        font-weight: 600;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
@@ -131,7 +163,7 @@
                     }
 
                     .onlineStatus {
-                        color: $text-gray-light;
+                        color: $text-gray-secondary;
                         font-size: 12px;
                         margin: 0;
                         white-space: nowrap;
@@ -141,54 +173,60 @@
                 }
 
                 .fa-camera {
-                    color: $text-white;
-                    margin-right: 10px;
-                    font-size: 24px;
+                    color: $text-gray-secondary;
+                    margin-right: 4px;
+                    font-size: 20px;
+                    transition: color 0.2s ease;
+
+                    &:hover {
+                        color: $accent-indigo-light;
+                    }
                 }
-
-            }
-
-            .friendMessage:hover {
-                background-color: $bg-overlay;
-                border-radius: 10px;
             }
         }
     }
 
     .messageContent {
-        border-radius: 10px;
-        background-color: $bg-darker;
+        border-radius: 20px;
+        background: $glass-bg;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid $glass-border;
         display: flex;
         flex-direction: column;
         overflow: hidden;
         min-height: 0;
         max-height: 100%;
+        box-shadow: $shadow-lg;
 
         .headerMessage {
-            padding: 12px 16px 12px 12px;
-            background-color: $bg-overlay;
-            border-radius: 10px 10px 0 0;
+            padding: 12px 20px;
+            background: rgba(15, 23, 42, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px 20px 0 0;
             display: flex;
             justify-content: space-between;
+            align-items: center;
 
             .friendInfo {
                 display: flex;
                 align-items: center;
                 border-radius: 12px;
-                padding: 4px;
-                gap: 10px;
+                padding: 4px 8px;
+                gap: 12px;
                 cursor: pointer;
+                transition: background-color 0.2s ease;
 
                 &:hover {
-                    background-color: $bg-overlay;
+                    background: rgba(255, 255, 255, 0.06);
                 }
 
                 .avaFriend {
-                    width: 42px;
-                    height: 42px;
+                    width: 44px;
+                    height: 44px;
                     object-fit: cover;
-                    border: 4px solid #000;
-                    border-radius: 10px;
+                    border: 2px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 50%;
                     flex-shrink: 0;
                 }
 
@@ -201,25 +239,23 @@
                 .nameFriend {
                     color: $text-white;
                     font-size: 16px;
+                    font-weight: 600;
                     margin: 0;
                 }
 
                 .onlineStatus {
-                    color: $text-gray-light;
+                    color: $status-online;
                     font-size: 12px;
+                    font-weight: 500;
                     margin: 0;
                 }
-            }
-
-            .friendInfo:hover {
-                background-color: $bg-overlay;
             }
 
             .actions {
                 display: flex;
                 align-items: center;
-                gap: 40px;
-                color: $text-white;
+                gap: 24px;
+                color: $text-gray-secondary;
                 font-size: 18px;
 
                 .fa-phone,
@@ -229,138 +265,148 @@
                     cursor: pointer;
 
                     &:hover {
-                        transform: scale(1.2);
-                        color: $text-gray-light;
+                        transform: scale(1.15);
+                        color: $accent-indigo-light;
                     }
                 }
             }
         }
 
         .chatMessgae {
-            margin-top: 10px;
+            padding: 16px 20px;
             flex: 1;
             min-height: 0;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-direction: column;
             overflow-y: auto;
-            scrollbar-width: none;
-            /* Firefox */
-            -ms-overflow-style: none;
-            /* Internet Explorer 10+ */
-
-            &::-webkit-scrollbar {
-                display: none;
-                /* Chrome, Safari and Opera */
-            }
 
             .friendSend {
                 display: flex;
-                gap: 8px;
-                align-items: center;
+                gap: 10px;
+                align-items: flex-end;
 
                 .avaMess {
-                    width: 20px;
-                    height: 20px;
-                    object-fit: contain;
-                    margin-left: 10px;
+                    width: 28px;
+                    height: 28px;
+                    object-fit: cover;
+                    border-radius: 50%;
+                    flex-shrink: 0;
                 }
             }
 
             .chatHistoryState {
                 align-self: center;
                 font-size: 12px;
-                color: $text-gray-primary;
-                padding: 6px 10px;
-                border-radius: 999px;
-                background-color: rgba(255, 255, 255, 0.06);
+                color: $text-gray-muted;
+                padding: 6px 14px;
+                border-radius: 20px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.06);
             }
 
             p {
-                padding: 10px;
+                padding: 12px 18px;
                 display: flex;
                 flex-wrap: wrap;
-                max-width: 78%;
+                max-width: 75%;
                 width: fit-content;
-                border-radius: 5px;
-                line-height: 1.4;
+                border-radius: 18px;
+                line-height: 1.5;
+                font-size: 14px;
+                word-break: break-word;
+                margin: 0;
             }
 
             .meSend {
                 margin-left: auto;
-                margin-right: 10px;
-                background-color: $bg-message-me;
+                background: $bg-message-me;
+                color: #1a1a1a;
+                font-weight: 500;
+                border-bottom-right-radius: 4px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             }
 
             .youSend {
-                background-color: $bg-message-you;
+                background: rgba(255, 255, 255, 0.08);
+                color: $text-white;
+                border-bottom-left-radius: 4px;
+                border: 1px solid rgba(255, 255, 255, 0.06);
             }
         }
 
         .callBanner {
-            margin: 10px 10px 0;
-            padding: 10px 12px;
-            border-radius: 10px;
+            margin: 12px 16px 0;
+            padding: 12px 16px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
+            gap: 12px;
             color: $text-white;
 
             p {
                 margin: 0;
                 font-size: 14px;
+                font-weight: 500;
             }
 
             &.incoming {
-                background-color: rgba(255, 190, 11, 0.16);
-                border: 1px solid rgba(255, 190, 11, 0.4);
+                background: rgba(245, 158, 11, 0.15);
+                border: 1px solid rgba(245, 158, 11, 0.4);
             }
 
             &.active {
-                background-color: rgba(6, 214, 160, 0.14);
-                border: 1px solid rgba(6, 214, 160, 0.4);
+                background: rgba(16, 185, 129, 0.15);
+                border: 1px solid rgba(16, 185, 129, 0.4);
             }
 
             .callActions {
                 display: flex;
-                gap: 8px;
+                gap: 10px;
             }
 
             .callBtn {
                 border: none;
-                border-radius: 8px;
-                padding: 6px 10px;
+                border-radius: 10px;
+                padding: 8px 14px;
                 color: $text-white;
                 cursor: pointer;
                 font-size: 13px;
+                font-weight: 600;
+                transition: transform 0.2s ease;
+
+                &:hover {
+                    transform: scale(1.05);
+                }
 
                 &.accept {
-                    background-color: #069f7a;
+                    background: linear-gradient(135deg, #10b981, #059669);
                 }
 
                 &.reject,
                 &.end {
-                    background-color: #c43c4e;
+                    background: linear-gradient(135deg, #f43f5e, #e11d48);
                 }
             }
         }
 
         .videoCallPanel {
-            margin: 10px;
-            border-radius: 10px;
-            background: #121212;
-            padding: 10px;
+            margin: 12px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px;
             display: grid;
             grid-template-columns: 1fr;
-            gap: 8px;
+            gap: 12px;
 
             .videoRemote,
             .videoLocal {
                 width: 100%;
-                max-height: 220px;
+                max-height: 240px;
                 object-fit: cover;
-                border-radius: 8px;
+                border-radius: 12px;
                 background: #000;
             }
         }
@@ -369,16 +415,18 @@
             display: flex;
             color: $text-white;
             align-items: center;
-            background-color: $bg-input-area;
-            padding: 12px 8px;
-            border-radius: 0 0 10px 10px;
-            gap: 8px;
+            background: rgba(15, 23, 42, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 16px;
+            border-radius: 0 0 20px 20px;
+            gap: 12px;
 
             .attachMessage {
-                flex: 1;
-                font-size: 18px;
                 display: flex;
-                justify-content: space-evenly;
+                align-items: center;
+                gap: 14px;
+                font-size: 20px;
+                color: $text-gray-secondary;
 
                 .fa-face-smile,
                 .fa-file {
@@ -387,32 +435,51 @@
 
                     &:hover {
                         transform: scale(1.2);
-                        color: $text-gray-light;
+                        color: $highlight-yellow;
                     }
                 }
             }
 
             .inputText {
-                flex: 6;
-                background-color: $bg-overlay;
-                padding: 10px 14px;
-                border: none;
-                border-radius: 10px;
+                flex: 1;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                padding: 12px 18px;
+                border-radius: 24px;
                 font-size: 15px;
                 color: $text-white;
                 min-width: 0;
+                outline: none;
+                transition: all 0.3s ease;
+
+                &:focus {
+                    background: rgba(255, 255, 255, 0.08);
+                    border-color: rgba(255, 253, 2, 0.5);
+                    box-shadow: 0 0 0 3px rgba(255, 253, 2, 0.15);
+                }
+
+                &::placeholder {
+                    color: $text-gray-secondary;
+                }
             }
 
             .fa-paper-plane {
                 font-size: 18px;
-                flex: 1;
+                color: #1a1a1a;
+                background: $accent-gradient;
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
                 display: flex;
+                align-items: center;
                 justify-content: center;
                 cursor: pointer;
-                transition: color 0.2s;
+                transition: all 0.25s ease;
+                box-shadow: 0 4px 12px rgba(255, 253, 2, 0.3);
 
                 &:hover {
-                    color: $text-gray-light;
+                    transform: scale(1.08);
+                    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.6);
                 }
             }
         }
@@ -420,38 +487,26 @@
 }
 
 .choosenFriend {
-    background-color: $bg-overlay !important;
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(99, 102, 241, 0.4) !important;
 }
 
 @include up(sm) {
     .messagePage {
-        padding: 18px;
-        gap: 18px;
+        padding: 20px;
+        gap: 20px;
         grid-template-rows: minmax(280px, 42vh) minmax(0, 1fr);
 
         .messageList {
             .messageTitle {
-                padding: 20px 24px;
+                padding: 18px 24px;
                 font-size: 20px;
             }
 
             .inputSearch {
                 .searchMess {
-                    width: 85%;
-                    padding: 10px 40px;
+                    padding: 10px 42px;
                 }
-
-                .fa-magnifying-glass {
-                    left: 8%;
-                }
-
-                .fa-sliders {
-                    right: 8%;
-                }
-            }
-
-            .listFriendMessage {
-                height: auto;
             }
         }
     }
@@ -459,8 +514,8 @@
 
 @include up(md) {
     .messagePage {
-        padding: 20px;
-        grid-template-columns: 1fr 2fr;
+        padding: 24px;
+        grid-template-columns: 340px 1fr;
         grid-template-rows: 1fr;
         height: calc(100vh - 72px);
         max-height: calc(100vh - 72px);
@@ -469,44 +524,46 @@
             min-height: 0;
 
             .headerMessage {
+                padding: 16px 24px;
+
                 .friendInfo {
                     .avaFriend {
-                        width: 50px;
-                        height: 50px;
+                        width: 48px;
+                        height: 48px;
                     }
 
                     .nameFriend {
-                        font-size: 20px;
+                        font-size: 18px;
                     }
                 }
 
                 .actions {
                     font-size: 20px;
+                    gap: 28px;
                 }
             }
 
             .chatMessgae p {
-                max-width: 40%;
+                max-width: 65%;
             }
 
             .inputMessage {
-                padding: 20px 0;
-                gap: 0;
+                padding: 16px 24px;
 
                 .attachMessage {
-                    font-size: 24px;
-                    justify-content: space-around;
+                    font-size: 22px;
+                    gap: 16px;
                 }
 
                 .inputText {
-                    font-size: 16px;
+                    font-size: 15px;
                     padding: 12px 20px;
                 }
 
                 .fa-paper-plane {
-                    font-size: 24px;
+                    font-size: 18px;
                 }
             }
         }
     }
-}
+}
