@@ -21,6 +21,7 @@ exports.register = asyncHandler(async (req, res) => {
   const result = await authService.register({
     username: req.validated.username,
     fullname: req.validated.fullname,
+    email: req.validated.email,
     password: req.validated.password,
     confirmPassword: req.validated.confirmPassword,
     avatar: req.validated.avatar,
@@ -91,17 +92,28 @@ exports.getFollowing = asyncHandler(async (req, res) => {
   res.json(following);
 });
 
-//[POST] /api/users/forgot-password
+// [POST] /api/users/forgot-password
 exports.forgotPassword = asyncHandler(async (req, res) => {
-  const result = await userService.forgotPassword(req.validated.username);
+  const result = await authService.forgotPassword(req.validated.identifier);
   res.json(result);
 });
 
-//[POST] /api/users/reset-password
+// [POST] /api/users/verify-otp
+exports.verifyOtp = asyncHandler(async (req, res) => {
+  const result = await authService.verifyOtp({
+    email: req.validated.email,
+    otp: req.validated.otp,
+  });
+  res.json(result);
+});
+
+// [POST] /api/users/reset-password
 exports.resetPassword = asyncHandler(async (req, res) => {
-  const result = await userService.resetPassword({
-    token: req.validated.token,
-    password: req.validated.password,
+  const result = await authService.resetPassword({
+    email: req.validated.email,
+    resetToken: req.validated.resetToken,
+    newPassword: req.validated.newPassword,
+    confirmPassword: req.validated.confirmPassword,
   });
 
   res.json(result);

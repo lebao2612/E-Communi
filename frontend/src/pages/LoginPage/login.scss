@@ -384,6 +384,57 @@
                     }
                 }
 
+                .stepperBadge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 4px 12px;
+                    background: rgba(234, 179, 8, 0.12);
+                    border: 1px solid rgba(234, 179, 8, 0.3);
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: $highlight-yellow;
+                    margin-bottom: 12px;
+                }
+
+                .otpInputWrapper input {
+                    text-align: center;
+                    font-size: 24px;
+                    font-weight: 800;
+                    letter-spacing: 8px;
+                    font-family: monospace;
+                    color: $highlight-yellow;
+                }
+
+                .resendBox {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 6px;
+                    font-size: 13px;
+                    color: $text-gray-secondary;
+
+                    .resendBtn {
+                        background: none;
+                        border: none;
+                        color: $highlight-yellow;
+                        font-weight: 600;
+                        cursor: pointer;
+                        padding: 0;
+
+                        &:hover {
+                            text-decoration: underline;
+                        }
+
+                        &:disabled {
+                            color: $text-gray-muted;
+                            cursor: not-allowed;
+                            text-decoration: none;
+                        }
+                    }
+                }
+
                 // SUCCESS CARD (FORGOT PASSWORD)
                 .successCard {
                     text-align: center;

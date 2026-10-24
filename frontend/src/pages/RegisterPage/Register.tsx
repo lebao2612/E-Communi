@@ -9,6 +9,7 @@ const Register = () => {
 
   const [username, setUsername] = useState('');
   const [fullname, setFullname] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -22,8 +23,13 @@ const Register = () => {
     if (e) e.preventDefault();
     setError(null);
 
-    if (!username.trim() || !fullname.trim() || !password || !confirmPassword) {
+    if (!username.trim() || !fullname.trim() || !email.trim() || !password || !confirmPassword) {
       setError('Vui lòng điền đầy đủ tất cả các trường');
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError('Định dạng email không hợp lệ');
       return;
     }
 
@@ -43,6 +49,7 @@ const Register = () => {
       await api.post('/api/users/register', {
         username: username.trim(),
         fullname: fullname.trim(),
+        email: email.trim(),
         password,
         confirmPassword
       });
@@ -147,6 +154,24 @@ const Register = () => {
                     value={fullname}
                     onChange={e => setFullname(e.target.value)}
                     placeholder="Nhập họ và tên hiển thị"
+                  />
+                </div>
+              </div>
+
+              <div className='inputGroup'>
+                <label htmlFor='reg-email'>Địa chỉ Email</label>
+                <div className='inputWrapper'>
+                  <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  <input
+                    type="email"
+                    id="reg-email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="Nhập email để nhận thông báo và khôi phục"
+                    autoComplete="email"
                   />
                 </div>
               </div>

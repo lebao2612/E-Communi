@@ -30,7 +30,7 @@ const validateUsernameParam = (req, res, next) => {
 };
 
 const validateRegisterBody = (req, res, next) => {
-    const { username, fullname, password, confirmPassword, avatar } = req.body;
+    const { username, fullname, email, password, confirmPassword, avatar } = req.body;
 
     if (!username || !fullname || !password || !confirmPassword) {
         return next(createHttpError('Missing fields', 400));
@@ -40,6 +40,7 @@ const validateRegisterBody = (req, res, next) => {
         ...(req.validated || {}),
         username,
         fullname,
+        email,
         password,
         confirmPassword,
         avatar,
@@ -110,31 +111,61 @@ const validateUserIdParam = (req, res, next) => {
 };
 
 const validateForgotPasswordBody = (req, res, next) => {
-    const { username } = req.body;
+    const identifier = req.body.identifier || req.body.email || req.body.username;
 
-    if (!username) {
-        return next(createHttpError('Username is required!', 400));
+    if (!identifier || typeof identifier !== 'string' || !identifier.trim()) {
+        return next(createHttpError('Vui lòng nhập email hoặc tên đăng nhập', 400));
     }
 
     req.validated = {
         ...(req.validated || {}),
-        username,
+        identifier: identifier.trim(),
+    };
+
+    next();
+};
+
+const validateVerifyOtpBody = (req, res, next) => {
+    const { email, otp } = req.body;
+
+    if (!email || typeof email !== 'string' || !email.trim()) {
+        return next(createHttpError('Email là bắt buộc', 400));
+    }
+
+    if (!otp || !String(otp).trim()) {
+        return next(createHttpError('Mã OTP là bắt buộc', 400));
+    }
+
+    req.validated = {
+        ...(req.validated || {}),
+        email: email.trim().toLowerCase(),
+        otp: String(otp).trim(),
     };
 
     next();
 };
 
 const validateResetPasswordBody = (req, res, next) => {
-    const { token, password } = req.body;
+    const { email, resetToken, newPassword, confirmPassword } = req.body;
 
-    if (!token || !password) {
-        return next(createHttpError('Token and password are required!', 400));
+    if (!email || !resetToken || !newPassword || !confirmPassword) {
+        return next(createHttpError('Vui lòng điền đầy đủ tất cả các trường', 400));
+    }
+
+    if (newPassword !== confirmPassword) {
+        return next(createHttpError('Mật khẩu xác nhận không khớp', 400));
+    }
+
+    if (newPassword.length < 6) {
+        return next(createHttpError('Mật khẩu mới phải có ít nhất 6 ký tự', 400));
     }
 
     req.validated = {
         ...(req.validated || {}),
-        token,
-        password,
+        email: email.trim().toLowerCase(),
+        resetToken: String(resetToken).trim(),
+        newPassword,
+        confirmPassword,
     };
 
     next();
@@ -148,5 +179,6 @@ module.exports = {
     validateUpdateUserBody,
     validateUserIdParam,
     validateForgotPasswordBody,
+    validateVerifyOtpBody,
     validateResetPasswordBody,
 };
