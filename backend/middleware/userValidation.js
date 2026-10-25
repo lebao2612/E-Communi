@@ -50,20 +50,21 @@ const validateRegisterBody = (req, res, next) => {
 };
 
 const validateLoginBody = (req, res, next) => {
-    const { username, password } = req.body;
+    const identifier = req.body.identifier || req.body.username || req.body.email;
 
-    if (!username) {
-        return next(createHttpError('Username is required', 400));
+    if (!identifier || typeof identifier !== 'string' || !identifier.trim()) {
+        return next(createHttpError('Vui lòng nhập tên đăng nhập hoặc email', 400));
     }
 
-    if (typeof password !== 'string' || !password) {
-        return next(createHttpError('Password is required', 400));
+    if (typeof req.body.password !== 'string' || !req.body.password) {
+        return next(createHttpError('Mật khẩu là bắt buộc', 400));
     }
 
     req.validated = {
         ...(req.validated || {}),
-        username,
-        password,
+        identifier: identifier.trim(),
+        username: identifier.trim(),
+        password: req.body.password,
     };
 
     next();

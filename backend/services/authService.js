@@ -47,15 +47,26 @@ const register = async ({ username, fullname, email, password, confirmPassword, 
     };
 };
 
-const login = async ({ username, password }) => {
-    const user = await User.findOne({ username });
+const login = async ({ identifier, username, password }) => {
+    const loginId = (identifier || username || '').trim();
+    if (!loginId) {
+        throw createHttpError('Vui lòng cung cấp tên đăng nhập hoặc email', 400);
+    }
+
+    const user = await User.findOne({
+        $or: [
+            { username: loginId },
+            { email: loginId.toLowerCase() }
+        ]
+    });
+
     if (!user) {
-        throw createHttpError('User not found', 404);
+        throw createHttpError('Tài khoản không tồn tại', 404);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        throw createHttpError('Invalid password', 401);
+        throw createHttpError('Mật khẩu không chính xác', 401);
     }
 
     const accessToken = generateAccessToken(user._id);

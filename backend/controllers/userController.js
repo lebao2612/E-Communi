@@ -33,6 +33,7 @@ exports.register = asyncHandler(async (req, res) => {
 //[POST] /api/users/login
 exports.login = asyncHandler(async (req, res) => {
   const result = await authService.login({
+    identifier: req.validated.identifier || req.validated.username,
     username: req.validated.username,
     password: req.validated.password,
   });

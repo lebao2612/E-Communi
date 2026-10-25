@@ -24,7 +24,7 @@ const Login = () => {
   const handleLogin = async (e?: FormEvent) => {
     if (e) e.preventDefault();
     if (!username.trim() || !password) {
-      setError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu');
+      setError('Vui lòng nhập tên đăng nhập hoặc email và mật khẩu');
       return;
     }
 
@@ -111,7 +111,7 @@ const Login = () => {
 
             <form onSubmit={handleLogin} className='authForm'>
               <div className='inputGroup'>
-                <label htmlFor='username'>Tên đăng nhập</label>
+                <label htmlFor='username'>Tên đăng nhập hoặc Email</label>
                 <div className='inputWrapper'>
                   <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -122,7 +122,7 @@ const Login = () => {
                     id="username"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
-                    placeholder="Nhập tên đăng nhập"
+                    placeholder="Nhập tên đăng nhập hoặc email"
                     autoComplete="username"
                   />
                 </div>
