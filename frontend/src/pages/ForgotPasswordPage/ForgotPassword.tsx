@@ -347,8 +347,10 @@ const ForgotPassword = () => {
                                         />
                                         <button
                                             type="button"
-                                            className="passwordToggle"
+                                            className="togglePasswordBtn"
                                             onClick={() => setShowNewPassword(!showNewPassword)}
+                                            tabIndex={-1}
+                                            aria-label={showNewPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                                         >
                                             {showNewPassword ? (
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -381,8 +383,10 @@ const ForgotPassword = () => {
                                         />
                                         <button
                                             type="button"
-                                            className="passwordToggle"
+                                            className="togglePasswordBtn"
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            tabIndex={-1}
+                                            aria-label={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                                         >
                                             {showConfirmPassword ? (
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
