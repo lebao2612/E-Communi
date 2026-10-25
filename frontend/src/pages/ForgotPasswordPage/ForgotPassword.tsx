@@ -434,7 +434,6 @@ const ForgotPassword = () => {
                                     type="button"
                                     className="submitButton"
                                     onClick={() => navigate('/login')}
-                                    style={{ marginTop: '24px' }}
                                 >
                                     Đăng nhập ngay
                                 </button>

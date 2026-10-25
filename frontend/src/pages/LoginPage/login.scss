@@ -442,34 +442,67 @@
                     padding: 20px 0;
 
                     .successIcon {
-                        width: 56px;
-                        height: 56px;
+                        width: 64px;
+                        height: 64px;
                         background: rgba(34, 197, 94, 0.12);
+                        border: 2px solid rgba(34, 197, 94, 0.3);
                         border-radius: 50%;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        margin: 0 auto 16px auto;
+                        margin: 0 auto 18px auto;
                         color: #22c55e;
+                        box-shadow: 0 0 24px rgba(34, 197, 94, 0.2);
 
                         svg {
-                            width: 28px;
-                            height: 28px;
+                            width: 32px;
+                            height: 32px;
                         }
                     }
 
                     h3 {
-                        font-size: 20px;
-                        font-weight: 700;
+                        font-size: 22px;
+                        font-weight: 800;
                         color: $text-white;
-                        margin: 0 0 8px 0;
+                        margin: 0 0 10px 0;
                     }
 
                     p {
                         font-size: 14px;
                         color: $text-gray-primary;
-                        line-height: 1.5;
+                        line-height: 1.6;
                         margin: 0;
+                        max-width: 380px;
+                        margin: 0 auto;
+                    }
+
+                    .submitButton {
+                        margin-top: 28px;
+                        width: 100%;
+                        padding: 14px 24px;
+                        background: $highlight-yellow;
+                        color: #1a1a1a;
+                        border: none;
+                        border-radius: 12px;
+                        font-size: 15px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.25s ease;
+                        box-shadow: 0 4px 16px rgba(234, 179, 8, 0.25);
+
+                        &:hover {
+                            background: lighten($highlight-yellow, 5%);
+                            transform: translateY(-2px);
+                            box-shadow: 0 8px 24px rgba(234, 179, 8, 0.35);
+                        }
+
+                        &:active {
+                            transform: translateY(0);
+                            box-shadow: 0 2px 8px rgba(234, 179, 8, 0.2);
+                        }
                     }
                 }
 
