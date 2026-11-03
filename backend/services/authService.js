@@ -175,8 +175,8 @@ const forgotPassword = async (identifier) => {
     try {
         await sendOtpEmail(user.email, otpCode, user.fullname);
     } catch (mailErr) {
-        console.error('❌ Lỗi gửi email qua Nodemailer:', mailErr.message);
-        throw createHttpError('Không thể gửi email lúc này. Vui lòng kiểm tra lại cấu hình EMAIL_USER và EMAIL_PASS hoặc thử lại sau.', 500);
+        console.error('❌ Lỗi gửi email OTP:', mailErr.message);
+        throw createHttpError(`Không thể gửi email: ${mailErr.message || 'Lỗi dịch vụ email'}. Vui lòng thử lại sau.`, 500);
     }
 
     // Mask email để trả về cho Frontend (ví dụ: b***@gmail.com)
