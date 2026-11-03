@@ -32,15 +32,20 @@ const validateUsernameParam = (req, res, next) => {
 const validateRegisterBody = (req, res, next) => {
     const { username, fullname, email, password, confirmPassword, avatar } = req.body;
 
-    if (!username || !fullname || !password || !confirmPassword) {
-        return next(createHttpError('Missing fields', 400));
+    if (!username || !fullname || !email || !password || !confirmPassword) {
+        return next(createHttpError('Vui lòng điền đầy đủ tất cả các trường', 400));
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (typeof email !== 'string' || !emailRegex.test(email.trim())) {
+        return next(createHttpError('Định dạng email không hợp lệ', 400));
     }
 
     req.validated = {
         ...(req.validated || {}),
-        username,
-        fullname,
-        email,
+        username: typeof username === 'string' ? username.trim() : username,
+        fullname: typeof fullname === 'string' ? fullname.trim() : fullname,
+        email: email.trim().toLowerCase(),
         password,
         confirmPassword,
         avatar,
@@ -71,7 +76,7 @@ const validateLoginBody = (req, res, next) => {
 };
 
 const validateRefreshTokenBody = (req, res, next) => {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
 
     if (!refreshToken) {
         return next(createHttpError('No refresh token', 401));

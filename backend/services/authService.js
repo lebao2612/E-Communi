@@ -14,17 +14,24 @@ const register = async ({ username, fullname, email, password, confirmPassword, 
         throw createHttpError('Passwords do not match', 400);
     }
 
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-        throw createHttpError('User already exists', 400);
+    if (!email || typeof email !== 'string' || !email.trim()) {
+        throw createHttpError('Email là bắt buộc', 400);
     }
 
-    if (email && email.trim()) {
-        const cleanEmail = email.trim().toLowerCase();
-        const existingEmail = await User.findOne({ email: cleanEmail });
-        if (existingEmail) {
-            throw createHttpError('Email đã được sử dụng bởi tài khoản khác', 400);
-        }
+    const cleanEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+        throw createHttpError('Định dạng email không hợp lệ', 400);
+    }
+
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+        throw createHttpError('Tên đăng nhập đã tồn tại', 400);
+    }
+
+    const existingEmail = await User.findOne({ email: cleanEmail });
+    if (existingEmail) {
+        throw createHttpError('Email đã được sử dụng bởi tài khoản khác', 400);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,12 +39,27 @@ const register = async ({ username, fullname, email, password, confirmPassword, 
     const newUser = new User({
         username,
         fullname,
-        email: email ? email.trim().toLowerCase() : undefined,
+        email: cleanEmail,
         password: hashedPassword,
         avatar: avatar || undefined,
     });
 
-    await newUser.save();
+    try {
+        await newUser.save();
+    } catch (err) {
+        // Bắt lỗi duplicate key từ MongoDB (race condition safety net)
+        if (err.code === 11000) {
+            const field = Object.keys(err.keyPattern || {})[0];
+            if (field === 'email') {
+                throw createHttpError('Email đã được sử dụng bởi tài khoản khác', 400);
+            }
+            if (field === 'username') {
+                throw createHttpError('Tên đăng nhập đã tồn tại', 400);
+            }
+            throw createHttpError('Thông tin đăng ký bị trùng lặp', 400);
+        }
+        throw err;
+    }
 
     const safeUser = await User.findById(newUser._id).select(SAFE_USER_SELECT);
 
@@ -96,6 +118,22 @@ const refreshToken = async (inputRefreshToken) => {
 
     return {
         accessToken: generateAccessToken(user._id),
+    };
+};
+
+const logout = async (inputRefreshToken) => {
+    if (inputRefreshToken) {
+        try {
+            const payload = jwt.verify(inputRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+            if (payload?.userId) {
+                await User.findByIdAndUpdate(payload.userId, { refreshToken: null });
+            }
+        } catch {
+            // Token hết hạn hoặc không hợp lệ thì vẫn tiếp tục hủy phiên
+        }
+    }
+    return {
+        message: 'Đăng xuất thành công',
     };
 };
 
@@ -236,6 +274,7 @@ module.exports = {
     register,
     login,
     refreshToken,
+    logout,
     forgotPassword,
     verifyOtp,
     resetPassword,

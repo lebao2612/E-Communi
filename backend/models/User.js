@@ -14,9 +14,12 @@ const userSchema = new mongoose.Schema({
 
   email: {
     type: String,
+    required: [true, 'Email là bắt buộc'],
     trim: true,
     lowercase: true,
-    default: "",
+    unique: true,
+    sparse: true,
+    default: undefined,
   },
 
   password: {

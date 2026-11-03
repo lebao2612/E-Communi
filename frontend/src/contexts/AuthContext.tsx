@@ -8,7 +8,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   loading: boolean;
   user: User | null;
-  logout: () => void;
+  logout: () => Promise<void> | void;
   markLoggedIn: () => void;
 }
 

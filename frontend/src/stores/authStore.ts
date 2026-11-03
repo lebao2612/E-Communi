@@ -10,7 +10,7 @@ interface AuthState {
   initializing: boolean;
   initializeAuth: () => Promise<void>;
   fetchUser: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   markLoggedIn: () => void;
 }
 
@@ -40,21 +40,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({ initializing: true, loading: true });
 
-    const refreshToken = localStorage.getItem('refreshToken');
-
-    if (!refreshToken) {
-      set({
-        isLoggedIn: false,
-        user: null,
-        loading: false,
-        initialized: true,
-        initializing: false,
-      });
-      return;
-    }
-
     try {
-      const res = await api.post('/api/users/refresh-token', { refreshToken });
+      // Gọi refresh-token với cookie httpOnly tự động đính kèm
+      const res = await api.post('/api/users/refresh-token');
       setAccessToken(res.data.accessToken);
       set({ isLoggedIn: true });
       await fetchUser();
@@ -67,10 +55,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  logout: () => {
-    setAccessToken(null);
-    localStorage.removeItem('refreshToken');
-    set({ isLoggedIn: false, user: null });
+  logout: async () => {
+    try {
+      await api.post('/api/users/logout');
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setAccessToken(null);
+      localStorage.removeItem('refreshToken');
+      set({ isLoggedIn: false, user: null });
+    }
   },
 
   markLoggedIn: () => {

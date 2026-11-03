@@ -1,8 +1,16 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
+const { generalLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 const { swaggerUi, specs } = require('./swagger');
+
+// Cấu hình HTTP Security Headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -20,8 +28,11 @@ app.use(cors({
   credentials: true,
 }));
 
-
+app.use(cookieParser());
 app.use(express.json());
+
+// Áp dụng Rate Limiting chung cho toàn bộ API
+app.use('/api', generalLimiter);
 
 app.get('/health', (req, res) => {
   res.status(200).send('OK');

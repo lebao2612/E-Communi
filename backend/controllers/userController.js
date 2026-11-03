@@ -1,6 +1,7 @@
 const userService = require('../services/userService');
 const authService = require('../services/authService');
 const asyncHandler = require('../utils/asyncHandler');
+const { getRefreshTokenCookieOptions } = require('../utils/cookieOptions');
 
 
 // [GET] /api/users/
@@ -38,12 +39,29 @@ exports.login = asyncHandler(async (req, res) => {
     password: req.validated.password,
   });
 
+  // Lưu refresh token vào httpOnly Cookie an toàn
+  res.cookie('refreshToken', result.refreshToken, getRefreshTokenCookieOptions());
+
   res.json(result);
 });
 
 // [POST] /api/users/refresh-token
 exports.refreshToken = asyncHandler(async (req, res) => {
   const result = await authService.refreshToken(req.validated.refreshToken);
+  res.json(result);
+});
+
+// [POST] /api/users/logout
+exports.logout = asyncHandler(async (req, res) => {
+  const token = req.cookies?.refreshToken || req.body?.refreshToken;
+  const result = await authService.logout(token);
+
+  // Xóa cookie refreshToken
+  res.clearCookie('refreshToken', {
+    ...getRefreshTokenCookieOptions(),
+    maxAge: 0,
+  });
+
   res.json(result);
 });
 

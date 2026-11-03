@@ -40,7 +40,8 @@ const Login = () => {
         }
       );
 
-      localStorage.setItem('refreshToken', res.data.refreshToken);
+      // Token refresh đã được lưu tự động trong httpOnly cookie an toàn
+      localStorage.removeItem('refreshToken');
       setAccessToken(res.data.accessToken);
       markLoggedIn();
 

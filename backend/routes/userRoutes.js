@@ -1,8 +1,8 @@
 const express = require('express');
-const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const authMiddleware = require('../middleware/auth');
+const { authLimiter, otpLimiter } = require('../middleware/rateLimiter');
 const {
     validateUsernameParam,
     validateRegisterBody,
@@ -15,15 +15,6 @@ const {
     validateResetPasswordBody,
 } = require('../middleware/userValidation');
 
-// Giới hạn chống spam gửi email OTP (tối đa 5 lần / 15 phút)
-const forgotPasswordLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
-    message: { error: 'Bạn đã yêu cầu gửi mã quá nhiều lần. Vui lòng thử lại sau 15 phút.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
 router.get('/me', authMiddleware, userController.getMe);
 router.patch('/me', authMiddleware, validateUpdateUserBody, userController.updateUser);
 router.put('/update', authMiddleware, validateUpdateUserBody, userController.updateUser);
@@ -31,18 +22,21 @@ router.put('/update', authMiddleware, validateUpdateUserBody, userController.upd
 // GET /api/users/
 router.get('/', userController.getAllUsers);
 
-// POST /api/users/login
-router.post('/login', validateLoginBody, userController.login);
+// POST /api/users/login (Áp dụng authLimiter chống brute-force)
+router.post('/login', authLimiter, validateLoginBody, userController.login);
 
-// POST /api/users/register
-router.post('/register', validateRegisterBody, userController.register);
+// POST /api/users/register (Áp dụng authLimiter chống spam đăng ký tài khoản)
+router.post('/register', authLimiter, validateRegisterBody, userController.register);
 
 // POST /api/users/refresh-token
 router.post('/refresh-token', validateRefreshTokenBody, userController.refreshToken);
 
+// POST /api/users/logout
+router.post('/logout', userController.logout);
+
 // Luồng Quên mật khẩu & Đặt lại mật khẩu qua OTP
 // POST /api/users/forgot-password
-router.post('/forgot-password', forgotPasswordLimiter, validateForgotPasswordBody, userController.forgotPassword);
+router.post('/forgot-password', otpLimiter, validateForgotPasswordBody, userController.forgotPassword);
 
 // POST /api/users/verify-otp
 router.post('/verify-otp', validateVerifyOtpBody, userController.verifyOtp);

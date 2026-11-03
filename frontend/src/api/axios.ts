@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL
+  baseURL: process.env.REACT_APP_API_URL,
+  withCredentials: true,
 });
 
 let accessToken: string | null = null;
@@ -59,17 +60,12 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        isRefreshing = false;
-        window.dispatchEvent(new Event('auth:logout'));
-        return Promise.reject(err);
-      }
-
       try {
+        // Gửi request refresh-token kèm httpOnly cookie
         const res = await axios.post(
           `${process.env.REACT_APP_API_URL}/api/users/refresh-token`,
-          { refreshToken }
+          {},
+          { withCredentials: true }
         );
 
         accessToken = res.data.accessToken;

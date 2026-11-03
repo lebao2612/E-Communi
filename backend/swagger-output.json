@@ -122,7 +122,13 @@
             "schema": {
               "type": "object",
               "properties": {
+                "identifier": {
+                  "example": "any"
+                },
                 "username": {
+                  "example": "any"
+                },
+                "email": {
                   "example": "any"
                 },
                 "password": {
@@ -158,6 +164,9 @@
                 "fullname": {
                   "example": "any"
                 },
+                "email": {
+                  "example": "any"
+                },
                 "password": {
                   "example": "any"
                 },
@@ -184,6 +193,32 @@
     "/api/users/refresh-token": {
       "post": {
         "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/logout": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/forgot-password": {
+      "post": {
+        "description": "",
         "parameters": [
           {
             "name": "body",
@@ -191,7 +226,79 @@
             "schema": {
               "type": "object",
               "properties": {
-                "refreshToken": {
+                "identifier": {
+                  "example": "any"
+                },
+                "email": {
+                  "example": "any"
+                },
+                "username": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/verify-otp": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                },
+                "otp": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/reset-password": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                },
+                "resetToken": {
+                  "example": "any"
+                },
+                "newPassword": {
+                  "example": "any"
+                },
+                "confirmPassword": {
                   "example": "any"
                 }
               }

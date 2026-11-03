@@ -135,12 +135,13 @@ const Register = () => {
                     onChange={e => setUsername(e.target.value)}
                     placeholder="Nhập tên đăng nhập"
                     autoComplete="username"
+                    required
                   />
                 </div>
               </div>
 
               <div className='inputGroup'>
-                <label htmlFor='fullname'>Họ và tên</label>
+                <label htmlFor='fullname'>Họ và tên <span style={{ color: '#ef4444' }}>*</span></label>
                 <div className='inputWrapper'>
                   <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -154,12 +155,13 @@ const Register = () => {
                     value={fullname}
                     onChange={e => setFullname(e.target.value)}
                     placeholder="Nhập họ và tên hiển thị"
+                    required
                   />
                 </div>
               </div>
 
               <div className='inputGroup'>
-                <label htmlFor='reg-email'>Địa chỉ Email</label>
+                <label htmlFor='reg-email'>Địa chỉ Email <span style={{ color: '#ef4444' }}>*</span></label>
                 <div className='inputWrapper'>
                   <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -170,8 +172,9 @@ const Register = () => {
                     id="reg-email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="Nhập email để nhận thông báo và khôi phục"
+                    placeholder="Nhập email để nhận mã OTP và khôi phục"
                     autoComplete="email"
+                    required
                   />
                 </div>
               </div>
