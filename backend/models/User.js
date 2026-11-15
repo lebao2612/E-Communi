@@ -39,6 +39,11 @@ const userSchema = new mongoose.Schema({
     default: 'local',
   },
 
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
+  },
+
   refreshToken: {
     type: String
   },

@@ -43,6 +43,7 @@ const register = async ({ username, fullname, email, password, confirmPassword, 
         email: cleanEmail,
         password: hashedPassword,
         avatar: avatar || undefined,
+        isEmailVerified: false,
     });
 
     try {
@@ -62,10 +63,30 @@ const register = async ({ username, fullname, email, password, confirmPassword, 
         throw err;
     }
 
+    // Tạo mã OTP 6 số để kích hoạt tài khoản
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = await bcrypt.hash(otpCode, 10);
+
+    await Otp.deleteMany({ email: cleanEmail, type: 'VERIFY_EMAIL' });
+    await Otp.create({
+        email: cleanEmail,
+        otp: hashedOtp,
+        type: 'VERIFY_EMAIL',
+    });
+
+    // Gửi email kích hoạt OTP (bọc try-catch để nếu lỗi mail không làm hỏng tài khoản)
+    try {
+        await sendOtpEmail(cleanEmail, otpCode, fullname, 'VERIFY_EMAIL');
+    } catch (mailError) {
+        console.error('[Register] Failed to send verification OTP email:', mailError.message);
+    }
+
     const safeUser = await User.findById(newUser._id).select(SAFE_USER_SELECT);
 
     return {
-        message: 'User registered successfully',
+        message: 'Đăng ký tài khoản thành công! Vui lòng kiểm tra email để nhận mã OTP kích hoạt.',
+        requireEmailVerification: true,
+        email: cleanEmail,
         user: safeUser,
     };
 };
@@ -90,6 +111,14 @@ const login = async ({ identifier, username, password }) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
         throw createHttpError('Mật khẩu không chính xác', 401);
+    }
+
+    // Kiểm tra tài khoản đã kích hoạt email chưa (ngoại trừ tài khoản đăng nhập Google)
+    if (user.authProvider !== 'google' && user.isEmailVerified === false) {
+        throw createHttpError('Tài khoản của bạn chưa được kích hoạt qua email. Vui lòng xác thực mã OTP để tiếp tục.', 403, {
+            requireEmailVerification: true,
+            email: user.email,
+        });
     }
 
     const accessToken = generateAccessToken(user._id);
@@ -364,6 +393,10 @@ const googleLogin = async (idToken) => {
             user.avatar = avatar;
             isModified = true;
         }
+        if (!user.isEmailVerified) {
+            user.isEmailVerified = true;
+            isModified = true;
+        }
 
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefreshToken(user._id);
@@ -465,6 +498,7 @@ const googleCompleteRegistration = async ({ googleSetupToken, username, fullname
         bio: (bio || '').trim(),
         googleId: payload.googleId,
         authProvider: 'google',
+        isEmailVerified: true,
     });
 
     try {
@@ -492,6 +526,108 @@ const googleCompleteRegistration = async ({ googleSetupToken, username, fullname
     };
 };
 
+/**
+ * Xác thực mã OTP để kích hoạt email đăng ký (Task 1.4)
+ */
+const verifyEmailOtp = async ({ email, otp }) => {
+    if (!email || !otp) {
+        throw createHttpError('Vui lòng cung cấp đầy đủ email và mã OTP', 400);
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOtp = otp.toString().trim();
+
+    if (!/^\d{6}$/.test(cleanOtp)) {
+        throw createHttpError('Mã OTP phải bao gồm 6 chữ số', 400);
+    }
+
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+        throw createHttpError('Không tìm thấy tài khoản với email này', 404);
+    }
+
+    if (user.isEmailVerified) {
+        throw createHttpError('Tài khoản này đã được kích hoạt trước đó. Vui lòng đăng nhập.', 400);
+    }
+
+    const latestOtp = await Otp.findOne({
+        email: cleanEmail,
+        type: 'VERIFY_EMAIL',
+    }).sort({ createdAt: -1 });
+
+    if (!latestOtp) {
+        throw createHttpError('Mã xác nhận đã hết hạn hoặc không tồn tại. Vui lòng bấm gửi lại mã mới.', 400);
+    }
+
+    const isMatch = await bcrypt.compare(cleanOtp, latestOtp.otp);
+    if (!isMatch) {
+        throw createHttpError('Mã OTP không chính xác. Vui lòng kiểm tra lại.', 400);
+    }
+
+    // Kích hoạt tài khoản
+    user.isEmailVerified = true;
+
+    // Tự động cấp phiên đăng nhập luôn
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // Xóa OTP kích hoạt đã dùng
+    await Otp.deleteMany({ email: cleanEmail, type: 'VERIFY_EMAIL' });
+
+    const safeUser = await User.findById(user._id).select(SAFE_USER_SELECT);
+
+    return {
+        message: 'Kích hoạt tài khoản thành công! Chào mừng bạn đến với BChat.',
+        accessToken,
+        refreshToken,
+        user: safeUser,
+    };
+};
+
+/**
+ * Gửi lại mã OTP kích hoạt tài khoản
+ */
+const resendVerificationOtp = async ({ email }) => {
+    if (!email || typeof email !== 'string' || !email.trim()) {
+        throw createHttpError('Vui lòng cung cấp địa chỉ email', 400);
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail });
+
+    if (!user) {
+        throw createHttpError('Không tìm thấy tài khoản với email này', 404);
+    }
+
+    if (user.isEmailVerified) {
+        throw createHttpError('Tài khoản này đã được kích hoạt trước đó. Vui lòng đăng nhập.', 400);
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = await bcrypt.hash(otpCode, 10);
+
+    await Otp.deleteMany({ email: cleanEmail, type: 'VERIFY_EMAIL' });
+    await Otp.create({
+        email: cleanEmail,
+        otp: hashedOtp,
+        type: 'VERIFY_EMAIL',
+    });
+
+    try {
+        await sendOtpEmail(cleanEmail, otpCode, user.fullname || user.username, 'VERIFY_EMAIL');
+    } catch (mailError) {
+        console.error('[Resend Verification] Failed to send email:', mailError.message);
+        throw createHttpError('Không thể gửi email lúc này. Vui lòng thử lại sau ít phút.', 500);
+    }
+
+    return {
+        message: 'Mã xác nhận OTP mới đã được gửi tới email của bạn.',
+        email: cleanEmail,
+    };
+};
+
 module.exports = {
     register,
     login,
@@ -502,4 +638,6 @@ module.exports = {
     resetPassword,
     googleLogin,
     googleCompleteRegistration,
+    verifyEmailOtp,
+    resendVerificationOtp,
 };

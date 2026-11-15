@@ -60,4 +60,11 @@ router.post('/google-login', authLimiter, userController.googleLogin);
 // POST /api/users/google-complete
 router.post('/google-complete', authLimiter, userController.googleCompleteRegistration);
 
+// Xác thực email kích hoạt tài khoản OTP (Task 1.4)
+// POST /api/users/verify-email
+router.post('/verify-email', otpLimiter, userController.verifyEmail);
+
+// POST /api/users/resend-verification-otp
+router.post('/resend-verification-otp', otpLimiter, userController.resendVerificationOtp);
+
 module.exports = router;

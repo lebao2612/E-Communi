@@ -606,3 +606,60 @@
   }
 }
 
+.targetEmailHighlight {
+  color: $highlight-yellow;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.secondaryActionBtn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  margin-top: 14px;
+  font-size: 13px;
+  text-align: center;
+  width: 100%;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #ffffff;
+    text-decoration: underline;
+  }
+}
+
+.activateAccountPrompt {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  span {
+    font-size: 13px;
+    color: #fef08a;
+  }
+
+  .activateBtn {
+    background: $highlight-yellow;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+

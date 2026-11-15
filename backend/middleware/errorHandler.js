@@ -11,6 +11,13 @@ const errorHandler = (err, req, res, next) => {
         message,
     };
 
+    if (err.requireEmailVerification !== undefined) {
+        payload.requireEmailVerification = err.requireEmailVerification;
+    }
+    if (err.email) {
+        payload.email = err.email;
+    }
+
     if (err.details && typeof err.details === 'object') {
         Object.assign(payload, err.details);
     }

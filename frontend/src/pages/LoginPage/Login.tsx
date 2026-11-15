@@ -18,6 +18,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   // State cho quy trình Hoàn tất thông tin Google (TH2)
@@ -38,6 +39,7 @@ const Login = () => {
     }
 
     setError(null);
+    setUnverifiedEmail(null);
     setLoading(true);
 
     try {
@@ -56,6 +58,9 @@ const Login = () => {
 
       navigate('/');
     } catch (err: any) {
+      if (err.response?.data?.requireEmailVerification) {
+        setUnverifiedEmail(err.response.data.email || username.trim());
+      }
       setError(err.response?.data?.error || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setLoading(false);
@@ -188,6 +193,19 @@ const Login = () => {
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                   </svg>
                   <span>{error}</span>
+                </div>
+              )}
+
+              {unverifiedEmail && (
+                <div className="activateAccountPrompt">
+                  <span>Tài khoản chưa kích hoạt email.</span>
+                  <button
+                    type="button"
+                    className="activateBtn"
+                    onClick={() => navigate('/register', { state: { email: unverifiedEmail, step: 'VERIFY_OTP' } })}
+                  >
+                    Kích hoạt ngay
+                  </button>
                 </div>
               )}
 

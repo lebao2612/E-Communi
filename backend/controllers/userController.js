@@ -190,3 +190,27 @@ exports.googleCompleteRegistration = asyncHandler(async (req, res) => {
   });
 });
 
+// [POST] /api/users/verify-email (Kích hoạt email OTP sau khi đăng ký)
+exports.verifyEmail = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+  const result = await authService.verifyEmailOtp({ email, otp });
+
+  // Set cookie refreshToken
+  res.cookie('refreshToken', result.refreshToken, getRefreshTokenCookieOptions());
+
+  res.json({
+    message: result.message,
+    accessToken: result.accessToken,
+    user: result.user,
+  });
+});
+
+// [POST] /api/users/resend-verification-otp (Gửi lại mã OTP kích hoạt)
+exports.resendVerificationOtp = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const result = await authService.resendVerificationOtp({ email });
+
+  res.json(result);
+});
+
+

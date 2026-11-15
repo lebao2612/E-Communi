@@ -96,7 +96,7 @@ pie title Tỷ lệ hoàn thiện tổng thể hệ thống (Cập nhật 11/202
 - [x] Chuyển Refresh Token sang `httpOnly, Secure, SameSite` Cookie & Triển khai Refresh Token Rotation chống Replay Attack (Task 1.1).
 - [x] Tối ưu câu lệnh Follow/Unfollow dùng `$addToSet` và `$pull` chống Race Condition & chặn tự follow (Task 1.2).
 - [x] Tích hợp Google OAuth 2.0 (Google Login 1-click & Hoàn tất Profile Username) (Task 1.3).
-- [ ] Xác thực Email khi Đăng ký mới (Verify Email OTP) (Task 1.4).
+- [x] Xác thực Email khi Đăng ký mới (Verify Email OTP) & Tự động kích hoạt đăng nhập (Task 1.4).
 
 ### 🎯 Giai Đoạn 2: Nâng Cấp Trải Nghiệm Bài Viết & Bình Luận (Tuần tiếp theo)
 - [ ] Nâng cấp Schema `Post` và UI hỗ trợ Album nhiều ảnh (Carousel / Grid).

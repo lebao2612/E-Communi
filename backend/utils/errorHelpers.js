@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
 
-const createHttpError = (message, statusCode = 500) => {
+const createHttpError = (message, statusCode = 500, extra = {}) => {
     const error = new Error(message);
     error.statusCode = statusCode;
+    if (extra && typeof extra === 'object') {
+        Object.assign(error, extra);
+    }
     return error;
 };
 

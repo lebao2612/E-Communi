@@ -150,7 +150,10 @@ sequenceDiagram
      - **TH1 (Tài khoản đã tồn tại):** Đăng nhập vào thẳng trong 0.5s, cấp `accessToken` và cập nhật `refreshToken` vào `httpOnly Cookie`.
      - **TH2 (Tài khoản mới toanh):** Cấp `googleSetupToken` tạm thời (15m) $\rightarrow$ Frontend bật modal **Hoàn tất hồ sơ** để người dùng chọn `username` độc nhất, chỉnh họ tên và viết tiểu sử ngắn $\rightarrow$ Gọi `/google-complete` tạo tài khoản chính thức.
    - Xác thực an toàn qua Google OAuth2 tokeninfo endpoint, không phụ thuộc thư viện ngoài, hoạt động mượt mà với React 19 và Google Identity Services (GIS).
-4. **Task 1.4: Xác thực Email khi đăng ký tài khoản mới (Verify Email)**:
-   - Tái sử dụng `emailService` và model `Otp` với `type: 'VERIFY_EMAIL'` để kích hoạt tài khoản sau khi đăng ký, loại bỏ hoàn toàn tài khoản ảo (bot accounts).
+- [x] **Task 1.4: Xác thực Email khi đăng ký tài khoản mới (Verify Email OTP)**:
+   - Tái sử dụng `emailService` (Resend HTTPS API) và model `Otp` với `type: 'VERIFY_EMAIL'` để kích hoạt tài khoản (`isEmailVerified = true`), loại bỏ tài khoản rác/ảo.
+   - Form đăng ký phân luồng 2 bước mượt mà: Đăng ký thông tin $\rightarrow$ Nhập mã OTP 6 số kích hoạt (kèm đếm ngược 60s, gửi lại mã).
+   - Tự động đăng nhập vào thẳng Feed ngay sau khi nhập đúng OTP, không bắt người dùng phải đăng nhập lại lần 2.
+   - Trang Đăng nhập phát hiện tài khoản chưa kích hoạt và cung cấp nút bấm "Kích hoạt ngay".
 5. **Đổi mật khẩu từ trang Cài đặt (Change Password in Profile Setting)**:
    - Cho phép người dùng đang đăng nhập đổi mật khẩu bằng cách nhập: Mật khẩu hiện tại $\rightarrow$ Mật khẩu mới.

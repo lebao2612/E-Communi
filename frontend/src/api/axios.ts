@@ -48,7 +48,9 @@ api.interceptors.response.use(
       originalRequest?.url?.includes('/api/users/google-complete') ||
       originalRequest?.url?.includes('/api/users/forgot-password') ||
       originalRequest?.url?.includes('/api/users/verify-otp') ||
-      originalRequest?.url?.includes('/api/users/reset-password');
+      originalRequest?.url?.includes('/api/users/reset-password') ||
+      originalRequest?.url?.includes('/api/users/verify-email') ||
+      originalRequest?.url?.includes('/api/users/resend-verification-otp');
     const isAuthFailure = (status === 401 || (status === 403 && errorMessage === 'Invalid token')) && !isAuthRoute;
 
     if (isAuthFailure && !originalRequest?._retry && !isRefreshRequest) {

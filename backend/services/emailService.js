@@ -1,5 +1,52 @@
 const nodemailer = require('nodemailer');
 
+const buildVerificationEmailHtml = (otpCode, fullname = 'bạn') => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
+    .container { max-width: 500px; margin: 0 auto; background-color: #1e1e1e; border-radius: 16px; border: 1px solid #333; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+    .header { background: linear-gradient(135deg, #2d240e, #1a1a1a); padding: 30px 25px; text-align: center; border-bottom: 2px solid #eab308; }
+    .brand { font-size: 30px; font-weight: 800; color: #eab308; letter-spacing: 1px; }
+    .tagline { font-size: 13px; color: #aaa; margin-top: 6px; }
+    .content { padding: 30px; line-height: 1.6; }
+    .greeting { font-size: 19px; font-weight: 700; color: #ffffff; margin-bottom: 14px; }
+    .otp-box { background: linear-gradient(180deg, #161616, #0e0e0e); border: 2px dashed #eab308; border-radius: 12px; padding: 20px; text-align: center; margin: 25px 0; }
+    .otp-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .otp-code { font-size: 38px; font-weight: 800; color: #eab308; letter-spacing: 10px; font-family: monospace; }
+    .warning { font-size: 13px; color: #888; margin-top: 25px; border-top: 1px solid #2a2a2a; padding-top: 15px; }
+    .footer { padding: 18px; text-align: center; font-size: 12px; color: #666; background-color: #141414; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">BChat</div>
+      <div class="tagline">Mạng xã hội & Trò chuyện trực tuyến</div>
+    </div>
+    <div class="content">
+      <div class="greeting">Chào mừng ${fullname || 'bạn'} gia nhập BChat! 🎉</div>
+      <p>Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất kích hoạt tài khoản và bảo vệ quyền riêng tư của bạn, vui lòng nhập mã xác thực (OTP) dưới đây:</p>
+      <div class="otp-box">
+        <div class="otp-label">MÃ XÁC THỰC KÍCH HOẠT</div>
+        <div class="otp-code">${otpCode}</div>
+      </div>
+      <p>Mã xác thực có hiệu lực trong vòng <strong>10 phút</strong>. Tuyệt đối không chia sẻ mã này cho bất kỳ ai.</p>
+      <div class="warning">
+        Nếu bạn không thực hiện đăng ký tài khoản tại BChat, vui lòng bỏ qua email này.
+      </div>
+    </div>
+    <div class="footer">
+      © 2026 BChat (E-Community). Mọi quyền được bảo lưu.
+    </div>
+  </div>
+</body>
+</html>
+`;
+
 const buildOtpEmailHtml = (otpCode, fullname = 'bạn') => `
 <!DOCTYPE html>
 <html>
@@ -45,12 +92,20 @@ const buildOtpEmailHtml = (otpCode, fullname = 'bạn') => `
 `;
 
 // Phương án 1: Gửi qua Resend HTTP API (Port 443 - Không bao giờ bị Render chặn)
-const sendViaResend = async (toEmail, otpCode, fullname) => {
+const sendViaResend = async (toEmail, otpCode, fullname, type = 'FORGOT_PASSWORD') => {
     const apiKey = process.env.RESEND_API_KEY.trim();
     const fromSender = process.env.EMAIL_FROM?.trim() || 'BChat Security <onboarding@resend.dev>';
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+    const isVerify = type === 'VERIFY_EMAIL';
+    const subject = isVerify
+        ? `[BChat] Mã xác nhận kích hoạt tài khoản: ${otpCode}`
+        : `[BChat] Mã xác nhận khôi phục mật khẩu: ${otpCode}`;
+    const html = isVerify
+        ? buildVerificationEmailHtml(otpCode, fullname)
+        : buildOtpEmailHtml(otpCode, fullname);
 
     try {
         const response = await fetch('https://api.resend.com/emails', {
@@ -62,8 +117,8 @@ const sendViaResend = async (toEmail, otpCode, fullname) => {
             body: JSON.stringify({
                 from: fromSender,
                 to: [toEmail],
-                subject: `[BChat] Mã xác nhận khôi phục mật khẩu: ${otpCode}`,
-                html: buildOtpEmailHtml(otpCode, fullname),
+                subject,
+                html,
             }),
             signal: controller.signal,
         });
@@ -79,12 +134,20 @@ const sendViaResend = async (toEmail, otpCode, fullname) => {
 };
 
 // Phương án 2: Gửi qua Brevo HTTP API (Port 443 - Miễn phí 300 mail/ngày, gửi được mọi email)
-const sendViaBrevo = async (toEmail, otpCode, fullname) => {
+const sendViaBrevo = async (toEmail, otpCode, fullname, type = 'FORGOT_PASSWORD') => {
     const apiKey = process.env.BREVO_API_KEY.trim();
     const senderEmail = process.env.EMAIL_USER?.trim() || 'btaldforever@gmail.com';
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const isVerify = type === 'VERIFY_EMAIL';
+    const subject = isVerify
+        ? `[BChat] Mã xác nhận kích hoạt tài khoản: ${otpCode}`
+        : `[BChat] Mã xác nhận khôi phục mật khẩu: ${otpCode}`;
+    const htmlContent = isVerify
+        ? buildVerificationEmailHtml(otpCode, fullname)
+        : buildOtpEmailHtml(otpCode, fullname);
 
     try {
         const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -102,8 +165,8 @@ const sendViaBrevo = async (toEmail, otpCode, fullname) => {
                 to: [
                     { email: toEmail, name: fullname || 'User' }
                 ],
-                subject: `[BChat] Mã xác nhận khôi phục mật khẩu: ${otpCode}`,
-                htmlContent: buildOtpEmailHtml(otpCode, fullname),
+                subject,
+                htmlContent,
             }),
             signal: controller.signal,
         });
@@ -119,7 +182,7 @@ const sendViaBrevo = async (toEmail, otpCode, fullname) => {
 };
 
 // Phương án 3: Gửi qua Nodemailer (Gmail SMTP có timeout chống treo vô tận)
-const sendViaNodemailer = async (toEmail, otpCode, fullname) => {
+const sendViaNodemailer = async (toEmail, otpCode, fullname, type = 'FORGOT_PASSWORD') => {
     const user = process.env.EMAIL_USER;
     const pass = process.env.EMAIL_PASS;
 
@@ -138,29 +201,37 @@ const sendViaNodemailer = async (toEmail, otpCode, fullname) => {
         socketTimeout: 8000,
     });
 
+    const isVerify = type === 'VERIFY_EMAIL';
+    const subject = isVerify
+        ? `[BChat] Mã xác nhận kích hoạt tài khoản: ${otpCode}`
+        : `[BChat] Mã xác nhận khôi phục mật khẩu: ${otpCode}`;
+    const html = isVerify
+        ? buildVerificationEmailHtml(otpCode, fullname)
+        : buildOtpEmailHtml(otpCode, fullname);
+
     const mailOptions = {
         from: `"BChat Security" <${user.trim()}>`,
         to: toEmail,
-        subject: `[BChat] Mã xác nhận khôi phục mật khẩu: ${otpCode}`,
-        html: buildOtpEmailHtml(otpCode, fullname),
+        subject,
+        html,
     };
 
     return await transporter.sendMail(mailOptions);
 };
 
-const sendOtpEmail = async (toEmail, otpCode, fullname = 'bạn') => {
+const sendOtpEmail = async (toEmail, otpCode, fullname = 'bạn', type = 'FORGOT_PASSWORD') => {
     // 1. Ưu tiên Resend HTTP API (nếu có key)
     if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim()) {
-        return await sendViaResend(toEmail, otpCode, fullname);
+        return await sendViaResend(toEmail, otpCode, fullname, type);
     }
 
     // 2. Ưu tiên Brevo HTTP API (nếu có key)
     if (process.env.BREVO_API_KEY && process.env.BREVO_API_KEY.trim()) {
-        return await sendViaBrevo(toEmail, otpCode, fullname);
+        return await sendViaBrevo(toEmail, otpCode, fullname, type);
     }
 
     // 3. Fallback dùng Nodemailer (chạy local hoặc host mở port SMTP)
-    return await sendViaNodemailer(toEmail, otpCode, fullname);
+    return await sendViaNodemailer(toEmail, otpCode, fullname, type);
 };
 
 module.exports = {
