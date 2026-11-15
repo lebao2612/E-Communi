@@ -7,6 +7,9 @@ const { generalLimiter } = require('./middleware/rateLimiter');
 const app = express();
 const { swaggerUi, specs } = require('./swagger');
 
+// Hỗ trợ reverse proxy trên Render / Cloud để rate-limiter và cookie hoạt động chuẩn xác
+app.set('trust proxy', 1);
+
 // Cấu hình HTTP Security Headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
