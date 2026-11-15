@@ -25,7 +25,7 @@ Tất cả các mô-đun chức năng và dịch vụ cốt lõi đã được k
 
 | STT | Tài Liệu Mô-đun | Tóm Tắt Nội Dung | Trạng Thái |
 | :---: | :--- | :--- | :---: |
-| 01 | [01-auth-user-management.md](file:///d:/Project/E-Community/docs/01-auth-user-management.md) | Đăng ký, Đăng nhập, Dual JWT, Quên mật khẩu OTP Email qua Resend, Rate Limiting, Trang cá nhân, Follow/Unfollow. | 🟢 Hoàn thiện 95% |
+| 01 | [01-auth-user-management.md](file:///d:/Project/E-Community/docs/01-auth-user-management.md) | Đăng ký, Đăng nhập, Dual JWT, Quên mật khẩu OTP Email qua Resend, Rate Limiting, Trang cá nhân, Follow/Unfollow. | 🟢 Hoàn thiện 100% |
 | 02 | [02-post-feed-system.md](file:///d:/Project/E-Community/docs/02-post-feed-system.md) | Đăng bài viết, Thả tim, Phân trang Feed, Tích hợp Sightengine AI Moderation. | 🟢 Hoàn thiện 80% |
 | 03 | [03-comment-system.md](file:///d:/Project/E-Community/docs/03-comment-system.md) | Bình luận bài viết, Thả tim bình luận, Xóa bình luận theo phân quyền. | 🟡 Hoàn thiện 70% |
 | 04 | [04-realtime-messaging.md](file:///d:/Project/E-Community/docs/04-realtime-messaging.md) | Nhắn tin 1-1, Trạng thái bạn bè Online/Offline thời gian thực, Lịch sử hội thoại. | 🟢 Hoàn thiện 85% |
@@ -41,15 +41,18 @@ Tất cả các mô-đun chức năng và dịch vụ cốt lõi đã được k
 
 ```mermaid
 pie title Tỷ lệ hoàn thiện tổng thể hệ thống (Cập nhật 11/2026)
-    "Đã hoàn thành & Hoạt động tốt" : 85
-    "Cần nâng cấp / Thiếu sót UX" : 12
-    "Chưa triển khai (Missing)" : 3
+    "Đã hoàn thành & Hoạt động tốt" : 90
+    "Cần nâng cấp / Thiếu sót UX" : 8
+    "Chưa triển khai (Missing)" : 2
 ```
 
 ### 3.1 Các Chức Năng Đã Hoàn Thành (Implemented & Operational)
-- [x] **Xác thực an toàn**: Đăng ký, Đăng nhập mã hóa bcrypt, Access Token & Refresh Token JWT.
+- [x] **Xác thực an toàn & Token Rotation (Task 1.1)**: Dual JWT Token, Refresh Token Rotation, Token Reuse Detection, lưu hoàn toàn trong `httpOnly, Secure, SameSite=None` Cookie chống XSS.
+- [x] **Tối ưu Follow/Unfollow Atomic (Task 1.2)**: Toán tử nguyên tử MongoDB `$addToSet` và `$pull` chống Race Condition & Chặn tự follow.
+- [x] **Đăng nhập Google OAuth 2.0 In Production (Task 1.3)**: Google Identity Services (GIS), xử lý TH1 đăng nhập nhanh và TH2 hoàn tất hồ sơ độc nhất.
+- [x] **Xác thực Email OTP khi Đăng ký mới (Task 1.4)**: Băm bcrypt, TTL 10 phút, gửi qua Resend HTTPS API (Port 443), tự động kích hoạt và đăng nhập.
 - [x] **Quên mật khẩu & Gửi OTP qua Email**: Luồng 4 bước UI/UX Pro Max, mã OTP 6 số hash bcrypt, MongoDB TTL 10 phút, cấp resetToken trung gian, gửi mail siêu tốc qua **Resend HTTPS API (Port 443)** không bị Render firewall chặn.
-- [x] **Chống Brute-force & Spam (Rate Limiter)**: Áp dụng `authLimiter` (10 req/15m) cho login/register và `otpLimiter` (5 req/15m) cho forgot-password.
+- [x] **Chống Brute-force & Spam (Rate Limiter)**: Áp dụng `authLimiter` (10 req/15m) cho login/register và `otpLimiter` (5 req/15m) cho forgot-password/verify-email, kết hợp `trust proxy`.
 - [x] **Giao diện Auth UI/UX Pro Max**: Hero 2-column layout, hiển thị/ẩn mật khẩu, input icons, đếm ngược 60s, email masking.
 - [x] **Quản lý Hồ sơ & Follow**: Cập nhật bio/avatar/cover, xem số lượng follower/following, follow/unfollow thời gian thực.
 - [x] **Đăng bài viết & Thả tim**: Tạo bài viết đính kèm ảnh, thả tim/bỏ thả tim bài viết.
@@ -64,17 +67,11 @@ pie title Tỷ lệ hoàn thiện tổng thể hệ thống (Cập nhật 11/202
 
 ### 3.2 Các Hạn Chế & Tính Năng Còn Thiếu Cần Cải Thiện (Gaps & Tech Debt Audit)
 
-#### A. An Ninh & Xác Thực (Security & Auth)
-1. **Refresh Token lưu tại LocalStorage**: Cần chuyển sang **`httpOnly Cookie`** để chống tấn công XSS.
-2. **Chưa có Đăng nhập mạng xã hội (OAuth 2.0)**: Cần tích hợp Google Login để người dùng đăng nhập 1 click.
-3. **Chưa có Xác thực Email khi Đăng ký**: Người dùng đăng ký tài khoản chưa cần verify email để active.
-4. **Race Condition Follow**: Cần chuyển thao tác Follow sang toán tử nguyên tử MongoDB `$addToSet` / `$pull`.
-
-#### B. Trải Nghiệm Bài Viết & Bình Luận (Post & Comment UX)
-1. **Một ảnh duy nhất**: Bài viết mới chỉ hỗ trợ 1 ảnh, chưa hỗ trợ album ảnh (Carousel/Grid) hoặc video.
-2. **Thuật toán Feed đơn giản**: Chưa có trang New Feed lọc riêng bài viết của những người mình đang `following`, chưa hỗ trợ phân trang Cursor-based.
-3. **Bình luận phẳng (1-level)**: Chưa hỗ trợ bình luận phân cấp (Nested Replies / Trả lời bình luận con).
-4. **Emoji & Tương tác**: Chưa có Emoji Picker cho ô đăng bài và bình luận.
+#### A. Trải Nghiệm Bài Viết & Bình Luận (Post & Comment UX - Nhóm 2)
+1. **Một ảnh duy nhất**: Bài viết mới chỉ hỗ trợ 1 ảnh, chưa hỗ trợ album ảnh (Carousel/Grid) hoặc video (Task 2.1).
+2. **Bình luận phẳng (1-level)**: Chưa hỗ trợ bình luận phân cấp (Nested Replies / Trả lời bình luận con với `parentId`) (Task 2.2).
+3. **Emoji & Tương tác**: Chưa có Emoji Picker cho ô đăng bài và bình luận (Task 2.3).
+4. **Thuật toán Feed đơn giản**: Chưa có trang New Feed lọc riêng bài viết của những người mình đang `following`, chưa hỗ trợ phân trang Cursor-based (Task 2.4).
 
 #### C. Trò Chuyện & WebRTC (Realtime & Call)
 1. **Đính kèm file trong Chat**: Chưa hỗ trợ gửi hình ảnh, video, hoặc tài liệu trong khung chat 1-1.

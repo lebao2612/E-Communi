@@ -1,159 +1,245 @@
 # Document Chức Năng 01: Auth & User Management (Xác Thực & Quản Lý Người Dùng)
 
 > **Tác giả**: Senior Fullstack Developer / Solutions Architect  
-> **Dự án**: E-Community (BChat)  
-> **Cập nhật gần nhất**: 2026-11-04  
-> **Trạng thái**: 🟢 Hoàn thiện 95% (Đã hoàn thành toàn bộ luồng Quên mật khẩu qua OTP Email & Rate Limiting)
+> **Dự án**: E-Community (BChat) - Mạng Xã Hội & Trò Chuyện Trực Tuyến  
+> **Cập nhật gần nhất**: 2026-11-16  
+> **Trạng thái**: 🟢 **Hoàn thiện 100% (Hoàn thành trọn vẹn toàn bộ Nhóm 1: Tasks 1.1 đến 1.4)**  
+> **Môi trường hoạt động**: Localhost, Vercel Production, Render Cloud Production  
 
 ---
 
-## 1. Tổng Quan Chức Năng & Kiến Trúc (Overview & Architecture)
+## 1. Tổng Quan Kiến Trúc Phân Hệ Auth (System Architecture Overview)
 
-Hệ thống Xác thực (Authentication) và Quản lý Người dùng (User Management) đóng vai trò làm nền tảng cho toàn bộ ứng dụng BChat. Cung cấp cơ chế định danh người dùng qua JWT (JSON Web Token) với chiến lược Dual Token (Access Token ngắn hạn + Refresh Token dài hạn), quản lý hồ sơ cá nhân, đổi ảnh đại diện (avatar), tính năng theo dõi/bỏ theo dõi (Follow / Unfollow), và luồng Khôi phục mật khẩu bảo mật qua mã OTP Email thời gian thực.
+Phân hệ **Auth & User Management** là xương sống bảo mật của toàn bộ nền tảng BChat. Hệ thống được thiết kế theo các tiêu chuẩn kỹ thuật an ninh hiện đại nhất dành cho Single-Page Application (SPA) đa miền (Cross-Origin giữa Frontend Vercel và Backend Render):
+
+1. **Dual JWT Token với httpOnly Cookie**:
+   - `accessToken` (ngắn hạn - 15 phút) lưu tại bộ nhớ Frontend (Memory State).
+   - `refreshToken` (dài hạn - 7 ngày) lưu an toàn tuyệt đối trong `httpOnly, Secure, SameSite=None` Cookie, triệt tiêu 100% nguy cơ tấn công đánh cắp phiên qua mã độc XSS.
+2. **Refresh Token Rotation & Token Reuse Detection**:
+   - Mỗi lần gia hạn phiên đều thu hồi token cũ và sinh token mới.
+   - Nếu phát hiện token cũ bị kẻ gian dùng lại, hệ thống lập tức thu hồi toàn bộ phiên đăng nhập của người dùng.
+3. **Đăng nhập Google OAuth 2.0 (Google Identity Services)**:
+   - Đã xuất bản chính thức **In Production** trên Google Cloud Platform.
+   - Phân luồng thông minh: **TH1** (Tài khoản đã có $\rightarrow$ Đăng nhập ngay) và **TH2** (Người dùng mới $\rightarrow$ Form chọn Username độc nhất và Bio $\rightarrow$ Tạo tài khoản).
+4. **Xác thực Email OTP Kích Hoạt Tài Khoản (Task 1.4)**:
+   - Gửi mã OTP 6 số qua **Resend HTTPS API (Port 443)** siêu tốc, không bị chặn bởi tường lửa đám mây.
+   - Băm mã OTP bằng `bcryptjs` (salt 10), tự hủy sau 10 phút qua **MongoDB TTL Index**.
+   - Tự động đăng nhập vào thẳng Feed ngay khi kích hoạt thành công.
+5. **Thao tác Follow/Unfollow Nguyên Tử (Atomic Operations)**:
+   - Sử dụng `$addToSet` và `$pull` triệt tiêu lỗi Race Condition khi người dùng bấm đúp hoặc mạng lag.
+   - Chặn người dùng tự follow chính mình ngay tại tầng nghiệp vụ.
+6. **Bảo vệ Hệ Thống với Rate Limiting & Trust Proxy**:
+   - `authLimiter`: Chặn brute-force đăng nhập/đăng ký (10 req / 15m).
+   - `otpLimiter`: Chặn spam gửi mã email (5 req / 15m).
+   - Cấu hình `app.set('trust proxy', 1)` tương thích chuẩn xác với Reverse Proxy trên Render Cloud.
+
+---
+
+## 2. Sơ Đồ Trình Tự Các Luồng Xác Thực (Sequence Diagrams)
+
+### 2.1 Luồng Đăng Ký Tài Khoản & Kích Hoạt Email OTP (Task 1.4)
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User as Người dùng
-    participant FE as React Frontend (ForgotPassword)
-    participant Limiter as Rate Limiter (otpLimiter)
-    participant AuthAPI as Express Auth Controller / Service
-    participant DB as MongoDB (User & Otp Models)
-    participant EmailService as Resend HTTPS API (Port 443)
+    participant FE as React Frontend (RegisterPage)
+    participant Limiter as Rate Limiter (authLimiter)
+    participant AuthAPI as Express Controller & Service
+    participant DB as MongoDB (User & Otp Collections)
+    participant Resend as Resend HTTPS API (Port 443)
 
-    Note over User,EmailService: 1. GIAI ĐOẠN YÊU CẦU MÃ OTP
-    User->>FE: Nhập username hoặc email
-    FE->>Limiter: POST /api/users/forgot-password
-    Limiter->>AuthAPI: Cho phép request (tối đa 5 req/15m)
-    AuthAPI->>DB: Kiểm tra tài khoản User tồn tại
-    AuthAPI->>AuthAPI: Sinh OTP 6 số ngẫu nhiên & Băm bcrypt.hash(otp, 10)
-    AuthAPI->>DB: Xóa OTP cũ & Lưu bản ghi Otp mới (TTL index 10m)
-    AuthAPI->>EmailService: Gửi email OTP (HTTPS API qua Port 443)
-    EmailService-->>User: Gửi email HTML chứa mã OTP
-    AuthAPI-->>FE: Trả về { message, email, maskedEmail }
-    FE->>FE: Chuyển sang màn hình nhập OTP & Bật đếm ngược 60s
-
-    Note over User,EmailService: 2. GIAI ĐOẠN XÁC THỰC MÃ OTP
+    User->>FE: Điền form (username, fullname, email, password)
+    FE->>Limiter: POST /api/users/register
+    Limiter->>AuthAPI: Cho phép request
+    AuthAPI->>DB: Kiểm tra trùng lặp email / username
+    AuthAPI->>DB: Tạo User (isEmailVerified = false, bcrypt password)
+    AuthAPI->>AuthAPI: Sinh OTP 6 số ngẫu nhiên & hash bcrypt
+    AuthAPI->>DB: Lưu Otp { email, type: 'VERIFY_EMAIL', TTL: 600s }
+    AuthAPI->>Resend: POST https://api.resend.com/emails
+    Resend-->>User: Gửi email chứa mã OTP kích hoạt
+    AuthAPI-->>FE: Trả về { requireEmailVerification: true, email }
+    FE->>FE: Chuyển sang màn hình nhập OTP & Đếm ngược 60s
+    
     User->>FE: Nhập mã OTP 6 số
-    FE->>AuthAPI: POST /api/users/verify-otp { email, otp }
-    AuthAPI->>DB: Tìm bản ghi Otp theo email
-    AuthAPI->>AuthAPI: bcrypt.compare(otp, otpRecord.otp)
-    AuthAPI->>AuthAPI: Ký resetToken tạm thời bằng JWT (hạn 10 phút, purpose: 'PASSWORD_RESET')
-    AuthAPI-->>FE: Trả về { message, resetToken }
-    FE->>FE: Chuyển sang màn hình nhập mật khẩu mới
-
-    Note over User,EmailService: 3. GIAI ĐOẠN ĐẶT LẠI MẬT KHẨU
-    User->>FE: Nhập newPassword & confirmPassword
-    FE->>AuthAPI: POST /api/users/reset-password { email, resetToken, newPassword, confirmPassword }
-    AuthAPI->>AuthAPI: Xác thực chữ ký resetToken & kiểm tra purpose
-    AuthAPI->>AuthAPI: Băm mật khẩu mới bằng bcrypt.hash(newPassword, 10)
-    AuthAPI->>DB: Cập nhật user.password, user.refreshToken = null (hủy phiên cũ)
-    AuthAPI->>DB: Otp.deleteMany({ email })
-    AuthAPI-->>FE: Trả về thông báo thành công
-    FE->>User: Hiển thị màn hình thành công & Nút về Đăng nhập
+    FE->>AuthAPI: POST /api/users/verify-email { email, otp }
+    AuthAPI->>DB: So khớp bcrypt với Otp trong DB
+    AuthAPI->>DB: Cập nhật user.isEmailVerified = true
+    AuthAPI->>DB: Otp.deleteMany({ email, type: 'VERIFY_EMAIL' })
+    AuthAPI->>AuthAPI: Cấp accessToken & refreshToken mới
+    AuthAPI->>DB: Lưu refreshToken vào User
+    AuthAPI-->>FE: Set Cookie httpOnly refreshToken + Trả về accessToken & user
+    FE->>FE: Lưu accessToken, markLoggedIn()
+    FE->>User: Điều hướng vào thẳng Trang chủ Feed (/)
 ```
 
 ---
 
-## 2. Chi Tiết Kỹ Thuật Đã Triển Khai (Implemented Features & Tech Specs)
+### 2.2 Luồng Đăng Nhập Google OAuth 2.0 (TH1 & TH2) (Task 1.3)
 
-### 2.1 Backend Services & Data Models
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Người dùng
+    participant FE as React Frontend (GoogleLoginButton)
+    participant Google as Google Identity Services (GIS)
+    participant AuthAPI as Backend (/api/users/google-login)
+    participant GoogleAPI as Google TokenInfo Endpoint
+    participant DB as MongoDB (User Collection)
 
-* **Model User (`backend/models/User.js`)**:
-  * `username` (String, Unique, Required, Index): Tên định danh người dùng.
-  * `fullname` (String, Required): Họ tên hiển thị.
-  * `email` (String, Unique, Required, Index): Email người dùng.
-  * `password` (String, Required, Hashed by `bcryptjs` với salt round = 10).
-  * `avatar` (String): URL ảnh đại diện.
-  * `cover` (String): URL ảnh bìa cá nhân.
-  * `bio` (String): Tiểu sử cá nhân.
-  * `followers` (Array of ObjectId `User`): Danh sách người theo dõi.
-  * `following` (Array of ObjectId `User`): Danh sách người đang theo dõi.
-  * `refreshToken` (String): Lưu Refresh Token hiện tại để revoke / rotation.
+    User->>FE: Bấm "Tiếp tục với Google"
+    FE->>Google: Mở popup xác thực tài khoản Google
+    User->>Google: Chọn tài khoản Gmail & Cấp quyền
+    Google-->>FE: Trả về Google ID Token (credential)
+    FE->>AuthAPI: POST /api/users/google-login { idToken }
+    AuthAPI->>GoogleAPI: GET https://oauth2.googleapis.com/tokeninfo?id_token=...
+    GoogleAPI-->>AuthAPI: Trả về { email, name, picture, sub, aud }
+    AuthAPI->>AuthAPI: Kiểm tra aud === process.env.GOOGLE_CLIENT_ID
+    AuthAPI->>DB: Tìm user theo email
 
-* **Model OTP (`backend/models/Otp.js`)**:
-  * `email` (String, Required, Index): Email nhận OTP.
-  * `otp` (String, Required): Mã OTP đã được băm bằng bcrypt (không lưu plain text).
-  * `type` (String, Enum: `['FORGOT_PASSWORD', 'VERIFY_EMAIL']`, Default: `'FORGOT_PASSWORD'`).
-  * `createdAt` (Date, Default: `Date.now`, `expires: 600`): **MongoDB TTL Index** tự động xóa vĩnh viễn bản ghi sau 600 giây (10 phút).
-
-* **Email Service Đa Nền Tảng (`backend/services/emailService.js`)**:
-  * **Resend HTTP API (Port 443 HTTPS)**: Giải pháp chính cho môi trường Cloud / Render. Gửi trực tiếp qua REST API bằng native `fetch`, hoàn toàn không bị ảnh hưởng bởi chính sách chặn cổng SMTP của Render Free Tier. Tốc độ gửi cực nhanh (< 1 giây).
-  * **Brevo HTTP API (Port 443 HTTPS)**: Phương án dự phòng với hạn mức 300 email/ngày tới mọi địa chỉ nhận.
-  * **Gmail SMTP (Nodemailer)**: Fallback cho localhost với bộ đếm `connectionTimeout: 8000ms` chống hiện tượng treo vô tận (Anti-Hang).
-  * **Mẫu Email HTML chuẩn nhận diện thương hiệu BChat**: Giao diện Dark Theme cao cấp, viền vàng `#eab308`, hiển thị rõ mã OTP 6 số, thông tin bảo mật và thời hạn sử dụng.
-
-* **Rate Limiting & Security Middleware (`backend/middleware/rateLimiter.js`)**:
-  * `authLimiter`: Giới hạn tối đa 10 lần thử đăng nhập/đăng ký trong 15 phút cho mỗi IP để chống Brute-force mật khẩu.
-  * `otpLimiter`: Giới hạn tối đa 5 lần yêu cầu OTP trong 15 phút cho mỗi IP để chống spam email.
-
-* **API Endpoints (`backend/routes/userRoutes.js`)**:
-  | Method | Endpoint | Middleware / Rate Limit | Mô Tả |
-  | :--- | :--- | :---: | :--- |
-  | `POST` | `/api/users/register` | `authLimiter`, `validateRegisterBody` | Đăng ký tài khoản mới với username, email, fullname, password. |
-  | `POST` | `/api/users/login` | `authLimiter`, `validateLoginBody` | Đăng nhập bằng username/email + password, nhận Access Token & Refresh Token. |
-  | `POST` | `/api/users/refresh-token` | `validateRefreshTokenBody` | Cấp lại Access Token mới khi Access Token cũ hết hạn. |
-  | `POST` | `/api/users/logout` | None | Hủy phiên đăng nhập, thu hồi refresh token của người dùng. |
-  | `POST` | `/api/users/forgot-password` | `otpLimiter`, `validateForgotPasswordBody` | Gửi mã OTP 6 số qua email xác thực khôi phục mật khẩu. |
-  | `POST` | `/api/users/verify-otp` | `validateVerifyOtpBody` | Xác thực mã OTP 6 số và cấp `resetToken` hạn 10 phút. |
-  | `POST` | `/api/users/reset-password` | `validateResetPasswordBody` | Đặt lại mật khẩu mới thông qua `resetToken`. Hủy mọi phiên cũ. |
-  | `GET` | `/api/users/me` | `authMiddleware` | Lấy thông tin user đăng nhập hiện tại từ JWT payload. |
-  | `GET` | `/api/users/profile/:username` | Optional Auth | Xem trang cá nhân người dùng theo username (kèm số lượng follow). |
-  | `PATCH` / `PUT` | `/api/users/me` | `authMiddleware`, `validateUpdateUserBody` | Cập nhật thông tin cá nhân (fullname, bio, avatar, cover). |
-  | `POST` | `/api/users/follow/:id` | `authMiddleware`, `validateUserIdParam` | Follow một người dùng. |
-  | `POST` | `/api/users/unfollow/:id` | `authMiddleware`, `validateUserIdParam` | Unfollow một người dùng. |
-
-### 2.2 Frontend Integration
-
-* **Trang Quên mật khẩu (`frontend/src/pages/ForgotPasswordPage/ForgotPassword.tsx`)**:
-  * Thiết kế UI/UX Pro Max chia đôi màn hình (Split-Screen Hero Layout) chuẩn nhận diện BChat.
-  * Quản lý State phân tầng 4 bước (`REQUEST_OTP` $\rightarrow$ `VERIFY_OTP` $\rightarrow$ `RESET_PASSWORD` $\rightarrow$ `COMPLETED`).
-  * Có bộ đếm ngược 60s (`countdown`) trước khi cho phép bấm nút "Gửi lại mã" (Resend OTP).
-  * Hiển thị email đã che bảo mật (`maskedEmail` dạng `b***@gmail.com`).
-  * Nút toggle con mắt hiển thị/ẩn mật khẩu ở cả 2 ô mật khẩu mới và xác nhận mật khẩu.
-
-* **Axios Interceptor (`frontend/src/api/axios.ts`) & Auth Context**:
-  * Tự động bắt lỗi HTTP 401 để tự làm mới token qua `/refresh-token` mà không làm gián đoạn trải nghiệm người dùng.
+    alt TH1: Email đã tồn tại trong hệ thống
+        AuthAPI->>DB: Liên kết googleId & Cập nhật avatar nếu thiếu
+        AuthAPI->>AuthAPI: Cấp accessToken & refreshToken
+        AuthAPI-->>FE: Set-Cookie refreshToken + Trả về { isNewUser: false, accessToken, user }
+        FE->>User: Vào thẳng Trang chủ (/)
+    else TH2: Email chưa từng đăng ký tài khoản
+        AuthAPI->>AuthAPI: Ký googleSetupToken (JWT hạn 15m, purpose: 'GOOGLE_SETUP')
+        AuthAPI-->>FE: Trả về { isNewUser: true, googleSetupToken, defaultInfo }
+        FE->>FE: Mở modal GoogleCompleteModal (chọn username, bio)
+        User->>FE: Nhập username mong muốn & bấm "Hoàn tất"
+        FE->>AuthAPI: POST /api/users/google-complete { googleSetupToken, username, ... }
+        AuthAPI->>DB: Tạo User mới (isEmailVerified = true, authProvider: 'google')
+        AuthAPI->>AuthAPI: Cấp accessToken & refreshToken
+        AuthAPI-->>FE: Set-Cookie refreshToken + Trả về { accessToken, user }
+        FE->>User: Vào thẳng Trang chủ (/)
+    end
+```
 
 ---
 
-## 3. Danh Mục Các Công Việc Đã Hoàn Thành (Completed Tasks)
+### 2.3 Luồng Refresh Token Rotation & Chống Tấn Công Phát Lại (Task 1.1)
 
-- [x] **Xây dựng luồng Quên mật khẩu & Gửi mã OTP Email thực tế**: Đã tích hợp hoàn chỉnh từ Frontend đến Backend.
-- [x] **Giải quyết triệt để rào cản mạng trên Render Cloud**: Chuyển từ SMTP truyền thống sang **Resend HTTPS API (Port 443)**, không bị firewall Render chặn cổng 465/587.
-- [x] **Bảo mật mã OTP chuẩn Production**:
-  - Không lưu mã OTP thô (được hash bằng bcrypt).
-  - Tự hủy sau 10 phút qua MongoDB TTL Index.
-  - Cấp token trung gian `resetToken` (JWT) chống bypass bước OTP.
-  - Hủy toàn bộ `refreshToken` cũ khi đổi mật khẩu thành công.
-- [x] **Bảo vệ chống Brute-force & Spam**: Cấu hình `authLimiter` và `otpLimiter` qua `express-rate-limit`.
-- [x] **Kiểm toán kiến trúc mã nguồn toàn vẹn qua Graphify**: Xây dựng Knowledge Graph hoàn chỉnh (686 nodes, 1,260 edges, 59 communities) và xuất báo cáo `GRAPH_REPORT.md` + bản đồ tương tác `graph.html`.
+```mermaid
+sequenceDiagram
+    autonumber
+    participant FE as Axios Interceptor (Trình duyệt)
+    participant AuthAPI as Backend (/api/users/refresh-token)
+    participant DB as MongoDB (User Collection)
+
+    Note over FE,AuthAPI: Khi accessToken hết hạn (lỗi 401 trên API được bảo vệ)
+    FE->>AuthAPI: POST /api/users/refresh-token (Tự đính kèm Cookie refreshToken)
+    AuthAPI->>AuthAPI: jwt.verify(refreshToken, REFRESH_TOKEN_SECRET)
+    AuthAPI->>DB: Tìm user theo payload.userId
+
+    alt Token hợp lệ và trùng khớp user.refreshToken
+        AuthAPI->>AuthAPI: Sinh accessToken mới & newRefreshToken mới (Rotation)
+        AuthAPI->>DB: user.refreshToken = newRefreshToken; await user.save()
+        AuthAPI-->>FE: res.cookie('refreshToken', newRefreshToken) + { accessToken }
+        FE->>FE: Cập nhật accessToken trong bộ nhớ & Retry request ban đầu
+    else Token cũ bị dùng lại (Token Reuse / Stolen Token)
+        AuthAPI->>DB: user.refreshToken = null (Thu hồi toàn bộ phiên)
+        AuthAPI-->>FE: Xóa cookie refreshToken + Lỗi 403 Forbidden
+        FE->>FE: Bắn sự kiện auth:logout, xóa state, chuyển hướng về /login
+    end
+```
 
 ---
 
-## 4. Các Công Việc Tiếp Theo Cần Triển Khai (Upcoming Tasks & Roadmap)
+## 3. Danh Mục Chi Tiết Toàn Bộ API Endpoints (Phân Hệ Auth & User)
 
-> [!IMPORTANT]
-> Dưới đây là danh sách các task còn lại của phân hệ Auth & User Management được xếp theo độ ưu tiên:
+| STT | Phương thức | Đường dẫn API | Middleware Kiểm Soát | Payload Đầu Vào | Dữ Liệu Trả Về |
+| :---: | :---: | :--- | :---: | :--- | :--- |
+| 1 | `POST` | `/api/users/register` | `authLimiter`, `validateRegisterBody` | `{ username, fullname, email, password, confirmPassword }` | `{ message, requireEmailVerification: true, email }` |
+| 2 | `POST` | `/api/users/verify-email` | `otpLimiter` | `{ email, otp }` | `{ message, accessToken, user }` + Set-Cookie `refreshToken` |
+| 3 | `POST` | `/api/users/resend-verification-otp` | `otpLimiter` | `{ email }` | `{ message, email }` |
+| 4 | `POST` | `/api/users/login` | `authLimiter`, `validateLoginBody` | `{ username, password }` | `{ accessToken, user }` + Set-Cookie `refreshToken` |
+| 5 | `POST` | `/api/users/google-login` | `authLimiter` | `{ idToken }` | TH1: `{ isNewUser: false, accessToken, user }`<br>TH2: `{ isNewUser: true, googleSetupToken, defaultInfo }` |
+| 6 | `POST` | `/api/users/google-complete` | `authLimiter` | `{ googleSetupToken, username, fullname, bio }` | `{ message, accessToken, user }` + Set-Cookie `refreshToken` |
+| 7 | `POST` | `/api/users/refresh-token` | `validateRefreshTokenBody` | Tự động đọc từ `req.cookies.refreshToken` | `{ accessToken }` + Set-Cookie `newRefreshToken` |
+| 8 | `POST` | `/api/users/logout` | Không | Không | Xóa cookie `refreshToken`, set `user.refreshToken = null` |
+| 9 | `POST` | `/api/users/forgot-password` | `otpLimiter`, `validateForgotPasswordBody` | `{ identifier }` (email hoặc username) | `{ message, email, maskedEmail }` |
+| 10 | `POST` | `/api/users/verify-otp` | `validateVerifyOtpBody` | `{ email, otp }` | `{ message, resetToken }` (JWT hạn 10m) |
+| 11 | `POST` | `/api/users/reset-password` | `validateResetPasswordBody` | `{ email, resetToken, newPassword, confirmPassword }` | `{ message }` (Đổi mật khẩu & thu hồi mọi session cũ) |
+| 12 | `GET` | `/api/users/me` | `authMiddleware` | Bearer Token qua Header Authorization | Thông tin chi tiết user đang đăng nhập |
+| 13 | `PATCH` / `PUT` | `/api/users/me` | `authMiddleware`, `validateUpdateUserBody` | `{ fullname, bio, avatar, coverImage, socialLinks }` | User sau khi cập nhật |
+| 14 | `POST` | `/api/users/follow/:id` | `authMiddleware`, `validateUserIdParam` | `:id` của người cần follow | Cập nhật nguyên tử `$addToSet` (Không trùng lặp ID) |
+| 15 | `POST` | `/api/users/unfollow/:id` | `authMiddleware`, `validateUserIdParam` | `:id` của người cần bỏ follow | Cập nhật nguyên tử `$pull` |
+| 16 | `GET` | `/api/users/followers/:id` | `validateUserIdParam` | `:id` | Danh sách người theo dõi |
+| 17 | `GET` | `/api/users/following/:id` | `validateUserIdParam` | `:id` | Danh sách đang theo dõi |
+| 18 | `GET` | `/api/users/:username` | `validateUsernameParam` | `:username` | Thông tin trang cá nhân công khai |
 
-### 🎯 Ưu tiên 1 (High Priority - An Ninh & Tiện Ích Đăng Nhập):
-- [x] **Task 1.1: Chuyển Refresh Token sang `httpOnly Cookie` & Refresh Token Rotation**:
-   - Lưu trữ Refresh Token hoàn toàn trong `httpOnly, secure, sameSite=none` Cookie (hỗ trợ chéo domain Vercel & Render).
-   - Cơ chế Refresh Token Rotation: mỗi lần gia hạn phiên đều sinh cặp `accessToken` và `newRefreshToken` mới, cập nhật vào Cookie và MongoDB.
-   - Cơ chế Token Reuse Detection: tự động phát hiện và thu hồi toàn bộ phiên nếu phát hiện refresh token cũ bị sử dụng lại (chống Token Replay Attack).
-- [x] **Task 1.2: Chống Race Condition trong thao tác Follow/Unfollow & Chặn Tự Follow**:
-   - Chặn người dùng tự theo dõi chính mình (`currentUserId === targetUserId`) ở tầng service.
-   - Chuyển toàn bộ thao tác sang toán tử nguyên tử MongoDB: `$addToSet` (thay thế `$push`) và `$pull` để chống trùng lặp ID khi nhận request song song (Double-click / Network lag).
-   - Kiểm tra điều kiện atomic `{ _id: targetUserId, followers: { $ne: currentUserId } }` loại bỏ 4 query tuần tự thừa, tăng tốc độ phản hồi.
-- [x] **Task 1.3: Tích hợp Google OAuth 2.0 (Đăng nhập nhanh với Google)**:
-   - Xử lý phân nhánh 2 trường hợp:
-     - **TH1 (Tài khoản đã tồn tại):** Đăng nhập vào thẳng trong 0.5s, cấp `accessToken` và cập nhật `refreshToken` vào `httpOnly Cookie`.
-     - **TH2 (Tài khoản mới toanh):** Cấp `googleSetupToken` tạm thời (15m) $\rightarrow$ Frontend bật modal **Hoàn tất hồ sơ** để người dùng chọn `username` độc nhất, chỉnh họ tên và viết tiểu sử ngắn $\rightarrow$ Gọi `/google-complete` tạo tài khoản chính thức.
-   - Xác thực an toàn qua Google OAuth2 tokeninfo endpoint, không phụ thuộc thư viện ngoài, hoạt động mượt mà với React 19 và Google Identity Services (GIS).
-- [x] **Task 1.4: Xác thực Email khi đăng ký tài khoản mới (Verify Email OTP)**:
-   - Tái sử dụng `emailService` (Resend HTTPS API) và model `Otp` với `type: 'VERIFY_EMAIL'` để kích hoạt tài khoản (`isEmailVerified = true`), loại bỏ tài khoản rác/ảo.
-   - Form đăng ký phân luồng 2 bước mượt mà: Đăng ký thông tin $\rightarrow$ Nhập mã OTP 6 số kích hoạt (kèm đếm ngược 60s, gửi lại mã).
-   - Tự động đăng nhập vào thẳng Feed ngay sau khi nhập đúng OTP, không bắt người dùng phải đăng nhập lại lần 2.
-   - Trang Đăng nhập phát hiện tài khoản chưa kích hoạt và cung cấp nút bấm "Kích hoạt ngay".
-5. **Đổi mật khẩu từ trang Cài đặt (Change Password in Profile Setting)**:
-   - Cho phép người dùng đang đăng nhập đổi mật khẩu bằng cách nhập: Mật khẩu hiện tại $\rightarrow$ Mật khẩu mới.
+---
+
+## 4. Mô Hình Dữ Liệu Chi Tiết (Data Models)
+
+### 4.1 Schema Người Dùng (`User.js`)
+```javascript
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true, index: true },
+  fullname: { type: String, required: true },
+  email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
+  password: { type: String, required: true },
+  googleId: { type: String, sparse: true, unique: true },
+  authProvider: { type: String, enum: ['local', 'google'], default: 'local' },
+  isEmailVerified: { type: Boolean, default: false },
+  refreshToken: { type: String },
+  avatar: { type: String, default: "https://cdn-icons-png.flaticon.com/512/149/149071.png" },
+  coverImage: { type: String, default: "https://cdn-icons-png.flaticon.com/512/149/149071.png" },
+  bio: { type: String, default: "" },
+  socialLinks: { type: Array, default: [] },
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  createdAt: { type: Date, default: Date.now },
+});
+```
+
+### 4.2 Schema Mã Xác Thực OTP (`Otp.js`)
+```javascript
+const otpSchema = new mongoose.Schema({
+  email: { type: String, required: true, lowercase: true, trim: true, index: true },
+  otp: { type: String, required: true }, // Luôn được băm bằng bcrypt, không bao giờ lưu plain text
+  type: { type: String, enum: ['FORGOT_PASSWORD', 'VERIFY_EMAIL'], default: 'FORGOT_PASSWORD' },
+  createdAt: { type: Date, default: Date.now, expires: 600 }, // MongoDB TTL Index: tự hủy sau 10 phút
+});
+```
+
+---
+
+## 5. Cấu Hình Triển Khai Thực Tế (Cloud Production Configurations)
+
+### 5.1 Cấu hình Backend trên Render
+* **Biến môi trường (`Environment Variables`):**
+  * `MONGO_URI`: Kết nối cụm MongoDB Atlas Replica Set.
+  * `PORT`: Cổng dịch vụ (Render mặc định cấp phát động).
+  * `ACCESS_TOKEN_SECRET` / `REFRESH_TOKEN_SECRET`: Khóa bí mật JWT 256-bit.
+  * `RESEND_API_KEY`: API Key gửi mail port 443 HTTPS.
+  * `GOOGLE_CLIENT_ID`: `877869706102-thcbfu55l384jmpb2tc75abc73mn0vuj.apps.googleusercontent.com`
+  * `FE_URL`: `https://ecommunity-frontend.vercel.app`
+* **Cấu hình Reverse Proxy & Cookie:**
+  * `app.set('trust proxy', 1)`: Bắt buộc để Rate Limiter nhận diện IP người dùng qua header `X-Forwarded-For`.
+  * Cookie Options: `httpOnly: true`, `secure: true`, `sameSite: 'none'` (hỗ trợ lưu cookie xuyên domain giữa Vercel và Render).
+
+### 5.2 Cấu hình Frontend trên Vercel
+* **Biến môi trường (`Environment Variables`):**
+  * `REACT_APP_API_URL`: `https://ecommunity-backend.onrender.com`
+  * `REACT_APP_REALTIME_URL`: `https://ecommunity-backend.onrender.com`
+  * `REACT_APP_GOOGLE_CLIENT_ID`: Đặt ở dạng **`Type: Config`** (theo đúng quy chuẩn bảo mật mới nhất của Vercel đối với tiền tố `REACT_APP_`).
+* **Google Identity Services (GIS):**
+  * Script nhúng tại `frontend/index.html`:
+    `<script src="https://accounts.google.com/gsi/client" async defer></script>`
+  * Nguồn gốc JavaScript được ủy quyền (Authorized Origins) trên Google Cloud:
+    - `http://localhost:3000`
+    - `http://localhost:5173`
+    - `https://ecommunity-frontend.vercel.app`
+  * Trạng thái xuất bản (Publishing Status): **`In production`** (mở cửa cho mọi tài khoản Google).
+
+---
+
+## 6. Tổng Kết Tiến Độ Thực Hiện Nhóm 1
+
+- [x] **Task 1.1:** Refresh Token Rotation & httpOnly Cookie & Token Reuse Detection ✅
+- [x] **Task 1.2:** Tối ưu Follow/Unfollow Atomic & Anti-Race Condition bằng `$addToSet` ✅
+- [x] **Task 1.3:** Tích hợp Đăng nhập Google OAuth 2.0 (Xử lý TH1 vào thẳng & TH2 chọn Username) ✅
+- [x] **Task 1.4:** Xác thực Email OTP khi đăng ký mới & Tự động kích hoạt đăng nhập ✅
+
+> 🏆 **Phân hệ 01: Auth & User Management đã hoàn thiện 100% chuẩn Production! Sẵn sàng chuyển tiếp sang Nhóm 2 (Bài viết & Bình luận).**
