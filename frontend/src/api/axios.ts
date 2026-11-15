@@ -41,7 +41,15 @@ api.interceptors.response.use(
     const status = err.response?.status;
     const errorMessage = err.response?.data?.error;
     const isRefreshRequest = originalRequest?.url?.includes('/api/users/refresh-token');
-    const isAuthFailure = status === 401 || (status === 403 && errorMessage === 'Invalid token');
+    const isAuthRoute =
+      originalRequest?.url?.includes('/api/users/login') ||
+      originalRequest?.url?.includes('/api/users/register') ||
+      originalRequest?.url?.includes('/api/users/google-login') ||
+      originalRequest?.url?.includes('/api/users/google-complete') ||
+      originalRequest?.url?.includes('/api/users/forgot-password') ||
+      originalRequest?.url?.includes('/api/users/verify-otp') ||
+      originalRequest?.url?.includes('/api/users/reset-password');
+    const isAuthFailure = (status === 401 || (status === 403 && errorMessage === 'Invalid token')) && !isAuthRoute;
 
     if (isAuthFailure && !originalRequest?._retry && !isRefreshRequest) {
       if (isRefreshing) {

@@ -14,6 +14,7 @@ app.use(helmet({
 
 const allowedOrigins = [
   "http://localhost:3000",
+  "https://ecommunity-frontend.vercel.app",
   "https://ecommunity-frontend.s3.amazonaws.com",
   "http://ecommunity-frontend.s3-website-ap-southeast-1.amazonaws.com",
   "https://dsbzempbthi3k.cloudfront.net",

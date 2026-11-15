@@ -194,8 +194,8 @@
       "post": {
         "description": "",
         "responses": {
-          "200": {
-            "description": "OK"
+          "default": {
+            "description": ""
           }
         },
         "tags": [
@@ -306,8 +306,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "default": {
+            "description": ""
           }
         },
         "tags": [
@@ -424,6 +424,55 @@
           "200": {
             "description": "OK"
           },
+          "201": {
+            "description": "Created"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/google-login": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/google-complete": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "googleSetupToken": {
+                  "example": "any"
+                },
+                "username": {
+                  "example": "any"
+                },
+                "fullname": {
+                  "example": "any"
+                },
+                "bio": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
           "201": {
             "description": "Created"
           }

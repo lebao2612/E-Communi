@@ -307,6 +307,8 @@ const verifyGoogleToken = async (idToken) => {
         });
 
         if (!response.ok) {
+            const errorDetails = await response.text();
+            console.error('[Google OAuth] tokeninfo verification failed:', response.status, errorDetails);
             throw createHttpError('Mã xác thực Google không hợp lệ hoặc đã hết hạn', 401);
         }
 
@@ -325,8 +327,12 @@ const verifyGoogleToken = async (idToken) => {
         throw createHttpError('Email Google chưa được xác thực', 400);
     }
 
-    const configuredClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+    const configuredClientId = process.env.GOOGLE_CLIENT_ID?.trim().replace(/^["']|["']$/g, '');
     if (configuredClientId && googleData.aud !== configuredClientId) {
+        console.error('[Google OAuth] Client ID mismatch:', {
+            tokenAud: googleData.aud,
+            configuredClientId,
+        });
         throw createHttpError('Token Google không khớp với ứng dụng', 401);
     }
 
