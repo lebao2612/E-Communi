@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => {
         REACT_APP_API_URL: env.REACT_APP_API_URL || 'http://localhost:5000',
         REACT_APP_REALTIME_URL: env.REACT_APP_REALTIME_URL || env.REACT_APP_API_URL || 'http://localhost:5000',
         REACT_APP_WEBRTC_ICE_SERVERS: env.REACT_APP_WEBRTC_ICE_SERVERS || '',
+        REACT_APP_GOOGLE_CLIENT_ID: env.REACT_APP_GOOGLE_CLIENT_ID || env.VITE_GOOGLE_CLIENT_ID || '',
       },
     },
   };

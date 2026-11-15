@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -108,16 +109,34 @@ const refreshToken = async (inputRefreshToken) => {
     try {
         payload = jwt.verify(inputRefreshToken, process.env.REFRESH_TOKEN_SECRET);
     } catch (error) {
-        throw createHttpError('Token expired or invalid', 403);
+        throw createHttpError('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.', 403);
     }
 
     const user = await User.findById(payload.userId);
-    if (!user || user.refreshToken !== inputRefreshToken) {
-        throw createHttpError('Invalid refresh token', 403);
+    if (!user) {
+        throw createHttpError('Tài khoản không tồn tại', 404);
     }
 
+    // Token Reuse Detection (Phát hiện tấn công phát lại / đánh cắp token):
+    // Nếu token gửi lên không khớp với token đang lưu trong DB của user,
+    // chứng tỏ token cũ đã bị sử dụng lại sau khi đã xoay vòng.
+    if (user.refreshToken !== inputRefreshToken) {
+        // Thu hồi toàn bộ phiên của tài khoản để bảo vệ người dùng
+        user.refreshToken = null;
+        await user.save();
+        throw createHttpError('Phát hiện token đã bị thu hồi hoặc phiên bị can thiệp. Vui lòng đăng nhập lại.', 403);
+    }
+
+    // Cơ chế Refresh Token Rotation: cấp cặp token mới toanh
+    const newAccessToken = generateAccessToken(user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
+
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
     return {
-        accessToken: generateAccessToken(user._id),
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
     };
 };
 
@@ -270,6 +289,203 @@ const resetPassword = async ({ email, resetToken, newPassword, confirmPassword }
     };
 };
 
+/**
+ * Xác thực Google ID Token qua Google API endpoint
+ */
+const verifyGoogleToken = async (idToken) => {
+    if (!idToken || typeof idToken !== 'string') {
+        throw createHttpError('Google ID Token là bắt buộc', 400);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    let googleData;
+    try {
+        const response = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken.trim()), {
+            signal: controller.signal,
+        });
+
+        if (!response.ok) {
+            throw createHttpError('Mã xác thực Google không hợp lệ hoặc đã hết hạn', 401);
+        }
+
+        googleData = await response.json();
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            throw createHttpError('Kết nối xác thực Google bị quá thời gian. Vui lòng thử lại.', 504);
+        }
+        throw err.statusCode ? err : createHttpError('Không thể xác thực tài khoản Google lúc này', 500);
+    } finally {
+        clearTimeout(timeoutId);
+    }
+
+    const isEmailVerified = googleData.email_verified === 'true' || googleData.email_verified === true;
+    if (!googleData.email || !isEmailVerified) {
+        throw createHttpError('Email Google chưa được xác thực', 400);
+    }
+
+    const configuredClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+    if (configuredClientId && googleData.aud !== configuredClientId) {
+        throw createHttpError('Token Google không khớp với ứng dụng', 401);
+    }
+
+    return {
+        email: googleData.email.trim().toLowerCase(),
+        fullname: googleData.name || googleData.given_name || 'Người dùng Google',
+        avatar: googleData.picture || undefined,
+        googleId: googleData.sub,
+    };
+};
+
+/**
+ * Xử lý Đăng nhập Google (TH1: đã có tài khoản, TH2: chưa có tài khoản)
+ */
+const googleLogin = async (idToken) => {
+    const googleProfile = await verifyGoogleToken(idToken);
+    const { email, fullname, avatar, googleId } = googleProfile;
+
+    let user = await User.findOne({ email });
+
+    // TH1: ĐÃ CÓ TÀI KHOẢN TRONG HỆ THỐNG -> ĐĂNG NHẬP VÀO THẲNG
+    if (user) {
+        let isModified = false;
+        if (!user.googleId) {
+            user.googleId = googleId;
+            isModified = true;
+        }
+        if (!user.avatar && avatar) {
+            user.avatar = avatar;
+            isModified = true;
+        }
+
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        const safeUser = await User.findById(user._id).select(SAFE_USER_SELECT);
+
+        return {
+            isNewUser: false,
+            message: 'Đăng nhập Google thành công',
+            accessToken,
+            refreshToken,
+            user: safeUser,
+        };
+    }
+
+    // TH2: CHƯA CÓ TÀI KHOẢN -> CẤP SETUP TOKEN ĐỂ HOÀN TẤT PROFILE
+    const baseUsername = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase().slice(0, 15) || 'user';
+    let suggestedUsername = baseUsername;
+    const existingUsername = await User.findOne({ username: suggestedUsername });
+    if (existingUsername) {
+        suggestedUsername = `${baseUsername}_${Math.floor(100 + Math.random() * 900)}`;
+    }
+
+    const googleSetupToken = jwt.sign(
+        {
+            email,
+            fullname,
+            avatar,
+            googleId,
+            purpose: 'GOOGLE_SETUP',
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '15m' }
+    );
+
+    return {
+        isNewUser: true,
+        message: 'Vui lòng hoàn tất thông tin tài khoản để tham gia BChat',
+        googleSetupToken,
+        defaultInfo: {
+            email,
+            fullname,
+            avatar,
+            suggestedUsername,
+        },
+    };
+};
+
+/**
+ * Hoàn tất đăng ký tài khoản từ Google (TH2)
+ */
+const googleCompleteRegistration = async ({ googleSetupToken, username, fullname, bio }) => {
+    if (!googleSetupToken) {
+        throw createHttpError('Thiếu token xác thực Google', 400);
+    }
+
+    let payload;
+    try {
+        payload = jwt.verify(googleSetupToken, process.env.ACCESS_TOKEN_SECRET);
+    } catch {
+        throw createHttpError('Phiên đăng ký Google đã hết hạn. Vui lòng bấm đăng nhập Google lại', 403);
+    }
+
+    if (payload.purpose !== 'GOOGLE_SETUP' || !payload.email || !payload.googleId) {
+        throw createHttpError('Token đăng ký Google không hợp lệ', 403);
+    }
+
+    if (!username || typeof username !== 'string') {
+        throw createHttpError('Tên đăng nhập (username) là bắt buộc', 400);
+    }
+
+    const cleanUsername = username.trim().toLowerCase();
+    const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+    if (!usernameRegex.test(cleanUsername)) {
+        throw createHttpError('Tên đăng nhập phải từ 3 đến 30 ký tự, chỉ chứa chữ cái, số và dấu gạch dưới', 400);
+    }
+
+    const existingUsername = await User.findOne({ username: cleanUsername });
+    if (existingUsername) {
+        throw createHttpError('Tên đăng nhập này đã có người sử dụng. Vui lòng chọn tên khác', 400);
+    }
+
+    const existingEmail = await User.findOne({ email: payload.email });
+    if (existingEmail) {
+        throw createHttpError('Email này đã được kích hoạt tài khoản. Vui lòng đăng nhập lại.', 400);
+    }
+
+    const randomPassword = crypto.randomBytes(32).toString('hex');
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    const newUser = new User({
+        username: cleanUsername,
+        fullname: (fullname || payload.fullname || cleanUsername).trim(),
+        email: payload.email,
+        password: hashedPassword,
+        avatar: payload.avatar || undefined,
+        bio: (bio || '').trim(),
+        googleId: payload.googleId,
+        authProvider: 'google',
+    });
+
+    try {
+        await newUser.save();
+    } catch (err) {
+        if (err.code === 11000) {
+            throw createHttpError('Thông tin đăng ký (username hoặc email) đã tồn tại', 400);
+        }
+        throw err;
+    }
+
+    const accessToken = generateAccessToken(newUser._id);
+    const refreshToken = generateRefreshToken(newUser._id);
+
+    newUser.refreshToken = refreshToken;
+    await newUser.save();
+
+    const safeUser = await User.findById(newUser._id).select(SAFE_USER_SELECT);
+
+    return {
+        message: 'Hoàn tất đăng ký tài khoản thành công',
+        accessToken,
+        refreshToken,
+        user: safeUser,
+    };
+};
+
 module.exports = {
     register,
     login,
@@ -278,4 +494,6 @@ module.exports = {
     forgotPassword,
     verifyOtp,
     resetPassword,
+    googleLogin,
+    googleCompleteRegistration,
 };

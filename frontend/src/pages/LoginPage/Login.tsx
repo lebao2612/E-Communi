@@ -4,11 +4,13 @@ import images from "../../assets/images/index";
 import { setAccessToken } from '../../api/axios';
 import api from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
+import GoogleLoginButton from '../../components/GoogleAuth/GoogleLoginButton';
+import GoogleCompleteModal from '../../components/GoogleAuth/GoogleCompleteModal';
 import './login.scss';
 
 interface LoginResponse {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 }
 
 const Login = () => {
@@ -17,6 +19,13 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // State cho quy trình Hoàn tất thông tin Google (TH2)
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [googleSetupData, setGoogleSetupData] = useState<{
+    googleSetupToken: string;
+    defaultInfo: any;
+  } | null>(null);
 
   const { markLoggedIn } = useAuth();
   const navigate = useNavigate();
@@ -195,6 +204,21 @@ const Login = () => {
               </button>
             </form>
 
+            {/* Phân cách hoặc đăng nhập bằng mạng xã hội */}
+            <div className="authDivider">
+              <span>hoặc</span>
+            </div>
+
+            {/* Nút Đăng nhập nhanh bằng Google */}
+            <GoogleLoginButton
+              buttonText="Đăng nhập với Google"
+              onNewUser={(data) => {
+                setGoogleSetupData(data);
+                setIsCompleteModalOpen(true);
+              }}
+              onError={(err) => setError(err)}
+            />
+
             <div className="switchPrompt">
               Chưa có tài khoản?{' '}
               <span className="switchLink" onClick={() => navigate('/register')}>
@@ -204,9 +228,18 @@ const Login = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Hoàn tất thông tin cho người dùng mới (TH2) */}
+      {googleSetupData && (
+        <GoogleCompleteModal
+          isOpen={isCompleteModalOpen}
+          onClose={() => setIsCompleteModalOpen(false)}
+          googleSetupToken={googleSetupData.googleSetupToken}
+          defaultInfo={googleSetupData.defaultInfo}
+        />
+      )}
     </div>
   );
 };
 
 export default Login;
-

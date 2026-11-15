@@ -53,4 +53,11 @@ router.get('/following/:id', validateUserIdParam, userController.getFollowing);
 // GET /api/users/:username
 router.get('/:username', validateUsernameParam, userController.getUserByUsername);
 
+// Google OAuth 2.0 routes
+// POST /api/users/google-login
+router.post('/google-login', authLimiter, userController.googleLogin);
+
+// POST /api/users/google-complete
+router.post('/google-complete', authLimiter, userController.googleCompleteRegistration);
+
 module.exports = router;

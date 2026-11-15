@@ -1,7 +1,6 @@
-const crypto = require('crypto');
-
 const User = require('../models/User');
 const { createHttpError, ensureObjectId } = require('../utils/errorHelpers');
+const { createNotification } = require('./notificationService');
 
 const SAFE_USER_SELECT = '-password -refreshToken';
 
@@ -46,54 +45,89 @@ const updateUser = async ({ userId, updates }) => {
     return user;
 };
 
-const { createNotification } = require('./notificationService');
-
+/**
+ * Follow một người dùng với cơ chế Atomic Update và chống Race Condition
+ */
 const followUser = async ({ currentUserId, targetUserId }) => {
     ensureObjectId(currentUserId, 'currentUserId');
     ensureObjectId(targetUserId, 'targetUserId');
 
-    const userToFollow = await User.findById(targetUserId);
-    const currentUser = await User.findById(currentUserId);
-
-    if (!userToFollow || !currentUser) {
-        throw createHttpError('User not found', 404);
+    // 1. Chặn người dùng tự follow chính mình
+    if (currentUserId.toString() === targetUserId.toString()) {
+        throw createHttpError('Bạn không thể tự theo dõi chính mình', 400);
     }
 
-    if (userToFollow.followers.some((id) => id.toString() === currentUserId)) {
-        throw createHttpError('You are already following this user', 400);
+    // 2. Kiểm tra tài khoản hiện tại có tồn tại không
+    const currentUserExists = await User.exists({ _id: currentUserId });
+    if (!currentUserExists) {
+        throw createHttpError('Tài khoản của bạn không tồn tại', 404);
     }
 
-    await userToFollow.updateOne({ $push: { followers: currentUserId } });
-    await currentUser.updateOne({ $push: { following: targetUserId } });
+    // 3. Cập nhật Atomic: Dùng $addToSet đảm bảo không bao giờ bị trùng lặp ID
+    // Điều kiện followers: { $ne: currentUserId } ngăn chặn ghi đè nếu đã theo dõi
+    const updateTarget = await User.updateOne(
+        { _id: targetUserId, followers: { $ne: currentUserId } },
+        { $addToSet: { followers: currentUserId } }
+    );
 
+    // Nếu không khớp document nào (matchedCount === 0), phân loại lỗi cụ thể
+    if (updateTarget.matchedCount === 0) {
+        const targetExists = await User.exists({ _id: targetUserId });
+        if (!targetExists) {
+            throw createHttpError('Người dùng không tồn tại', 404);
+        }
+        throw createHttpError('Bạn đã theo dõi người dùng này rồi', 400);
+    }
+
+    // 4. Cập nhật atomic danh sách following của currentUser
+    await User.updateOne(
+        { _id: currentUserId },
+        { $addToSet: { following: targetUserId } }
+    );
+
+    // 5. Gửi thông báo realtime (bất đồng bộ ngầm, không chặn phản hồi của client)
     createNotification({
         recipientId: targetUserId,
         senderId: currentUserId,
         type: 'follow',
     }).catch((err) => console.error('Follow notification error:', err));
 
-    return { message: 'User followed successfully' };
+    return { message: 'Theo dõi người dùng thành công' };
 };
 
+/**
+ * Hủy theo dõi một người dùng với cơ chế Atomic Update
+ */
 const unfollowUser = async ({ currentUserId, targetUserId }) => {
     ensureObjectId(currentUserId, 'currentUserId');
     ensureObjectId(targetUserId, 'targetUserId');
 
-    const userToUnfollow = await User.findById(targetUserId);
-    const currentUser = await User.findById(currentUserId);
-
-    if (!userToUnfollow || !currentUser) {
-        throw createHttpError('User not found', 404);
+    // 1. Chặn người dùng tự hủy follow chính mình
+    if (currentUserId.toString() === targetUserId.toString()) {
+        throw createHttpError('Bạn không thể tự hủy theo dõi chính mình', 400);
     }
 
-    if (!userToUnfollow.followers.some((id) => id.toString() === currentUserId)) {
-        throw createHttpError('You are not following this user', 400);
+    // 2. Cập nhật Atomic: Chỉ xóa nếu targetUser đang có currentUserId trong followers
+    const updateTarget = await User.updateOne(
+        { _id: targetUserId, followers: currentUserId },
+        { $pull: { followers: currentUserId } }
+    );
+
+    if (updateTarget.matchedCount === 0) {
+        const targetExists = await User.exists({ _id: targetUserId });
+        if (!targetExists) {
+            throw createHttpError('Người dùng không tồn tại', 404);
+        }
+        throw createHttpError('Bạn chưa theo dõi người dùng này', 400);
     }
 
-    await userToUnfollow.updateOne({ $pull: { followers: currentUserId } });
-    await currentUser.updateOne({ $pull: { following: targetUserId } });
+    // 3. Cập nhật atomic danh sách following của currentUser
+    await User.updateOne(
+        { _id: currentUserId },
+        { $pull: { following: targetUserId } }
+    );
 
-    return { message: 'User unfollowed successfully' };
+    return { message: 'Hủy theo dõi người dùng thành công' };
 };
 
 const getFollowers = async (userId) => {
@@ -118,51 +152,6 @@ const getFollowing = async (userId) => {
     return user.following;
 };
 
-const sendPasswordResetEmail = async () => {
-    throw createHttpError('Email service is not configured', 503);
-};
-
-const forgotPassword = async (username) => {
-    const user = await User.findOne({ username });
-    if (!user) {
-        throw createHttpError('User not found!', 400);
-    }
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 15 * 60 * 1000;
-    await user.save();
-
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-
-    await sendPasswordResetEmail({
-        to: user.email,
-        subject: 'Reset Password',
-        text: `Click the link to reset your password: ${resetUrl}`,
-    });
-
-    return { message: 'Reset link sent to your email' };
-};
-
-const resetPassword = async ({ token, password }) => {
-    const user = await User.findOne({
-        resetToken: token,
-        resetTokenExpiry: { $gt: Date.now() },
-    });
-
-    if (!user) {
-        throw createHttpError('Invalid or expired token!', 400);
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
-    await user.save();
-
-    return { message: 'Password reset successfully' };
-};
-
 module.exports = {
     getAllUsers,
     getUserByUsername,
@@ -172,6 +161,4 @@ module.exports = {
     unfollowUser,
     getFollowers,
     getFollowing,
-    forgotPassword,
-    resetPassword,
 };

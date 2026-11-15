@@ -2,6 +2,8 @@ import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import images from "../../assets/images/index";
 import api from '../../api/axios';
+import GoogleLoginButton from '../../components/GoogleAuth/GoogleLoginButton';
+import GoogleCompleteModal from '../../components/GoogleAuth/GoogleCompleteModal';
 import '../LoginPage/login.scss';
 
 const Register = () => {
@@ -18,6 +20,13 @@ const Register = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // State cho quy trình Hoàn tất thông tin Google (TH2)
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [googleSetupData, setGoogleSetupData] = useState<{
+    googleSetupToken: string;
+    defaultInfo: any;
+  } | null>(null);
 
   const handleRegister = async (e?: FormEvent) => {
     if (e) e.preventDefault();
@@ -49,12 +58,12 @@ const Register = () => {
       await api.post('/api/users/register', {
         username: username.trim(),
         fullname: fullname.trim(),
-        email: email.trim(),
+        email: email.trim().toLowerCase(),
         password,
-        confirmPassword
+        confirmPassword,
       });
 
-      // Đăng ký thành công → chuyển sang login
+      // Đăng ký thành công -> chuyển sang trang đăng nhập
       navigate('/login');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Đăng ký thất bại. Vui lòng thử lại.');
@@ -75,33 +84,33 @@ const Register = () => {
               <span className='brandName'>BChat</span>
             </div>
             <h1 className='heroTitle'>
-              Tham gia cộng đồng,<br />
-              <span className='highlightText'>kết nối vô tận.</span>
+              Gia nhập cộng đồng,<br />
+              <span className='highlightText'>kết nối không giới hạn.</span>
             </h1>
             <p className='heroSubtitle'>
-              Tạo tài khoản chỉ trong vài giây để bắt đầu trò chuyện và chia sẻ câu chuyện của bạn với mọi người.
+              Tạo tài khoản ngay hôm nay để trải nghiệm mạng xã hội trò chuyện thời gian thực, gọi video HD và chia sẻ bài viết cùng bạn bè.
             </p>
 
             <div className='featureCards'>
               <div className='featureItem'>
                 <div className='featureIcon'>🚀</div>
                 <div>
-                  <h4>Đăng ký nhanh chóng</h4>
-                  <p>Thiết lập hồ sơ cá nhân chỉ trong tích tắc</p>
+                  <h4>Đăng ký siêu tốc</h4>
+                  <p>Khởi tạo tài khoản chỉ trong 30 giây</p>
                 </div>
               </div>
               <div className='featureItem'>
-                <div className='featureIcon'>👥</div>
+                <div className='featureIcon'>🌐</div>
                 <div>
-                  <h4>Tìm kiếm bạn bè</h4>
-                  <p>Mở rộng kết nối và theo dõi những nội dung hấp dẫn</p>
+                  <h4>Kết nối bạn bè</h4>
+                  <p>Dễ dàng tìm kiếm và theo dõi những người bạn quan tâm</p>
                 </div>
               </div>
               <div className='featureItem'>
-                <div className='featureIcon'>✨</div>
+                <div className='featureIcon'>🛡️</div>
                 <div>
-                  <h4>Trải nghiệm đỉnh cao</h4>
-                  <p>Giao diện hiện đại, tối ưu cho mọi thiết bị</p>
+                  <h4>Bảo mật kép</h4>
+                  <p>Mã hóa dữ liệu an toàn theo tiêu chuẩn hiện đại</p>
                 </div>
               </div>
             </div>
@@ -117,12 +126,12 @@ const Register = () => {
                 <span className='mobileBrandName'>BChat</span>
               </div>
               <h2 className='welcomeTitle'>Tạo tài khoản mới</h2>
-              <p className='welcomeSubtitle'>Trở thành thành viên của BChat ngay hôm nay</p>
+              <p className='welcomeSubtitle'>Điền thông tin bên dưới để bắt đầu hành trình của bạn</p>
             </div>
 
             <form onSubmit={handleRegister} className='authForm'>
               <div className='inputGroup'>
-                <label htmlFor='reg-username'>Tên đăng nhập</label>
+                <label htmlFor='fullname'>Họ và tên</label>
                 <div className='inputWrapper'>
                   <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -130,38 +139,35 @@ const Register = () => {
                   </svg>
                   <input
                     type="text"
-                    id="reg-username"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    placeholder="Nhập tên đăng nhập"
-                    autoComplete="username"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className='inputGroup'>
-                <label htmlFor='fullname'>Họ và tên <span style={{ color: '#ef4444' }}>*</span></label>
-                <div className='inputWrapper'>
-                  <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                  <input
-                    type="text"
                     id="fullname"
                     value={fullname}
                     onChange={e => setFullname(e.target.value)}
-                    placeholder="Nhập họ và tên hiển thị"
-                    required
+                    placeholder="Nhập họ và tên của bạn"
+                    autoComplete="name"
                   />
                 </div>
               </div>
 
               <div className='inputGroup'>
-                <label htmlFor='reg-email'>Địa chỉ Email <span style={{ color: '#ef4444' }}>*</span></label>
+                <label htmlFor='username'>Tên đăng nhập (Username)</label>
+                <div className='inputWrapper'>
+                  <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path>
+                  </svg>
+                  <input
+                    type="text"
+                    id="username"
+                    value={username}
+                    onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    placeholder="ví dụ: lebao2612"
+                    autoComplete="username"
+                  />
+                </div>
+              </div>
+
+              <div className='inputGroup'>
+                <label htmlFor='email'>Địa chỉ Email</label>
                 <div className='inputWrapper'>
                   <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -169,18 +175,17 @@ const Register = () => {
                   </svg>
                   <input
                     type="email"
-                    id="reg-email"
+                    id="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="Nhập email để nhận mã OTP và khôi phục"
+                    placeholder="Nhập địa chỉ email"
                     autoComplete="email"
-                    required
                   />
                 </div>
               </div>
 
               <div className='inputGroup'>
-                <label htmlFor='reg-password'>Mật khẩu</label>
+                <label htmlFor='password'>Mật khẩu</label>
                 <div className='inputWrapper'>
                   <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -188,10 +193,10 @@ const Register = () => {
                   </svg>
                   <input
                     type={showPassword ? "text" : "password"}
-                    id="reg-password"
+                    id="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                    placeholder="Tối thiểu 6 ký tự"
                     autoComplete="new-password"
                   />
                   <button
@@ -216,15 +221,15 @@ const Register = () => {
               </div>
 
               <div className='inputGroup'>
-                <label htmlFor='confirm-password'>Xác nhận mật khẩu</label>
+                <label htmlFor='confirmPassword'>Xác nhận mật khẩu</label>
                 <div className='inputWrapper'>
                   <svg className='inputIcon' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                   </svg>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
-                    id="confirm-password"
+                    id="confirmPassword"
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="Nhập lại mật khẩu"
@@ -275,6 +280,20 @@ const Register = () => {
               </button>
             </form>
 
+            <div className="authDivider">
+              <span>hoặc</span>
+            </div>
+
+            {/* Đăng ký nhanh qua Google */}
+            <GoogleLoginButton
+              buttonText="Đăng ký với Google"
+              onNewUser={(data) => {
+                setGoogleSetupData(data);
+                setIsCompleteModalOpen(true);
+              }}
+              onError={(err) => setError(err)}
+            />
+
             <div className="switchPrompt">
               Đã có tài khoản?{' '}
               <span className="switchLink" onClick={() => navigate('/login')}>
@@ -284,9 +303,18 @@ const Register = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Hoàn tất thông tin cho người dùng mới (TH2) */}
+      {googleSetupData && (
+        <GoogleCompleteModal
+          isOpen={isCompleteModalOpen}
+          onClose={() => setIsCompleteModalOpen(false)}
+          googleSetupToken={googleSetupData.googleSetupToken}
+          defaultInfo={googleSetupData.defaultInfo}
+        />
+      )}
     </div>
   );
 };
 
 export default Register;
-

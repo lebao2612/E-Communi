@@ -48,7 +48,14 @@ exports.login = asyncHandler(async (req, res) => {
 // [POST] /api/users/refresh-token
 exports.refreshToken = asyncHandler(async (req, res) => {
   const result = await authService.refreshToken(req.validated.refreshToken);
-  res.json(result);
+
+  // Ghi đè cookie refreshToken mới vào trình duyệt (Refresh Token Rotation)
+  res.cookie('refreshToken', result.refreshToken, getRefreshTokenCookieOptions());
+
+  res.json({
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+  });
 });
 
 // [POST] /api/users/logout
@@ -137,3 +144,49 @@ exports.resetPassword = asyncHandler(async (req, res) => {
 
   res.json(result);
 });
+
+// [POST] /api/users/google-login
+exports.googleLogin = asyncHandler(async (req, res) => {
+  const { idToken } = req.body;
+  const result = await authService.googleLogin(idToken);
+
+  // Nếu là TH1 (đã có tài khoản), set cookie refreshToken và trả về accessToken
+  if (!result.isNewUser && result.refreshToken) {
+    res.cookie('refreshToken', result.refreshToken, getRefreshTokenCookieOptions());
+    return res.json({
+      isNewUser: false,
+      message: result.message,
+      accessToken: result.accessToken,
+      user: result.user,
+    });
+  }
+
+  // Nếu là TH2 (chưa có tài khoản), trả về thông tin để hoàn tất profile
+  res.json({
+    isNewUser: true,
+    message: result.message,
+    googleSetupToken: result.googleSetupToken,
+    defaultInfo: result.defaultInfo,
+  });
+});
+
+// [POST] /api/users/google-complete
+exports.googleCompleteRegistration = asyncHandler(async (req, res) => {
+  const { googleSetupToken, username, fullname, bio } = req.body;
+  const result = await authService.googleCompleteRegistration({
+    googleSetupToken,
+    username,
+    fullname,
+    bio,
+  });
+
+  // Set cookie refreshToken
+  res.cookie('refreshToken', result.refreshToken, getRefreshTokenCookieOptions());
+
+  res.status(201).json({
+    message: result.message,
+    accessToken: result.accessToken,
+    user: result.user,
+  });
+});
+

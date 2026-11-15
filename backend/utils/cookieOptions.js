@@ -2,7 +2,7 @@
  * Cấu hình an toàn cho httpOnly Cookie lưu Refresh Token
  */
 const getRefreshTokenCookieOptions = () => {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
     return {
         httpOnly: true,
         secure: isProduction,                   // Chỉ gửi qua HTTPS khi ở production
