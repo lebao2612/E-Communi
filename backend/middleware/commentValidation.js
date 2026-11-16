@@ -17,15 +17,20 @@ const validatePostIdParam = (req, res, next) => {
 };
 
 const validateCommentBody = (req, res, next) => {
-    const { content } = req.body;
+    const { content, parentId } = req.body;
 
     if (typeof content !== 'string' || !content.trim()) {
         return next(createHttpError('Comment content is required', 400));
     }
 
+    if (parentId !== undefined && parentId !== null && !mongoose.Types.ObjectId.isValid(parentId)) {
+        return next(createHttpError('Invalid parentId', 400));
+    }
+
     req.validated = {
         ...(req.validated || {}),
         content,
+        parentId: parentId || null,
     };
 
     next();
