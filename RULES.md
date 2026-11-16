@@ -137,6 +137,15 @@ Mọi task đều được track trong `docs/SUMMARY.md` và `docs/XX-feature.md
 - ✅ Done
 - ❌ Blocked
 
+### 5. **Documentation Auto-Update (BẮT BUỘC)**
+- ✅ **Khi hoàn thành 1 feature/task**: Tự động cập nhật **TẤT CẢ** file tài liệu liên quan:
+  - `docs/XX-feature.md` - Cập nhật chi tiết kỹ thuật, API, schema, limitations, roadmap
+  - `docs/SUMMARY.md` - Cập nhật progress table, status, checklist, roadmap
+  - `README.md` (nếu có) - Cập nhật setup, features list
+- ✅ Bao gồm: Schema changes, API endpoints mới/đổi, UI components mới, config mới, limitations đã fix, roadmap tiếp theo
+- ✅ Mục đích: **Context đầy đủ cho AI/làm tiếp**, audit trail, knowledge transfer
+- 📝 Commit message: `docs: update <feature> documentation` (tách commit hoặc cùng commit feature)
+
 ---
 
 ## 🔄 **UPDATE RULES**
