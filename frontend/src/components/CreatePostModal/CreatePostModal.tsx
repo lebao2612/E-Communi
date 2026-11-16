@@ -36,13 +36,14 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, user
             // 1. Upload images to Cloudinary (if any)
             let imageUrls: string[] = [];
             if (images.length > 0) {
-                const uploadPromises = images.map(async (image) => {
-                    const formData = new FormData();
-                    formData.append('image', image);
-                    const res = await api.post('/api/uploads/upload', formData);
-                    return res.data.imageUrl;
+                const formData = new FormData();
+                images.forEach(image => {
+                    formData.append('images', image);
                 });
-                imageUrls = await Promise.all(uploadPromises);
+                const res = await api.post('/api/uploads/multiple', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                imageUrls = res.data.imageUrls || [];
             }
 
             // 2. Create Post

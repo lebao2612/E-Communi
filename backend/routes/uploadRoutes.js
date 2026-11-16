@@ -3,7 +3,7 @@ const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const uploadController = require('../controllers/uploadController');
-const { uploadSingleImage, validateUploadedImage } = require('../middleware/uploadValidation');
+const { uploadSingleImage, validateUploadedImage, uploadMultipleImages, validateUploadedImages } = require('../middleware/uploadValidation');
 
 const uploadLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -14,5 +14,6 @@ const uploadLimiter = rateLimit({
 });
 
 router.post('/upload', authMiddleware, uploadLimiter, uploadSingleImage, validateUploadedImage, uploadController.uploadImage);
+router.post('/multiple', authMiddleware, uploadLimiter, uploadMultipleImages, validateUploadedImages, uploadController.uploadMultipleImages);
 
 module.exports = router;
