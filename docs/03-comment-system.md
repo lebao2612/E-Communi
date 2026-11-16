@@ -2,7 +2,7 @@
 
 > **Tác giả**: Senior Fullstack Developer / Solutions Architect  
 > **Dự án**: E-Community (BChat)  
-> **Cập nhật gần nhất**: 2026-10-08  
+> **Cập nhật gần nhất**: 2026-11-16  
 
 ---
 
@@ -29,23 +29,47 @@ graph TD
   * `post` (ObjectId `Post`, Required, Index): Bài viết chứa bình luận.
   * `author` (ObjectId `User`, Required): Người gửi bình luận.
   * `content` (String, Required): Nội dung bình luận.
+  * `parentId` (ObjectId `Comment`, Optional, Index): ID của bình luận cha (để hỗ trợ nested replies).
+  * `replyTo` (ObjectId `User`, Optional): ID của người được trả lời (cho notification).
   * `likes` (Array of ObjectId `User`): Danh sách người thích bình luận này.
   * `createdAt`, `updatedAt` (Timestamps).
+
+* **Compound Index**: `{ postId: 1, parentId: 1, createdAt: 1 }` để tối ưu truy vấn cây bình luận.
 
 * **API Endpoints (`backend/routes/commentRoutes.js`)**:
   | Method | Endpoint | Auth Required | Mô Tả |
   | :--- | :--- | :---: | :--- |
-  | `GET` | `/api/comments/post/:postId` | Yes | Lấy danh sách bình luận của một bài viết. |
-  | `POST` | `/api/comments/post/:postId` | Yes | Thêm bình luận mới vào bài viết. |
-  | `DELETE` | `/api/comments/:id` | Yes | Xóa bình luận (chỉ tác giả comment hoặc tác giả bài viết có quyền xóa). |
+  | `GET` | `/api/comments/post/:postId` | Yes | Lấy danh sách bình luận của một bài viết (trả về cây nested). |
+  | `POST` | `/api/comments/post/:postId` | Yes | Thêm bình luận mới (hỗ trợ `parentId` cho reply). |
+  | `DELETE` | `/api/comments/:id` | Yes | Xóa bình luận (cascading delete: xóa cả các reply con). Chỉ tác giả comment hoặc tác giả bài viết có quyền xóa. |
   | `POST` | `/api/comments/:id/like` | Yes | Thả tim / Bỏ thả tim bình luận. |
+
+* **API Request Body (POST /api/comments/post/:postId)**:
+  ```json
+  {
+    "content": "string",
+    "parentId": "string (optional) - ID của comment cha để reply"
+  }
+  ```
+
+* **API Response (GET /api/comments/post/:postId)**:
+  Trả về mảng các root comments, mỗi comment có trường `replies[]` chứa các nested replies (đệ quy, tối đa 3 cấp).
 
 ### 2.2 Frontend Integration
 
 * **Post Detail Page & Post Modal**:
   * Cho phép gõ bình luận và gửi bằng phím `Enter`.
   * Hiển thị danh sách bình luận với avatar, họ tên tác giả và thời gian tương đối.
-  * Nút xóa comment hiển thị đúng phân quyền.
+  * Nút xóa comment hiển thị đúng phân quyền (tác giả comment hoặc tác giả bài viết).
+
+* **Nested Comments (Reply Feature)**:
+  * Component `CommentThread` đệ quy hiển thị cây bình luận đa cấp (tối đa 3 cấp).
+  * Nút "Reply" trên mỗi comment để mở ô nhập reply inline.
+  * Hiển thị nhãn "Replying to @username" khi đang reply.
+  * Component `ReplyInput` với nút Cancel và Submit.
+
+* **Realtime Updates**:
+  * Sự kiện `new_comment` từ Socket.io cập nhật cây bình luận realtime.
 
 ---
 
@@ -54,10 +78,11 @@ graph TD
 > [!WARNING]
 > Những điểm thiếu sót về tính năng và trải nghiệm người dùng trong hệ thống bình luận.
 
-1. **Thiếu Bình Luận Phân Cấp (Nested / Threaded Comments - Reply to Comment)**:
-   * **Hiện trạng**: Bình luận hiện tại đang ở cấu trúc 1 cấp phẳng (flat structure).
-   * **Hạn chế**: Không thể trả lời trực tiếp (Reply) vào một bình luận của người khác, gây khó khăn cho các cuộc thảo luận dài.
-   * **Giải pháp**: Cần bổ sung trường `parentId` (ObjectId `Comment`) trong `Comment` model để hỗ trợ cây bình luận n-cấp.
+1. ~~**Thiếu Bình Luận Phân Cấp (Nested / Threaded Comments - Reply to Comment)**~~: ✅ **ĐÃ HOÀN THIỆN**
+   * Đã thêm `parentId`, `replyTo` vào model Comment.
+   * UI hỗ trợ reply inline với component `CommentThread` đệ quy (max 3 cấp).
+   * Cascading delete khi xóa comment cha.
+   * Notification cho người được reply (type: `reply_comment`).
 
 2. **Chưa Hỗ Trợ Đính Kèm Hình Ảnh / Sticker / Emoji Picker**:
    * Bình luận mới chỉ chấp nhận chuỗi văn bản thuần (plain text).
@@ -67,14 +92,14 @@ graph TD
    * Khi nhắc đến tên người khác trong bình luận, hệ thống chưa tự động gợi ý danh sách người dùng và chưa gửi thông báo đẩy cho người được mention.
 
 4. **Vấn Đề Phân Trang Bình Luận (Comment Pagination)**:
-   * Khi bài viết có hàng ngàn comment, việc query toàn bộ comment một lúc gây nặng dung lượng mạng và làm đơ giao diện.
+   * Khi bài viết có hàng ngàn comment, việc query toàn bộ comment một lần gây nặng dung lượng mạng và làm đơ giao diện.
    * Cần phân trang bình luận (vd: 10 comment / lần bấm "Xem thêm bình luận").
 
 ---
 
 ## 4. Kế Hoạch Cải Tiến & Roadmap (Senior Dev Recommendations)
 
-- [ ] **Task 1**: Thêm trường `parentId` vào Schema và nâng cấp UI để hỗ trợ luồng Reply Comment (Nested Replies).
+- [x] **Task 1**: Thêm trường `parentId`, `replyTo` vào Schema và nâng cấp UI để hỗ trợ luồng Reply Comment (Nested Replies) - **HOÀN THIỆN 2026-11-16**.
 - [ ] **Task 2**: Tích hợp Emoji Picker (`emoji-mart` hoặc thư viện tương đương) vào ô nhập comment.
 - [ ] **Task 3**: Xây dựng tính năng Mention `@username` tự động gửi Notification đến người được gắn thẻ.
 - [ ] **Task 4**: Phân trang danh sách bình luận theo Lazy Loading / Infinite Scroll.

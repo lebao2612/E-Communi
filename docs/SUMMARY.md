@@ -2,7 +2,7 @@
 
 > **Dự án**: E-Community (BChat) - Mạng Xã Hội & Nền Tảng Trò Chuyện Trực Tuyến  
 > **Tác giả**: Senior Fullstack Developer / Solutions Architect  
-> **Cập nhật gần nhất**: 2026-11-04  
+> **Cập nhật gần nhất**: 2026-11-16  
 > **Thư mục tài liệu**: [d:/Project/E-Community/docs/](file:///d:/Project/E-Community/docs/)  
 
 ---
@@ -27,7 +27,7 @@ Tất cả các mô-đun chức năng và dịch vụ cốt lõi đã được k
 | :---: | :--- | :--- | :---: |
 | 01 | [01-auth-user-management.md](file:///d:/Project/E-Community/docs/01-auth-user-management.md) | Đăng ký, Đăng nhập, Dual JWT, Quên mật khẩu OTP Email qua Resend, Rate Limiting, Trang cá nhân, Follow/Unfollow. | 🟢 Hoàn thiện 100% |
 | 02 | [02-post-feed-system.md](file:///d:/Project/E-Community/docs/02-post-feed-system.md) | Đăng bài viết, Thả tim, Phân trang Feed, Tích hợp Sightengine AI Moderation. | 🟢 Hoàn thiện 80% |
-| 03 | [03-comment-system.md](file:///d:/Project/E-Community/docs/03-comment-system.md) | Bình luận bài viết, Thả tim bình luận, Xóa bình luận theo phân quyền. | 🟡 Hoàn thiện 70% |
+| 03 | [03-comment-system.md](file:///d:/Project/E-Community/docs/03-comment-system.md) | Bình luận bài viết, Thả tim bình luận, Xóa bình luận, **Nested Replies (Reply to Comment)**. | 🟢 Hoàn thiện 85% |
 | 04 | [04-realtime-messaging.md](file:///d:/Project/E-Community/docs/04-realtime-messaging.md) | Nhắn tin 1-1, Trạng thái bạn bè Online/Offline thời gian thực, Lịch sử hội thoại. | 🟢 Hoàn thiện 85% |
 | 05 | [05-webrtc-audio-video-call.md](file:///d:/Project/E-Community/docs/05-webrtc-audio-video-call.md) | Gọi thoại & Video call WebRTC P2P, Signaling qua Socket.io, Twilio TURN/STUN. | 🟢 Hoàn thiện 80% |
 | 06 | [06-notification-system.md](file:///d:/Project/E-Community/docs/06-notification-system.md) | Thông báo tương tác (Like, Comment, Follow, Message) lưu DB & Push Socket. | 🟢 Hoàn thiện 75% |
@@ -64,12 +64,13 @@ pie title Tỷ lệ hoàn thiện tổng thể hệ thống (Cập nhật 11/202
 - [x] **Thông báo thời gian thực (Notifications)**: Đẩy thông báo tức thì khi có người thả tim, bình luận, follow.
 - [x] **Tìm kiếm toàn cục**: Tìm người dùng & bài viết có debounce.
 - [x] **Kiểm toán mã nguồn tự động**: Tích hợp Graphify Knowledge Graph hỗ trợ phát hiện điểm nghẽn kiến trúc và AI context traversal.
+- [x] **Nested Comments (Reply to Comment)**: Hỗ trợ trả lời bình luận phân cấp đa cấp (max 3 cấp), cascading delete, notification cho người được reply.
 
 ### 3.2 Các Hạn Chế & Tính Năng Còn Thiếu Cần Cải Thiện (Gaps & Tech Debt Audit)
 
 #### A. Trải Nghiệm Bài Viết & Bình Luận (Post & Comment UX - Nhóm 2)
 1. **Một ảnh duy nhất**: Bài viết mới chỉ hỗ trợ 1 ảnh, chưa hỗ trợ album ảnh (Carousel/Grid) hoặc video (Task 2.1).
-2. **Bình luận phẳng (1-level)**: Chưa hỗ trợ bình luận phân cấp (Nested Replies / Trả lời bình luận con với `parentId`) (Task 2.2).
+2. ~~**Bình luận phẳng (1-level)**: Chưa hỗ trợ bình luận phân cấp (Nested Replies / Trả lời bình luận con với `parentId`) (Task 2.2).~~ ✅ **ĐÃ HOÀN THIỆN 2026-11-16**
 3. **Emoji & Tương tác**: Chưa có Emoji Picker cho ô đăng bài và bình luận (Task 2.3).
 4. **Thuật toán Feed đơn giản**: Chưa có trang New Feed lọc riêng bài viết của những người mình đang `following`, chưa hỗ trợ phân trang Cursor-based (Task 2.4).
 
@@ -97,7 +98,7 @@ pie title Tỷ lệ hoàn thiện tổng thể hệ thống (Cập nhật 11/202
 
 ### 🎯 Giai Đoạn 2: Nâng Cấp Trải Nghiệm Bài Viết & Bình Luận (Tuần tiếp theo)
 - [ ] Nâng cấp Schema `Post` và UI hỗ trợ Album nhiều ảnh (Carousel / Grid).
-- [ ] Triển khai Nested Comments (Bình luận phân cấp cha - con với `parentId`).
+- [x] Triển khai Nested Comments (Bình luận phân cấp cha - con với `parentId`) - **HOÀN THIỆN 2026-11-16**.
 - [ ] Tích hợp Emoji Picker cho ô soạn thảo bài viết và bình luận.
 - [ ] Xây dựng tab Feed "Đang theo dõi" (Following Feed) dùng Cursor Pagination.
 
