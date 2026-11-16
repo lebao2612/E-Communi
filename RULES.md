@@ -8,7 +8,8 @@
 
 ### 1. **Git & Version Control**
 - ❌ **KHÔNG được tự động `git push`** lên remote (origin) mà **KHÔNG có sự đồng ý rõ ràng** từ developer.
-- ✅ Chỉ được `git commit` local sau khi hoàn thành task/test.
+- ❌ **KHÔNG được `git commit` local** - Developer muốn review changes trước khi commit.
+- ✅ Chỉ được `git add` (stage) files sau khi hoàn thành task/test.
 - ✅ Push chỉ thực hiện khi developer xác nhận: *"Push lên remote"* hoặc *"Tạo PR"*.
 - 🔀 Branch naming: `feature/<task-name>`, `fix/<bug-name>`, `refactor/<scope>`, `chore/<task>`
 - 📝 Commit message: Conventional Commits (`feat:`, `fix:`, `refactor:`, `chore:`, `docs:`)
@@ -37,11 +38,12 @@
 1. Tạo branch mới từ main: git checkout -b feature/<task-name>
 2. Implement task (code + test)
 3. Build & validate: npm run build (FE), node -c (BE)
-4. Commit local: git add . && git commit -m "feat: <mô tả>"
-5. 🛑 DỪNG - Chờ developer review & approve
-6. Sau khi approve: git push origin feature/<task-name>
-7. Tạo Pull Request (nếu cần review team)
-8. Merge sau khi CI/CD pass
+4. Stage files: git add .
+5. 🛑 DỪNG - Chờ developer review changes (git diff --staged)
+6. Developer approve → git commit -m "feat: <mô tả>"
+7. Sau khi approve: git push origin feature/<task-name>
+8. Tạo Pull Request (nếu cần review team)
+9. Merge sau khi CI/CD pass
 ```
 
 ---
@@ -55,7 +57,9 @@
 | **Plan/Analyze** | ✅ Tự do phân tích, đề xuất plan |
 | **Edit files (Act mode)** | ✅ Chỉ khi developer approve plan |
 | **Run commands (build, test, lint)** | ✅ Chỉ read-only commands (build, test, syntax check) |
-| **Git commit** | ✅ Cho phép commit local sau khi task done |
+| **Terminal cleanup** | ⚠️ **KHÔNG THỂ tự đóng tab terminal** - Chỉ developer có thể đóng/clear tab trong VS Code. AI chỉ chạy lệnh. |
+| **Git commit** | ❌ **KHÔNG ĐƯỢC commit local** - Developer review changes trước. |
+| **Git add (stage)** | ✅ Cho phép stage files sau khi task done |
 | **Git push** | ❌ **TUYỆT ĐỐI KHÔNG** - Phải hỏi developer |
 | **Git checkout/switch branch** | ❌ Không tự ý switch branch |
 | **Install packages (npm install)** | ❌ Không tự ý install package mới |
@@ -162,3 +166,16 @@ File này có thể cập nhật khi:
 *Last updated: 2026-11-16*  
 *Project: E-Community (BChat)*  
 *Author: Senior Fullstack Developer / Solutions Architect*
+
+---
+
+## ⚠️ **LƯU Ý QUAN TRỌNG VỀ TERMINAL**
+
+> **AI KHÔNG THỂ tự đóng/xóa tab terminal trong VS Code.**
+> 
+> - Terminal tab là UI của VS Code, chỉ Developer (bạn) mới có quyền đóng, clear, hoặc mở tab mới.
+> - AI chỉ có thể **chạy lệnh** (`run_commands` tool).
+> - Sau khi AI chạy xong lệnh, bạn hãy tự:
+>   - `Clear-Host` (hoặc click chuột phải → Clear) để xóa output
+>   - Hoặc đóng tab terminal không cần thiết
+>   - Hoặc mở tab mới (`Ctrl + Shift + \` ` `)
